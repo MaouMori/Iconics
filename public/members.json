@@ -1,0 +1,92 @@
+[
+  {
+    "id": "Mika",
+    "name": "Mikaela Matsumoto",
+    "role": "Lider da Iconics",
+    "meta": "19 anos • Influenciadora & Competitiva",
+    "tags": ["Destemida", "Estrategica", "Adrenalina", "Retulada"],
+    "stats": [
+      { "value": "2K", "label": "Seguidores" },
+      { "value": "107", "label": "Posts" },
+      { "value": "75", "label": "Eventos" }
+    ],
+    "accent": "cyan",
+    "symbol": "spade",
+    "image": "images/members/mika.png"
+  },
+  {
+    "id": "maou",
+    "name": "Maou Mori",
+    "role": "Vice-lider",
+    "meta": "24 anos • Visual & Presenca",
+    "tags": ["Impacto", "Moda", "Carisma", "Presenca"],
+    "stats": [
+      { "value": "700", "label": "Seguidores" },
+      { "value": "55", "label": "Posts" },
+      { "value": "38", "label": "Horas Jogadas" }
+    ],
+    "accent": "gold",
+    "symbol": "star",
+    "image": "images/members/maou.png"
+  },
+  {
+    "id": "cupp",
+    "name": "Cupp Hinna",
+    "role": "Aura social",
+    "meta": "25 anos • Estetica & Influencia",
+    "tags": ["Mistica", "Elegante", "Influencia", "Aura"],
+    "stats": [
+      { "value": "298K", "label": "Visualizacoes" },
+      { "value": "89", "label": "Posts" },
+      { "value": "41", "label": "Aparicoes" }
+    ],
+    "accent": "pink",
+    "symbol": "moon",
+    "image": "images/members/cupp.png"
+  },
+  {
+    "id": "Noelle",
+    "name": "Noelle",
+    "role": "Presenca social",
+    "meta": "21 anos • Carisma & Estilo",
+    "tags": ["Elegante", "Social", "Charmosa", "Influencia"],
+    "stats": [
+      { "value": "190K", "label": "Seguidores" },
+      { "value": "54", "label": "Posts" },
+      { "value": "20", "label": "Eventos" }
+    ],
+    "accent": "purple",
+    "symbol": "diamond",
+    "image": "images/members/noelle.png"
+  },
+   {
+    "id": "Yuti",
+    "name": "Yuri Starfall",
+    "role": "Presenca social",
+    "meta": "21 anos • Carisma & Estilo",
+    "tags": ["Elegante", "Social", "Charmosa", "Influencia"],
+    "stats": [
+      { "value": "190K", "label": "Seguidores" },
+      { "value": "54", "label": "Posts" },
+      { "value": "20", "label": "Eventos" }
+    ],
+    "accent": "purple",
+    "symbol": "diamond",
+    "image": "images/members/yuti.png"
+  }, 
+   {
+    "id": "Iann Kyoto",
+    "name": "Iann Kyoto",
+    "role": "Presenca social",
+    "meta": "21 anos • Carisma & Estilo",
+    "tags": ["Elegante", "Social", "Charmosa", "Influencia"],
+    "stats": [
+      { "value": "190K", "label": "Seguidores" },
+      { "value": "54", "label": "Posts" },
+      { "value": "20", "label": "Eventos" }
+    ],
+    "accent": "purple",
+    "symbol": "diamond",
+    "image": "images/members/iann.jpg"
+  }
+]
