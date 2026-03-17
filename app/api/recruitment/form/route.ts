@@ -1,15 +1,18 @@
 import { NextResponse } from "next/server";
-import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { supabaseAdmin } from "@/lib/supabaseAdmin"
 
 export async function GET() {
   const { data, error } = await supabaseAdmin
-    .from("member_cards")
+    .from("recruitment_form_settings")
     .select("*")
-    .order("ordem", { ascending: true });
+    .eq("ativo", true)
+    .order("id", { ascending: false })
+    .limit(1)
+    .maybeSingle();
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  return NextResponse.json(data || []);
+  return NextResponse.json(data);
 }

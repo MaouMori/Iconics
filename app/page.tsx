@@ -2,6 +2,7 @@ import Script from "next/script";
 import "@/styles/style.css";
 import "@/styles/calendar.css";
 import Navbar from "@/components/Navbar";
+import Link from "next/link";
 import HomeEventsPreview from "@/components/HomeEventsPreview";
 
 export default function HomePage() {
@@ -265,7 +266,9 @@ export default function HomePage() {
           <div className="form-box">
             <h2>Quer entrar para a ICONICS?</h2>
             <p>Abra o formulário e envie sua candidatura.</p>
-            <button className="portal-btn" id="openFormModal">Abrir formulário</button>
+            <Link href="/recrutamento" className="portal-btn">
+              Abrir formulário
+            </Link>
           </div>
         </section>
         <section className="login-preview" id="login-preview">
@@ -300,8 +303,8 @@ export default function HomePage() {
             <h2>ICONICS</h2>
 
             <div className="footer-links">
-              <a href="#">Instagram</a>
-              <a href="#">Discord</a>
+              <a href="https://www.instagram.com/frat.iconics/">Instagram</a>
+              <a href="https://discord.gg/6E99APZefD">Discord</a>
               <a href="#">TikTok</a>
               <a href="#">Contato</a>
             </div>
@@ -313,21 +316,7 @@ export default function HomePage() {
 
       <div className="modal" id="loreModal"></div>
 
-      <div className="modal" id="formModal">
-        <div className="modal-content">
-          <button className="close-modal" data-close="formModal">×</button>
-          <h3>Formulário de Recrutamento</h3>
-
-          <form className="recruit-form" id="recruitForm">
-            <input type="text" placeholder="Nome" required />
-            <input type="text" placeholder="Instagram" required />
-            <input type="number" placeholder="Idade" required />
-            <input type="text" placeholder="Seu diferencial" required />
-            <textarea placeholder="Por que quer entrar?" rows={4} required></textarea>
-            <button type="submit" className="submit-btn">Enviar candidatura</button>
-          </form>
-        </div>
-      </div>
+      
 
       <div className="toast" id="toast"></div>
 

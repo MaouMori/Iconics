@@ -20,6 +20,7 @@ type MemberCard = {
   sigil: string | null;
   imagem_url: string | null;
   accent_color: string | null;
+  ordem: number | null;
 };
 
 export default function AdminMembrosPage() {
@@ -43,6 +44,7 @@ export default function AdminMembrosPage() {
   const [sigil, setSigil] = useState("✦");
   const [imagemUrl, setImagemUrl] = useState("");
   const [accentColor, setAccentColor] = useState("#7c3aed");
+  const [ordem, setOrdem] = useState(0);
 
   const [membros, setMembros] = useState<MemberCard[]>([]);
 
@@ -73,12 +75,17 @@ export default function AdminMembrosPage() {
   }, []);
 
   async function carregarMembros() {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("member_cards")
       .select("*")
-      .order("created_at", { ascending: false });
+      .order("ordem", { ascending: true });
 
-    setMembros(data || []);
+    if (error) {
+      setMensagem(error.message);
+      return;
+    }
+
+    setMembros((data as MemberCard[]) || []);
   }
 
   function editarMembro(membro: MemberCard) {
@@ -96,6 +103,7 @@ export default function AdminMembrosPage() {
     setSigil(membro.sigil || "✦");
     setImagemUrl(membro.imagem_url || "");
     setAccentColor(membro.accent_color || "#7c3aed");
+    setOrdem(membro.ordem ?? 0);
     setImagemFile(null);
 
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -117,50 +125,52 @@ export default function AdminMembrosPage() {
     setImagemUrl("");
     setAccentColor("#7c3aed");
     setImagemFile(null);
+    setOrdem(0);
   }
 
   async function salvarMembro(e: React.FormEvent) {
-  e.preventDefault();
-  setMensagem("");
+    e.preventDefault();
+    setMensagem("");
 
-  const { data: userData } = await supabase.auth.getUser();
+    const { data: userData } = await supabase.auth.getUser();
 
-  if (!userData.user) {
-    setMensagem("Usuário não autenticado.");
-    return;
-  }
-
-  let finalImageUrl = imagemUrl;
-
-  if (imagemFile) {
-    try {
-      setUploading(true);
-      finalImageUrl = await uploadPublicImage(imagemFile, "member-images");
-    } catch (error) {
-      setUploading(false);
-      setMensagem(error instanceof Error ? error.message : "Erro ao enviar imagem.");
+    if (!userData.user) {
+      setMensagem("Usuário não autenticado.");
       return;
-    } finally {
-      setUploading(false);
     }
-  }
 
-  const payload = {
-    nome,
-    idade: idade ? Number(idade) : null,
-    cargo,
-    meta,
-    personalidade,
-    habitos,
-    gostos,
-    hobbies,
-    tags,
-    stats,
-    sigil,
-    imagem_url: finalImageUrl,
-    accent_color: accentColor,
-    criado_por: userData.user.id,
-  };
+    let finalImageUrl = imagemUrl;
+
+    if (imagemFile) {
+      try {
+        setUploading(true);
+        finalImageUrl = await uploadPublicImage(imagemFile, "member-images");
+      } catch (error) {
+        setUploading(false);
+        setMensagem(error instanceof Error ? error.message : "Erro ao enviar imagem.");
+        return;
+      } finally {
+        setUploading(false);
+      }
+    }
+
+    const payload = {
+      nome,
+      idade: idade ? Number(idade) : null,
+      cargo,
+      meta,
+      personalidade,
+      habitos,
+      gostos,
+      hobbies,
+      tags,
+      stats,
+      sigil,
+      imagem_url: finalImageUrl,
+      accent_color: accentColor,
+      criado_por: userData.user.id,
+      ordem,
+    };
 
     let error = null;
 
@@ -210,6 +220,49 @@ export default function AdminMembrosPage() {
     }
 
     setMensagem("Membro excluído.");
+    await carregarMembros();
+  }
+
+  async function moverMembro(memberId: number, direction: "up" | "down") {
+    setMensagem("");
+
+    const membrosOrdenados = [...membros].sort(
+      (a, b) => (a.ordem ?? 0) - (b.ordem ?? 0)
+    );
+
+    const currentIndex = membrosOrdenados.findIndex((m) => m.id === memberId);
+    if (currentIndex === -1) return;
+
+    const targetIndex = direction === "up" ? currentIndex - 1 : currentIndex + 1;
+    if (targetIndex < 0 || targetIndex >= membrosOrdenados.length) return;
+
+    const membroAtual = membrosOrdenados[currentIndex];
+    const membroDestino = membrosOrdenados[targetIndex];
+
+    const ordemAtual = membroAtual.ordem ?? 0;
+    const ordemDestino = membroDestino.ordem ?? 0;
+
+    const { error: error1 } = await supabase
+      .from("member_cards")
+      .update({ ordem: ordemDestino })
+      .eq("id", membroAtual.id);
+
+    if (error1) {
+      setMensagem(error1.message);
+      return;
+    }
+
+    const { error: error2 } = await supabase
+      .from("member_cards")
+      .update({ ordem: ordemAtual })
+      .eq("id", membroDestino.id);
+
+    if (error2) {
+      setMensagem(error2.message);
+      return;
+    }
+
+    setMensagem("Ordem atualizada.");
     await carregarMembros();
   }
 
@@ -328,34 +381,42 @@ export default function AdminMembrosPage() {
             />
 
             <input
-                style={inputStyle}
-                type="file"
-                accept="image/*"
-                onChange={(e) => setImagemFile(e.target.files?.[0] || null)}
-              />
+              style={inputStyle}
+              type="file"
+              accept="image/*"
+              onChange={(e) => setImagemFile(e.target.files?.[0] || null)}
+            />
 
-              <input
-                style={inputStyle}
-                placeholder="Ou cole uma URL da imagem"
-                value={imagemUrl}
-                onChange={(e) => setImagemUrl(e.target.value)}
-              />
+            <input
+              style={inputStyle}
+              placeholder="Ou cole uma URL da imagem"
+              value={imagemUrl}
+              onChange={(e) => setImagemUrl(e.target.value)}
+            />
 
-              {(imagemFile || imagemUrl) && (
-                <div style={{ marginTop: 8 }}>
-                  <img
-                    src={imagemFile ? URL.createObjectURL(imagemFile) : imagemUrl}
-                    alt="Preview"
-                    style={{
-                      width: 180,
-                      height: 220,
-                      objectFit: "cover",
-                      borderRadius: 16,
-                      border: "1px solid rgba(255,255,255,.08)",
-                    }}
-                  />
-                </div>
-              )}
+            <input
+              type="number"
+              placeholder="Ordem de exibição"
+              value={ordem}
+              onChange={(e) => setOrdem(Number(e.target.value))}
+              style={inputStyle}
+            />
+
+            {(imagemFile || imagemUrl) && (
+              <div style={{ marginTop: 8 }}>
+                <img
+                  src={imagemFile ? URL.createObjectURL(imagemFile) : imagemUrl}
+                  alt="Preview"
+                  style={{
+                    width: 180,
+                    height: 220,
+                    objectFit: "cover",
+                    borderRadius: 16,
+                    border: "1px solid rgba(255,255,255,.08)",
+                  }}
+                />
+              </div>
+            )}
 
             <input
               style={inputStyle}
@@ -365,7 +426,7 @@ export default function AdminMembrosPage() {
             />
 
             <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-             <button type="submit" style={buttonStyle}>
+              <button type="submit" style={buttonStyle}>
                 {uploading
                   ? "Enviando imagem..."
                   : editingId
@@ -400,11 +461,20 @@ export default function AdminMembrosPage() {
                   <div>
                     <strong>{membro.nome}</strong>
                     <p style={mutedP}>Cargo: {membro.cargo}</p>
+                    <p style={mutedP}>Ordem: {membro.ordem ?? 0}</p>
                     <p style={mutedP}>Meta: {membro.meta || "Sem meta"}</p>
                     <p style={mutedP}>Imagem: {membro.imagem_url || "Sem imagem"}</p>
                   </div>
 
                   <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                    <button style={smallButtonStyle} onClick={() => moverMembro(membro.id, "up")}>
+                      ↑ Subir
+                    </button>
+
+                    <button style={smallButtonStyle} onClick={() => moverMembro(membro.id, "down")}>
+                      ↓ Descer
+                    </button>
+
                     <button style={buttonStyle} onClick={() => editarMembro(membro)}>
                       Editar
                     </button>
@@ -467,6 +537,17 @@ const buttonStyle: React.CSSProperties = {
   borderRadius: "999px",
   border: "none",
   background: "#8b5cf6",
+  color: "white",
+  fontWeight: 700,
+  cursor: "pointer",
+};
+
+const smallButtonStyle: React.CSSProperties = {
+  height: "42px",
+  padding: "0 16px",
+  borderRadius: "999px",
+  border: "1px solid rgba(255,255,255,0.08)",
+  background: "rgba(255,255,255,0.04)",
   color: "white",
   fontWeight: 700,
   cursor: "pointer",

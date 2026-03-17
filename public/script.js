@@ -1,6 +1,8 @@
 let members = [];
 let currentMember = 0;
 let currentCarouselPage = 0;
+let currentRecruitmentForm = null;
+let currentRecruitmentFields = [];
 
 const memberName = document.getElementById("memberName");
 const memberRole = document.getElementById("memberRole");
@@ -25,6 +27,10 @@ const cinemaTransition = document.getElementById("cinemaTransition");
 const loreModal = document.getElementById("loreModal");
 const formModal = document.getElementById("formModal");
 const toast = document.getElementById("toast");
+const recruitForm = document.getElementById("recruitForm");
+const dynamicFormTitle = document.getElementById("dynamicFormTitle");
+const dynamicFormDescription = document.getElementById("dynamicFormDescription");
+const dynamicFormMessage = document.getElementById("dynamicFormMessage");
 
 const detailsButton = document.querySelector(".discord-btn");
 
@@ -283,6 +289,193 @@ function openModal(modal) {
 function closeModal(modal) {
   if (modal) modal.classList.remove("open");
 }
+function renderDynamicRecruitmentForm(form) {
+  if (!recruitForm || !dynamicFormTitle || !dynamicFormDescription) return;
+
+  currentRecruitmentForm = form;
+  currentRecruitmentFields = Array.isArray(form?.campos) ? form.campos : [];
+
+  dynamicFormTitle.textContent = form?.titulo || "Formulário de Recrutamento";
+  dynamicFormDescription.textContent =
+    form?.descricao || "Preencha suas informações.";
+
+  recruitForm.innerHTML = "";
+
+  currentRecruitmentFields.forEach((field) => {
+    const wrapper = document.createElement("div");
+    wrapper.className = `recruit-field${field.fullWidth ? " full" : ""}`;
+
+    const label = document.createElement("label");
+    label.className = "recruit-label";
+    label.textContent = field.label || field.id || "Pergunta";
+    wrapper.appendChild(label);
+
+    const type = field.type || "text";
+    const required = !!field.required;
+    const placeholder = field.placeholder || field.label || "";
+    const fieldName = field.id || `campo_${Date.now()}`;
+
+    if (type === "textarea") {
+      const textarea = document.createElement("textarea");
+      textarea.name = fieldName;
+      textarea.placeholder = placeholder;
+      textarea.required = required;
+      textarea.rows = 4;
+      wrapper.appendChild(textarea);
+    } else if (type === "select") {
+      const select = document.createElement("select");
+      select.name = fieldName;
+      select.required = required;
+
+      const firstOption = document.createElement("option");
+      firstOption.value = "";
+      firstOption.textContent = placeholder || "Selecione uma opção";
+      firstOption.disabled = true;
+      firstOption.selected = true;
+      select.appendChild(firstOption);
+
+      (field.options || []).forEach((optionValue) => {
+        const option = document.createElement("option");
+        option.value = optionValue;
+        option.textContent = optionValue;
+        select.appendChild(option);
+      });
+
+      wrapper.appendChild(select);
+    } else if (type === "radio") {
+      const optionsWrap = document.createElement("div");
+      optionsWrap.className = "recruit-options";
+
+      (field.options || []).forEach((optionValue, index) => {
+        const optionLabel = document.createElement("label");
+        optionLabel.className = "recruit-option";
+
+        const input = document.createElement("input");
+        input.type = "radio";
+        input.name = fieldName;
+        input.value = optionValue;
+        input.required = required && index === 0;
+
+        const text = document.createElement("span");
+        text.textContent = optionValue;
+
+        optionLabel.appendChild(input);
+        optionLabel.appendChild(text);
+        optionsWrap.appendChild(optionLabel);
+      });
+
+      wrapper.appendChild(optionsWrap);
+    } else {
+      const input = document.createElement("input");
+      input.type = type;
+      input.name = fieldName;
+      input.placeholder = placeholder;
+      input.required = required;
+      wrapper.appendChild(input);
+    }
+
+    recruitForm.appendChild(wrapper);
+  });
+
+  const submitButton = document.createElement("button");
+  submitButton.type = "submit";
+  submitButton.className = "submit-btn";
+  submitButton.textContent = "Enviar candidatura";
+
+  recruitForm.appendChild(submitButton);
+}
+
+async function loadDynamicRecruitmentForm() {
+  if (!dynamicFormTitle || !dynamicFormDescription || !recruitForm) return;
+
+  dynamicFormTitle.textContent = "Carregando formulário...";
+  dynamicFormDescription.textContent = "Aguarde...";
+  recruitForm.innerHTML = "";
+  if (dynamicFormMessage) dynamicFormMessage.textContent = "";
+
+  try {
+    const response = await fetch("/api/recruitment/form", {
+      cache: "no-store",
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data) {
+      dynamicFormTitle.textContent = "Formulário indisponível";
+      dynamicFormDescription.textContent =
+        data?.error || "Não foi possível carregar o formulário.";
+      return;
+    }
+
+    renderDynamicRecruitmentForm(data);
+  } catch (error) {
+    console.error(error);
+    dynamicFormTitle.textContent = "Erro ao carregar";
+    dynamicFormDescription.textContent =
+      "Não foi possível carregar o formulário agora.";
+  }
+}
+
+async function submitDynamicRecruitmentForm(event) {
+  event.preventDefault();
+
+  if (!recruitForm) return;
+
+  const submitButton = recruitForm.querySelector(".submit-btn");
+  if (submitButton) {
+    submitButton.disabled = true;
+    submitButton.textContent = "Enviando...";
+  }
+
+  if (dynamicFormMessage) {
+    dynamicFormMessage.textContent = "";
+  }
+
+  try {
+   const respostas = {};
+
+currentRecruitmentFields.forEach((field) => {
+  const fieldName = field.id;
+
+  if (field.type === "radio") {
+    const checked = recruitForm.querySelector(`input[name="${fieldName}"]:checked`);
+    respostas[fieldName] = checked ? checked.value : "";
+    return;
+  }
+
+  const input = recruitForm.elements[fieldName];
+  respostas[fieldName] = input ? input.value : "";
+});
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      if (dynamicFormMessage) {
+        dynamicFormMessage.textContent = data?.error || "Erro ao enviar formulário.";
+      }
+      return;
+    }
+
+    recruitForm.reset();
+
+    if (dynamicFormMessage) {
+      dynamicFormMessage.textContent = "Candidatura enviada com sucesso.";
+    }
+
+    showToast("Formulário enviado com sucesso.");
+    closeModal(formModal);
+  } catch (error) {
+    console.error(error);
+    if (dynamicFormMessage) {
+      dynamicFormMessage.textContent = "Erro inesperado ao enviar formulário.";
+    }
+  } finally {
+    if (submitButton) {
+      submitButton.disabled = false;
+      submitButton.textContent = "Enviar candidatura";
+    }
+  }
+}
 
 function splitTags(value) {
   if (!value || typeof value !== "string") return [];
@@ -488,34 +681,51 @@ function renderMemberDetailsModal(member) {
 
 async function loadMembers() {
   try {
-    const response = await fetch("/api/public-members", { cache: "no-store" });
+    const response = await fetch("/api/public-members", {
+      cache: "no-store"
+    });
 
     if (!response.ok) {
-      throw new Error("Falha ao carregar membros do servidor");
+      throw new Error("Falha ao carregar membros");
     }
 
     const data = await response.json();
 
-    if (!Array.isArray(data) || data.length === 0) {
-      members = [];
-      if (membersTrack) membersTrack.innerHTML = "";
-      if (memberName) memberName.textContent = "Nenhum membro cadastrado";
-      if (memberRole) memberRole.textContent = "";
-      if (memberMeta) memberMeta.textContent = "";
-      if (memberTags) memberTags.innerHTML = "";
-      if (memberStats) memberStats.innerHTML = "";
-      showToast("Nenhum membro encontrado.");
-      return;
-    }
+    members = (data || []).map((member) => ({
+      name: member.nome || "Sem nome",
+      age: member.idade || null,
+      role: member.cargo || "membro",
+      meta: member.meta || "",
+      personality: member.personalidade || "",
+      habits: member.habitos || "",
+      likes: member.gostos || "",
+      hobbies: member.hobbies || "",
+      tags: member.tags
+        ? String(member.tags).split("|").map((item) => item.trim()).filter(Boolean)
+        : [],
+      stats: member.stats
+        ? String(member.stats).split("|").map((item) => {
+            const [label, value] = item.split(":");
+            return {
+              label: (label || "").trim(),
+              value: (value || "").trim(),
+            };
+          }).filter((item) => item.label || item.value)
+        : [],
+      symbol: member.sigil || "star",
+      image: member.imagem_url || "",
+      accent: normalizeAccent(member.accent_color),
+      ordem: member.ordem || 0,
+    }));
 
-    members = data.map(normalizeMember);
+    members.sort((a, b) => (a.ordem || 0) - (b.ordem || 0));
 
     renderMemberCards();
     setMember(0);
     updateCarousel();
   } catch (error) {
     console.error(error);
-    showToast("Não foi possível carregar os membros.");
+    showToast("Nao foi possivel carregar os membros.");
   }
 }
 
@@ -561,8 +771,9 @@ if (openLoreModalBtn && loreModal) {
 
 const openFormModalBtn = document.getElementById("openFormModal");
 if (openFormModalBtn && formModal) {
-  openFormModalBtn.addEventListener("click", () => {
+  openFormModalBtn.addEventListener("click", async () => {
     openModal(formModal);
+    await loadDynamicRecruitmentForm();
   });
 }
 
@@ -589,13 +800,8 @@ document.addEventListener("keydown", (event) => {
   }
 });
 
-const recruitForm = document.getElementById("recruitForm");
 if (recruitForm) {
-  recruitForm.addEventListener("submit", (event) => {
-    event.preventDefault();
-    closeModal(formModal);
-    showToast("Candidatura preparada. Agora é só conectar ao Discord.");
-  });
+  recruitForm.addEventListener("submit", submitDynamicRecruitmentForm);
 }
 
 window.addEventListener("resize", updateCarousel);
@@ -637,3 +843,19 @@ cycleMembersBackground();
 setInterval(cycleMembersBackground, 4500);
 
 loadMembers();
+function normalizeAccent(accent) {
+  if (!accent) return "purple";
+
+  const value = String(accent).toLowerCase().trim();
+
+  if (["purple", "gold", "pink", "cyan"].includes(value)) {
+    return value;
+  }
+
+  if (value === "#7c3aed") return "purple";
+  if (value === "#f472b6") return "pink";
+  if (value === "#facc15") return "gold";
+  if (value === "#22d3ee") return "cyan";
+
+  return "purple";
+}
