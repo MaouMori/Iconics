@@ -2,7 +2,7 @@ import { supabase } from "@/lib/supabase";
 
 export async function uploadPublicImage(
   file: File,
-  bucket: "member-images" | "event-images"
+  bucket: "member-images" | "event-images" | "member-gallery"
 ) {
   const ext = file.name.split(".").pop() || "png";
   const fileName = `${Date.now()}-${crypto.randomUUID()}.${ext}`;
