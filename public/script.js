@@ -216,25 +216,57 @@ function renderMemberCards() {
   membersTrack.innerHTML = "";
 
   members.forEach((member, index) => {
-    const card = document.createElement("button");
+    const card = document.createElement("div");
     card.className = "member-card";
-    card.type = "button";
     card.dataset.index = index;
 
     const useImage = hasMemberImage(member);
 
     card.innerHTML = `
-      <div class="member-card-image">
-        ${useImage
-          ? `<img class="member-card-photo" src="${member.image}" alt="${member.name}">`
-          : `<div class="card-sigil"><span>${getSigil(member.symbol)}</span></div>`}
+      <div class="member-card-clickable" role="button" tabindex="0">
+        <div class="member-card-image">
+          ${
+            useImage
+              ? `<img class="member-card-photo" src="${member.image}" alt="${member.name}">`
+              : `<div class="card-sigil"><span>${getSigil(member.symbol)}</span></div>`
+          }
+        </div>
+
+        <div class="member-card-footer">
+          <div class="member-card-name">${member.name}</div>
+
+          <div class="member-card-actions">
+            <button class="member-card-page" type="button">Ver perfil</button>
+          </div>
+        </div>
       </div>
-      <div class="member-card-footer">${member.name}</div>
     `;
 
-    card.addEventListener("click", () => {
+    const clickableArea = card.querySelector(".member-card-clickable");
+    const pageBtn = card.querySelector(".member-card-page");
+
+    clickableArea?.addEventListener("click", () => {
       cinematicFlash();
       setMember(index);
+    });
+
+    clickableArea?.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        cinematicFlash();
+        setMember(index);
+      }
+    });
+
+    pageBtn?.addEventListener("click", (event) => {
+      event.stopPropagation();
+
+      if (!member?.id) {
+        showToast("Membro inválido.");
+        return;
+      }
+
+      window.location.href = `/membro/${member.id}`;
     });
 
     membersTrack.appendChild(card);
@@ -446,6 +478,13 @@ currentRecruitmentFields.forEach((field) => {
   const input = recruitForm.elements[fieldName];
   respostas[fieldName] = input ? input.value : "";
 });
+    const response = await fetch("/api/recruitment/submit", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ respostas }),
+    });
 
     const data = await response.json();
 
@@ -522,6 +561,7 @@ function normalizeAccent(value) {
 
 function normalizeMember(member) {
   return {
+    id: member?.id || null,
     name: member?.nome || "Sem nome",
     age: member?.idade || null,
     role: member?.cargo || "membro",
@@ -534,7 +574,8 @@ function normalizeMember(member) {
     accent: normalizeAccent(member?.accent_color),
     symbol: member?.sigil || "✦",
     tags: splitTags(member?.tags),
-    stats: splitStats(member?.stats)
+    stats: splitStats(member?.stats),
+    ordem: member?.ordem || 0
   };
 }
 
@@ -692,8 +733,9 @@ async function loadMembers() {
     const data = await response.json();
 
     members = (data || []).map((member) => ({
+      id: member.id,
       name: member.nome || "Sem nome",
-      age: member.idade || null,
+      age: member.idade ?? null,
       role: member.cargo || "membro",
       meta: member.meta || "",
       personality: member.personalidade || "",
@@ -701,31 +743,49 @@ async function loadMembers() {
       likes: member.gostos || "",
       hobbies: member.hobbies || "",
       tags: member.tags
-        ? String(member.tags).split("|").map((item) => item.trim()).filter(Boolean)
+        ? String(member.tags)
+            .split("|")
+            .map((item) => item.trim())
+            .filter(Boolean)
         : [],
       stats: member.stats
-        ? String(member.stats).split("|").map((item) => {
-            const [label, value] = item.split(":");
-            return {
-              label: (label || "").trim(),
-              value: (value || "").trim(),
-            };
-          }).filter((item) => item.label || item.value)
+        ? String(member.stats)
+            .split("|")
+            .map((item) => {
+              const [label, value] = item.split(":");
+              return {
+                label: (label || "").trim(),
+                value: (value || "").trim(),
+              };
+            })
+            .filter((item) => item.label || item.value)
         : [],
       symbol: member.sigil || "star",
       image: member.imagem_url || "",
       accent: normalizeAccent(member.accent_color),
-      ordem: member.ordem || 0,
+      ordem: member.ordem ?? 0,
     }));
 
-    members.sort((a, b) => (a.ordem || 0) - (b.ordem || 0));
+    members.sort((a, b) => (a.ordem ?? 0) - (b.ordem ?? 0));
 
     renderMemberCards();
-    setMember(0);
-    updateCarousel();
+
+    if (members.length > 0) {
+      currentMember = 0;
+      setMember(0);
+      updateCarousel();
+
+    } else {
+      if (memberName) memberName.textContent = "Nenhum membro encontrado";
+      if (memberRole) memberRole.textContent = "";
+      if (memberMeta) memberMeta.textContent = "";
+    }
   } catch (error) {
-    console.error(error);
-    showToast("Nao foi possivel carregar os membros.");
+    console.error("Erro ao carregar membros:", error);
+
+    if (memberName) memberName.textContent = "Erro ao carregar membros";
+    if (memberRole) memberRole.textContent = "";
+    if (memberMeta) memberMeta.textContent = "";
   }
 }
 
@@ -843,19 +903,3 @@ cycleMembersBackground();
 setInterval(cycleMembersBackground, 4500);
 
 loadMembers();
-function normalizeAccent(accent) {
-  if (!accent) return "purple";
-
-  const value = String(accent).toLowerCase().trim();
-
-  if (["purple", "gold", "pink", "cyan"].includes(value)) {
-    return value;
-  }
-
-  if (value === "#7c3aed") return "purple";
-  if (value === "#f472b6") return "pink";
-  if (value === "#facc15") return "gold";
-  if (value === "#22d3ee") return "cyan";
-
-  return "purple";
-}

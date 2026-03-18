@@ -21,6 +21,7 @@ type MemberCard = {
   imagem_url: string | null;
   accent_color: string | null;
   ordem: number | null;
+  galeria?: string[] | null;
 };
 
 export default function AdminMembrosPage() {
@@ -30,6 +31,9 @@ export default function AdminMembrosPage() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [imagemFile, setImagemFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [galeria, setGaleria] = useState<string[]>(Array(16).fill(""));
+  const [galeriaFiles, setGaleriaFiles] = useState<(File | null)[]>(Array(16).fill(null));
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   const [nome, setNome] = useState("");
   const [idade, setIdade] = useState("");
@@ -105,9 +109,36 @@ export default function AdminMembrosPage() {
     setAccentColor(membro.accent_color || "#7c3aed");
     setOrdem(membro.ordem ?? 0);
     setImagemFile(null);
+    const galeriaExistente = Array.isArray(membro.galeria) ? membro.galeria : [];
+    const galeriaCompleta = Array(16)
+      .fill("")
+      .map((_, index) => galeriaExistente[index] || "");
+
+    setGaleria(galeriaCompleta);
+    setGaleriaFiles(Array(16).fill(null));
 
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
+  function updateGaleriaUrl(index: number, value: string) {
+      setGaleria((prev) => {
+        const next = [...prev];
+        next[index] = value;
+        return next;
+      });
+    }
+
+    function updateGaleriaFile(index: number, file: File | null) {
+      setGaleriaFiles((prev) => {
+        const next = [...prev];
+        next[index] = file;
+        return next;
+      });
+    }
+
+    function resetGaleria() {
+      setGaleria(Array(16).fill(""));
+      setGaleriaFiles(Array(16).fill(null));
+    }
 
   function limparFormulario() {
     setEditingId(null);
@@ -126,6 +157,7 @@ export default function AdminMembrosPage() {
     setAccentColor("#7c3aed");
     setImagemFile(null);
     setOrdem(0);
+    resetGaleria();
   }
 
   async function salvarMembro(e: React.FormEvent) {
@@ -153,6 +185,29 @@ export default function AdminMembrosPage() {
         setUploading(false);
       }
     }
+    let finalGaleria = [...galeria];
+
+      for (let i = 0; i < galeriaFiles.length; i++) {
+        const file = galeriaFiles[i];
+        if (!file) continue;
+
+        try {
+          const uploadedUrl = await uploadPublicImage(file, "member-gallery");
+          finalGaleria[i] = uploadedUrl;
+        } catch (error) {
+          setMensagem(
+            error instanceof Error
+              ? `Erro ao enviar imagem da galeria ${i + 1}: ${error.message}`
+              : `Erro ao enviar imagem da galeria ${i + 1}.`
+          );
+          return;
+        }
+      }
+
+      finalGaleria = finalGaleria
+        .map((item) => String(item || "").trim())
+        .filter(Boolean)
+        .slice(0, 16);
 
     const payload = {
       nome,
@@ -170,6 +225,7 @@ export default function AdminMembrosPage() {
       accent_color: accentColor,
       criado_por: userData.user.id,
       ordem,
+      galeria: finalGaleria,
     };
 
     let error = null;
@@ -417,6 +473,57 @@ export default function AdminMembrosPage() {
                 />
               </div>
             )}
+            <div style={galleryAdminWrapStyle}>
+              <h3 style={{ margin: 0 }}>Galeria do membro</h3>
+              <p style={{ margin: "4px 0 0", color: "#d8b4fe" }}>
+                Você pode adicionar até 16 fotos. Pode usar upload ou URL.
+              </p>
+
+              <div style={galleryGridStyle}>
+                {Array.from({ length: 16 }).map((_, index) => {
+                  const previewSrc = galeriaFiles[index]
+                    ? URL.createObjectURL(galeriaFiles[index] as File)
+                    : galeria[index];
+
+                  return (
+                    <div key={index} style={galleryItemAdminStyle}>
+                      <strong style={{ fontSize: 14 }}>Foto {index + 1}</strong>
+
+                      <input
+                        style={inputStyle}
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => updateGaleriaFile(index, e.target.files?.[0] || null)}
+                      />
+
+                      <input
+                        style={inputStyle}
+                        placeholder={`URL da foto ${index + 1}`}
+                        value={galeria[index] || ""}
+                        onChange={(e) => updateGaleriaUrl(index, e.target.value)}
+                      />
+                      
+                      {previewSrc ? (
+                        <img
+                          src={previewSrc}
+                          alt={`Preview ${index + 1}`}
+                          style={galleryPreviewStyle}
+                          onClick={() => setPreviewImage(previewSrc)}
+                        />
+                        
+                      ) : (
+                        <div style={galleryEmptyPreviewStyle}>Sem imagem</div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+            {previewImage && (
+              <div style={modalOverlayStyle} onClick={() => setPreviewImage(null)}>
+                <img src={previewImage} style={modalImageStyle} />
+              </div>
+            )}
 
             <input
               style={inputStyle}
@@ -578,4 +685,67 @@ const itemCardStyle: React.CSSProperties = {
 const mutedP: React.CSSProperties = {
   margin: "6px 0",
   color: "#d8b4fe",
+};
+const galleryAdminWrapStyle: React.CSSProperties = {
+  display: "grid",
+  gap: 12,
+  marginTop: 10,
+};
+
+const galleryGridStyle: React.CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))",
+  gap: 18,
+};
+
+const galleryItemAdminStyle: React.CSSProperties = {
+  display: "flex",
+  flexDirection: "column",
+  gap: 10,
+  padding: 16,
+  borderRadius: 18,
+  background: "rgba(255,255,255,0.04)",
+  border: "1px solid rgba(255,255,255,0.08)",
+  backdropFilter: "blur(10px)",
+};
+
+const galleryPreviewStyle: React.CSSProperties = {
+  width: "100%",
+  aspectRatio: "3 / 4",
+  objectFit: "cover",
+  borderRadius: 14,
+  border: "1px solid rgba(255,255,255,0.08)",
+  cursor: "pointer",
+  transition: "0.2s",
+};
+
+const galleryEmptyPreviewStyle: React.CSSProperties = {
+  width: "100%",
+  aspectRatio: "3 / 4",
+  borderRadius: 12,
+  border: "1px dashed rgba(255,255,255,0.12)",
+  display: "grid",
+  placeItems: "center",
+  color: "#d8b4fe",
+  background: "rgba(255,255,255,0.02)",
+};
+const galleryPreviewHover = {
+  transform: "scale(1.03)",
+};
+const modalOverlayStyle: React.CSSProperties = {
+  position: "fixed",
+  inset: 0,
+  background: "rgba(0,0,0,0.8)",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  zIndex: 9999,
+  cursor: "zoom-out",
+};
+
+const modalImageStyle: React.CSSProperties = {
+  maxWidth: "90%",
+  maxHeight: "90%",
+  borderRadius: 20,
+  boxShadow: "0 0 40px rgba(168,85,247,.4)",
 };
