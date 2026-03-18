@@ -393,3 +393,24 @@
     height: 58px;
   }
 }
+.login-page::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(5, 0, 15, 0.65); /* escurece */
+  backdrop-filter: blur(2px); /* leve blur */
+  z-index: 0;
+}
+.login-shell {
+  position: relative;
+  z-index: 2;
+}
+.login-page::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 50% 30%, rgba(168, 85, 247, 0.25), transparent 40%);
+  pointer-events: none;
+  z-index: 1;
+}
