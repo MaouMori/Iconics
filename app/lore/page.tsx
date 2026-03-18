@@ -30,8 +30,10 @@ export default function LorePage() {
           <h2>Os Arquivos da Fraternidade</h2>
 
           <p>
-            Na Universidade de Orleans, onde luzes de festas iluminam o campus e milhares de câmeras
-            registram cada momento, existe uma fraternidade que domina tanto os holofotes quanto as sombras.
+            Na Universidade de Orleans, onde festas iluminam os corredores,
+            câmeras registram cada momento e novas tendências nascem a cada
+            semestre, existe uma fraternidade que domina tanto os holofotes
+            quanto as sombras.
           </p>
 
           <div className="hero-actions">
@@ -51,7 +53,7 @@ export default function LorePage() {
               { id: "origem", label: "Origem e Formação" },
               { id: "simbolos", label: "Símbolos e Estética" },
               { id: "valores", label: "Valores e Filosofia" },
-              { id: "curiosidades", label: "Curiosidades" },
+              { id: "curiosidades", label: "Curiosidades e Segredos" },
             ].map((item) => (
               <a
                 key={item.id}
@@ -64,18 +66,26 @@ export default function LorePage() {
             ))}
           </nav>
 
-          <div className="mini-title">De manuscritos antigos da</div>
+          <div className="mini-title">Arquivo visual da mansão</div>
 
           <div className="image-slot portrait paper-slot">
-            <span>Imagem vertical</span>
+            <img
+                  src="/images/mansao.png"
+                  alt="Origem da ICONICS"
+                  className="slot-image"
+                />
           </div>
 
           <div className="divider"></div>
 
-          <div className="mini-title">De manuscritos antigos</div>
+          <div className="mini-title">Registro simbólico</div>
 
           <div className="image-slot landscape">
-            <span>Imagem horizontal</span>
+            <img
+                  src="/images/logo.png"
+                  alt="Origem da ICONICS"
+                  className="slot-image"
+                />
           </div>
 
           <div className="ornament ornament-bottom"></div>
@@ -91,15 +101,41 @@ export default function LorePage() {
             <div className="two-col">
               <div className="text-col">
                 <p>
-                  A fraternidade ICONICS nasceu da convergência entre ambição, estética e influência...
+                  A ICONICS nasceu dentro da Universidade de Orleans quando
+                  alguns estudantes perceberam que a nova geração já não
+                  conquistava poder apenas por cargos, títulos ou tradições.
+                  O verdadeiro domínio havia mudado de forma: agora ele vivia
+                  na capacidade de moldar narrativas, criar tendências e
+                  influenciar multidões com uma única ideia.
                 </p>
+
                 <p>
-                  Seus primeiros nomes foram marcados por personalidade forte...
+                  Desde o início, a fraternidade passou a atrair pessoas que
+                  não apenas participavam da cultura do campus, mas a definiam.
+                  Fotógrafos, estilistas, streamers, artistas digitais,
+                  músicos, performers e comunicadores encontraram na ICONICS
+                  um espaço onde estética, presença e ambição se transformavam
+                  em força coletiva.
+                </p>
+
+                <p>
+                  Para o restante da universidade, elas sempre pareceram ser
+                  apenas o que mostravam ao mundo: influenciadoras, artistas,
+                  criadoras de tendências e presenças inesquecíveis. Mas por
+                  trás da imagem impecável, a ICONICS cresceu como algo maior —
+                  uma irmandade em que carisma, criatividade e poder caminham
+                  lado a lado com algo mais antigo e mais difícil de explicar.
                 </p>
               </div>
 
               <div className="image-slot">
-                <span>Imagem horizontal</span>
+                <div className="image-slot square">
+                <img
+                  src="/images/origem.png"
+                  alt="Origem da ICONICS"
+                  className="slot-image"
+                />
+              </div>
               </div>
             </div>
           </article>
@@ -112,16 +148,34 @@ export default function LorePage() {
 
             <div className="two-col reverse">
               <div className="image-slot square">
-                <span>Logo</span>
+                <img
+                  src="/images/simbolo.png"
+                  alt="Símbolos da ICONICS"
+                  className="slot-image"
+                />
               </div>
 
               <div className="text-col">
                 <p>
-                  A identidade visual da ICONICS é marcada por tons escuros...
+                  A identidade da ICONICS é construída sobre símbolos que falam
+                  tanto de influência quanto de mistério. O roxo é sua cor:
+                  intenso, noturno, elegante e impossível de ignorar. A câmera
+                  é seu emblema principal, representando imagem, narrativa,
+                  visibilidade e controle sobre aquilo que o mundo vê.
+                </p>
+
+                <p>
+                  Sua mansão, conhecida por muitos como um verdadeiro estúdio
+                  criativo, vive cercada por luzes, gravações, sessões de foto
+                  e festas lendárias. Mas entre a decoração sofisticada e o
+                  glamour cuidadosamente montado, há detalhes que poucos notam:
+                  símbolos discretos espalhados pelos ambientes, objetos
+                  antigos, velas esquecidas e traços de uma herança que parece
+                  existir além da estética.
                 </p>
 
                 <blockquote>
-                  “Sob as luzes da noite e nas sombras do desconhecido, somos um.”
+                  “Influência, Criatividade e Poder.”
                 </blockquote>
               </div>
             </div>
@@ -136,12 +190,39 @@ export default function LorePage() {
             <div className="two-col">
               <div className="text-col">
                 <p>
-                  A filosofia da ICONICS se apoia em três pilares...
+                  A filosofia da ICONICS se apoia em três pilares fundamentais:
+                  influência, criatividade e poder. Influência, porque suas
+                  integrantes compreendem que presença é uma forma de domínio.
+                  Criatividade, porque tudo que nasce dentro da fraternidade
+                  precisa ter assinatura, estética e impacto. E poder, porque
+                  a verdadeira liderança não precisa ser anunciada quando já
+                  é sentida por todos ao redor.
+                </p>
+
+                <p>
+                  Dentro da fraternidade, há quem acredite que isso tudo seja
+                  apenas resultado de estratégia, talento e carisma. Mas outras
+                  integrantes aprendem cedo que existe algo mais profundo em
+                  jogo. A sensação de que algumas presenças alteram a atmosfera
+                  de um ambiente. A impressão de que certas ideias se espalham
+                  rápido demais para serem apenas coincidência. A certeza de que
+                  fascínio também pode ser uma força.
+                </p>
+
+                <p>
+                  Na ICONICS, estética não é só aparência. Performance não é só
+                  entretenimento. Tendência não é só moda. Tudo pode se tornar
+                  linguagem, influência e marca. E, para algumas, isso é apenas
+                  a primeira camada de algo muito maior.
                 </p>
               </div>
 
-              <div className="image-slot landscape">
-                <span>Imagem</span>
+              <div className="image-slot square">
+                <img
+                  src="/images/valores.png"
+                  alt="Origem da ICONICS"
+                  className="slot-image"
+                />
               </div>
             </div>
           </article>
@@ -149,23 +230,35 @@ export default function LorePage() {
           {/* CURIOSIDADES */}
           <article className="section-card" id="curiosidades">
             <div className="section-heading">
-              <h2>Curiosidades</h2>
+              <h2>Curiosidades e Segredos</h2>
             </div>
 
             <div className="curiosity-grid">
               <div className="curiosity-note">
-                <h4>Curiosidades</h4>
-                <p>Registros secretos e rituais...</p>
+                <h4>Presença</h4>
+                <p>
+                  Dizem que quando uma integrante da ICONICS entra em uma sala,
+                  os olhares se voltam naturalmente. Alguns chamam isso de
+                  carisma. Outros preferem não tentar explicar.
+                </p>
               </div>
 
               <div className="curiosity-note">
-                <h4>Registro</h4>
-                <p>Datas importantes e eventos...</p>
+                <h4>Mansão</h4>
+                <p>
+                  A sede da fraternidade é famosa por suas festas, gravações e
+                  encontros criativos. Ainda assim, muitos juram que a atmosfera
+                  muda completamente quando a noite cai.
+                </p>
               </div>
 
               <div className="curiosity-note">
-                <h4>Arquivo</h4>
-                <p>Rumores e histórias lendárias...</p>
+                <h4>Sussurro</h4>
+                <p>
+                  Entre os membros mais antigos, uma frase sempre retorna como
+                  aviso, lembrança ou maldição. Um nome envolto em sombras,
+                  raramente dito em voz alta: “Maldita seja Nyx.”
+                </p>
               </div>
             </div>
           </article>

@@ -297,35 +297,68 @@ body {
   line-height: 1.8;
 }
 
-.image-slot {
+.image-slot.square {
   position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 24px;
+  width: 100%;
+  aspect-ratio: 1 / 1;
   overflow: hidden;
-  background:
-    linear-gradient(135deg, rgba(255,255,255,0.025), rgba(255,255,255,0.01)),
-    rgba(255,255,255,0.01);
-  border: 1px dashed rgba(204, 154, 255, 0.55);
-  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.03);
+  border-radius: 16px;
+
+  background: #0b0613;
+  border: 1px solid rgba(140, 80, 255, 0.25);
+
+  box-shadow:
+    0 0 20px rgba(140, 80, 255, 0.15),
+    inset 0 0 40px rgba(0, 0, 0, 0.6);
 }
 
-.image-slot::before {
+/* IMAGEM */
+.slot-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+
+  transform: scale(1.05);
+  filter: brightness(0.8) contrast(1.1) saturate(1.1);
+
+  transition: all 0.6s ease;
+}
+
+/* HOVER (efeito vivo) */
+.image-slot.square:hover .slot-image {
+  transform: scale(1.1);
+  filter: brightness(1) contrast(1.2) saturate(1.2);
+}
+
+/* OVERLAY DARK + ROXO */
+.image-slot.square::after {
   content: "";
   position: absolute;
-  inset: 12px;
-  border: 1px solid rgba(202, 147, 255, 0.15);
-  border-radius: 18px;
+  inset: 0;
+
+  background:
+    radial-gradient(circle at center, transparent 50%, rgba(0, 0, 0, 0.85)),
+    linear-gradient(180deg, rgba(120, 60, 255, 0.15), transparent);
+
+  pointer-events: none;
 }
 
-.image-slot span {
-  position: relative;
-  z-index: 2;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  font-size: .9rem;
-  color: rgba(226, 210, 250, 0.65);
+/* BORDA INTERNA ESTILIZADA */
+.image-slot.square::before {
+  content: "";
+  position: absolute;
+  inset: 8px;
+  border-radius: 12px;
+  border: 1px solid rgba(180, 120, 255, 0.2);
+
+  pointer-events: none;
+}
+
+/* GLOW ROXO SUAVE */
+.image-slot.square:hover {
+  box-shadow:
+    0 0 40px rgba(140, 80, 255, 0.35),
+    inset 0 0 60px rgba(0, 0, 0, 0.8);
 }
 
 .landscape {
