@@ -72,7 +72,7 @@ export default function HomePage() {
               </div>
             </div>
 
-            <button className="portal-btn" id="goMembers">
+            <button className="portal-btn2" id="goMembers">
               Explore o Portal da ICONICS
             </button>
           </div>
@@ -103,13 +103,13 @@ export default function HomePage() {
           <div className="members-content">
             <div className="section-title">
               <h2>Membros em destaque</h2>
-              <p>Edite, adicione ou remova membros apenas pelo arquivo JSON.</p>
+              <p>Conheça nos membros e venha se torna um deles</p>
             </div>
 
             <div className="members-wrapper">
               <div className="member-main-panel" id="memberMainPanel">
                 <div className="member-info-panel">
-                  <span className="member-badge">Membro em destaque</span>
+                  <span className="member-badge">Membro das Iconics</span>
                   <h3 id="memberName">Carregando...</h3>
                   <p className="member-role" id="memberRole"></p>
                   <p className="member-meta" id="memberMeta"></p>
@@ -118,7 +118,7 @@ export default function HomePage() {
                   <div className="stats-list" id="memberStats"></div>
 
                   <button className="discord-btn">
-                    Entre no nosso Discord para detalhes detalhados
+                    Saiba Mais Sobre o Membro
                   </button>
                 </div>
 
@@ -266,9 +266,9 @@ export default function HomePage() {
           <div className="form-box">
             <h2>Quer entrar para a ICONICS?</h2>
             <p>Abra o formulário e envie sua candidatura.</p>
-            <Link href="/recrutamento" className="portal-btn">
+            <div className="botao"><Link href="/recrutamento" className="portal-btn">
               Abrir formulário
-            </Link>
+            </Link></div>
           </div>
         </section>
         <section className="login-preview" id="login-preview">

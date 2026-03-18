@@ -486,6 +486,7 @@ button,input,textarea{font:inherit}
 }
 
 .portal-btn,
+.portal-btn2,
 .discord-btn,
 .submit-btn{
   border:0;
@@ -494,8 +495,19 @@ button,input,textarea{font:inherit}
 }
 
 .portal-btn{
-  margin-top:18px;
-  min-height:56px;
+  margin-top:68px;
+  min-height:105px;
+  padding:20 30px;
+  border-radius:999px;
+  background:linear-gradient(90deg, rgba(39,23,64,.96), rgba(82,35,126,.98), rgba(39,23,64,.96));
+  border:1px solid rgba(240,220,255,.12);
+  box-shadow:0 14px 34px rgba(77,23,124,.35);
+  font-weight:700;
+  transition:transform .25s ease, box-shadow .25s ease;
+}
+.portal-btn2{
+  margin-top:68px;
+  min-height:65px;
   padding:0 30px;
   border-radius:999px;
   background:linear-gradient(90deg, rgba(39,23,64,.96), rgba(82,35,126,.98), rgba(39,23,64,.96));
@@ -504,8 +516,13 @@ button,input,textarea{font:inherit}
   font-weight:700;
   transition:transform .25s ease, box-shadow .25s ease;
 }
+.botao{
+  margin-top: 40px;
+  margin-bottom: 10px;
+}
 
 .portal-btn:hover,
+.portal-btn2:hover,
 .discord-btn:hover,
 .submit-btn:hover,
 .carousel-nav:hover{
