@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import TopBar from "@/components/Topbar";
+import "./login.css";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -22,24 +23,22 @@ export default function LoginPage() {
 
     try {
       if (isRegister) {
- const { error } = await supabase.auth.signUp({
-    email,
-    password: senha,
-    options: {
-    data: {
-    nome,
-    },
-  },
-});
+        const { error } = await supabase.auth.signUp({
+          email,
+          password: senha,
+          options: {
+            data: { nome },
+          },
+        });
 
-  if (error) {
-    setMensagem(traduzirErro(error.message));
-    setLoading(false);
-    return;
-  }
+        if (error) {
+          setMensagem(traduzirErro(error.message));
+          setLoading(false);
+          return;
+        }
 
-  setMensagem("Cadastro realizado com sucesso.");
-} else {
+        setMensagem("Cadastro realizado com sucesso.");
+      } else {
         const { data, error } = await supabase.auth.signInWithPassword({
           email,
           password: senha,
@@ -91,110 +90,115 @@ export default function LoginPage() {
   }
 
   return (
-     <>
-    <TopBar showPainel={false} showLogout={false} />
-    <main
-      style={{
-        minHeight: "100vh",
-        display: "grid",
-        placeItems: "center",
-        background: "linear-gradient(180deg, #090012 0%, #140021 100%)",
-        padding: "24px",
-        color: "white",
-      }}
-    >
-      <div
-        style={{
-          width: "100%",
-          maxWidth: "420px",
-          background: "rgba(255,255,255,0.04)",
-          border: "1px solid rgba(255,255,255,0.08)",
-          borderRadius: "20px",
-          padding: "24px",
-        }}
-      >
-        <h1 style={{ marginTop: 0 }}>{isRegister ? "Criar conta" : "Entrar"}</h1>
+    <>
+      <TopBar showPainel={false} showLogout={false} />
 
-        <form onSubmit={handleSubmit} style={{ display: "grid", gap: "12px" }}>
-          {isRegister && (
-            <input
-              type="text"
-              placeholder="Nome"
-              value={nome}
-              onChange={(e) => setNome(e.target.value)}
-              required
-              style={inputStyle}
-            />
-          )}
+      <main className="login-page">
+        <div className="login-bg-core" />
+        <div className="login-bg-fog" />
+        <div className="login-bg-noise" />
 
-          <input
-            type="email"
-            placeholder="E-mail"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            style={inputStyle}
-          />
+        <div className="login-light login-light-left" />
+        <div className="login-light login-light-right" />
 
-          <input
-            type="password"
-            placeholder="Senha"
-            value={senha}
-            onChange={(e) => setSenha(e.target.value)}
-            required
-            style={inputStyle}
-          />
+        <div className="login-column login-column-left" />
+        <div className="login-column login-column-right" />
 
-          <button
-            type="submit"
-            disabled={loading}
-            style={{
-              height: "48px",
-              borderRadius: "999px",
-              border: "none",
-              background: "#8b5cf6",
-              color: "white",
-              fontWeight: 700,
-              cursor: "pointer",
-              opacity: loading ? 0.7 : 1,
-            }}
-          >
-            {loading ? "Carregando..." : isRegister ? "Cadastrar" : "Entrar"}
-          </button>
-        </form>
+        <div className="login-steps" />
 
-        <button
-          onClick={() => {
-            setIsRegister(!isRegister);
-            setMensagem("");
-          }}
-          style={{
-            marginTop: "14px",
-            background: "transparent",
-            border: "none",
-            color: "#d8b4fe",
-            cursor: "pointer",
-          }}
-        >
-          {isRegister ? "Já tenho conta" : "Quero criar conta"}
-        </button>
+        <section className="login-shell">
+          <div className="login-brand">
+            <div className="login-emblem-orbit">
+              <div className="login-emblem-ring">
+                <img
+                  src="/images/logo.png"
+                  alt="Logo ICONICS"
+                  className="login-emblem"
+                />
+              </div>
+            </div>
 
-        {mensagem && (
-          <p style={{ marginTop: "16px", color: "#e9d5ff" }}>{mensagem}</p>
-        )}
-      </div>
-      
-    </main>
-  </>  
+            <h1 className="login-title">ICONICS</h1>
+            <p className="login-subtitle">Bem-vindo de volta.</p>
+          </div>
+
+          <div className="login-panel">
+            <div className="login-panel-crown" />
+
+            <div className="login-panel-top">
+              <h2>{isRegister ? "Criar Conta" : "Entrar"}</h2>
+              <p>
+                {isRegister
+                  ? "Crie seu acesso ao portal da fraternidade."
+                  : "Acesse o portal exclusivo da fraternidade."}
+              </p>
+            </div>
+
+            <form onSubmit={handleSubmit} className="login-form">
+              {isRegister && (
+                <div className="field-wrap">
+                  <span className="field-icon">✦</span>
+                  <input
+                    type="text"
+                    placeholder="Nome"
+                    value={nome}
+                    onChange={(e) => setNome(e.target.value)}
+                    required
+                    className="login-input"
+                  />
+                </div>
+              )}
+
+              <div className="field-wrap">
+                <span className="field-icon">✉</span>
+                <input
+                  type="email"
+                  placeholder="E-mail"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className="login-input"
+                />
+              </div>
+
+              <div className="field-wrap">
+                <span className="field-icon">🔒</span>
+                <input
+                  type="password"
+                  placeholder="Senha"
+                  value={senha}
+                  onChange={(e) => setSenha(e.target.value)}
+                  required
+                  className="login-input"
+                />
+              </div>
+
+              <div className="login-links">
+                <button
+                  type="button"
+                  className="link-ghost"
+                  onClick={() => {
+                    setIsRegister(!isRegister);
+                    setMensagem("");
+                  }}
+                >
+                  {isRegister ? "Já tenho conta" : "Quero criar conta"}
+                </button>
+
+                {!isRegister && (
+                  <span className="forgot-text">Esqueceu a senha?</span>
+                )}
+              </div>
+
+              <button type="submit" disabled={loading} className="login-submit">
+                {loading ? "Carregando..." : isRegister ? "Cadastrar" : "Entrar"}
+              </button>
+            </form>
+
+            {mensagem && <p className="login-message">{mensagem}</p>}
+          </div>
+        </section>
+      </main>
+    </>
   );
 }
-
-const inputStyle: React.CSSProperties = {
-  height: "46px",
-  borderRadius: "12px",
-  border: "1px solid rgba(255,255,255,0.08)",
-  background: "rgba(255,255,255,0.04)",
-  color: "white",
-  padding: "0 14px",
-  outline: "none",
-};
