@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import TopBar from "@/components/Topbar";
+import Toast from "@/components/Toast";
 import "./login.css";
 
 export default function LoginPage() {
@@ -15,6 +16,7 @@ export default function LoginPage() {
   const [senha, setSenha] = useState("");
   const [mensagem, setMensagem] = useState("");
   const [loading, setLoading] = useState(false);
+  const [mostrarSenha, setMostrarSenha] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -162,15 +164,23 @@ export default function LoginPage() {
               </div>
 
               <div className="field-wrap">
-                <span className="field-icon">🔒</span>
+                <span className="field-icon">&#128274;</span>
                 <input
-                  type="password"
+                  type={mostrarSenha ? "text" : "password"}
                   placeholder="Senha"
                   value={senha}
                   onChange={(e) => setSenha(e.target.value)}
                   required
                   className="login-input"
                 />
+                <button
+                  type="button"
+                  className="toggle-senha"
+                  onClick={() => setMostrarSenha(!mostrarSenha)}
+                  aria-label={mostrarSenha ? "Ocultar senha" : "Mostrar senha"}
+                >
+                  {mostrarSenha ? "\u{1F648}" : "\u{1F441}"}
+                </button>
               </div>
 
               <div className="login-links">
@@ -195,7 +205,7 @@ export default function LoginPage() {
               </button>
             </form>
 
-            {mensagem && <p className="login-message">{mensagem}</p>}
+            {mensagem && <Toast mensagem={mensagem} onClose={() => setMensagem("")} />}
           </div>
         </section>
       </main>

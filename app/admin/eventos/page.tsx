@@ -1,6 +1,8 @@
 "use client";
 
 import TopBar from "@/components/Topbar";
+import Spinner from "@/components/Spinner";
+import Toast from "@/components/Toast";
 import { supabase } from "@/lib/supabase";
 import { uploadPublicImage } from "@/lib/uploadImage";
 import { useEffect, useState } from "react";
@@ -149,7 +151,7 @@ export default function AdminEventosPage() {
   }
 
   if (loading) {
-    return <main style={pageStyle}>Carregando...</main>;
+    return <main style={pageStyle}><Spinner /></main>;
   }
 
   if (!permitido) {
@@ -271,7 +273,7 @@ export default function AdminEventosPage() {
             </div>
           </form>
 
-          {mensagem && <p style={messageStyle}>{mensagem}</p>}
+          {mensagem && <Toast mensagem={mensagem} onClose={() => setMensagem("")} />}
 
           <div style={{ marginTop: 32 }}>
             <h2 style={sectionTitle}>Eventos cadastrados</h2>
@@ -328,7 +330,7 @@ export default function AdminEventosPage() {
 const pageStyle: React.CSSProperties = {
   minHeight: "100vh",
   background: "linear-gradient(180deg, #090012 0%, #140021 100%)",
-  padding: "28px",
+  padding: "110px 24px 40px",
   color: "white",
 };
 

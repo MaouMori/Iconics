@@ -3,7 +3,6 @@ import "@/styles/style.css";
 import "@/styles/calendar.css";
 import Navbar from "@/components/Navbar";
 import Link from "next/link";
-import HomeEventsPreview from "@/components/HomeEventsPreview";
 
 export default function HomePage() {
   return (

@@ -128,14 +128,12 @@ export default function LorePage() {
                 </p>
               </div>
 
-              <div className="image-slot">
-                <div className="image-slot square">
+              <div className="image-slot square">
                 <img
                   src="/images/origem.png"
                   alt="Origem da ICONICS"
                   className="slot-image"
                 />
-              </div>
               </div>
             </div>
           </article>

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import TopBar from "@/components/Topbar";
+import Toast from "@/components/Toast";
 
 type FieldDef = {
   id: string;
@@ -206,7 +207,7 @@ export default function RecrutamentoPage() {
               </form>
             )}
 
-            {mensagem && !loading && <p style={messageStyle}>{mensagem}</p>}
+            {mensagem && !loading && <Toast mensagem={mensagem} onClose={() => setMensagem("")} />}
           </div>
         </div>
       </main>
@@ -292,7 +293,7 @@ const cardStyle: React.CSSProperties = {
 
 const formGridStyle: React.CSSProperties = {
   display: "grid",
-  gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+  gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
   gap: "16px",
 };
 

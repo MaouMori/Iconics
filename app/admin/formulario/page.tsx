@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import TopBar from "@/components/Topbar";
+import Spinner from "@/components/Spinner";
+import Toast from "@/components/Toast";
 
 type FieldDef = {
   id: string;
@@ -118,7 +120,7 @@ export default function AdminFormularioPage() {
   }
 
   if (loading) {
-    return <main style={pageStyle}>Carregando...</main>;
+    return <main style={pageStyle}><Spinner /></main>;
   }
 
   if (!permitido) {
@@ -178,7 +180,7 @@ export default function AdminFormularioPage() {
                 Salvar formulário
               </button>
 
-              {mensagem && <p style={messageStyle}>{mensagem}</p>}
+              {mensagem && <Toast mensagem={mensagem} onClose={() => setMensagem("")} />}
             </div>
 
             <div style={panelStyle}>
@@ -260,7 +262,7 @@ const mutedStyle: React.CSSProperties = {
 
 const gridStyle: React.CSSProperties = {
   display: "grid",
-  gridTemplateColumns: "1.15fr .85fr",
+  gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))",
   gap: 20,
 };
 

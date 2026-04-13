@@ -1,6 +1,8 @@
 "use client";
 
 import TopBar from "@/components/Topbar";
+import Spinner from "@/components/Spinner";
+import Toast from "@/components/Toast";
 import { supabase } from "@/lib/supabase";
 import { useEffect, useMemo, useState } from "react";
 import "./painel.css";
@@ -96,6 +98,19 @@ export default function PainelPage() {
   async function handleUploadAvatar(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file || !profile?.id) return;
+
+    const maxSize = 2 * 1024 * 1024;
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+
+    if (file.size > maxSize) {
+      setAvatarMessage("Erro: a imagem deve ter no máximo 2 MB.");
+      return;
+    }
+
+    if (!allowedTypes.includes(file.type)) {
+      setAvatarMessage("Erro: formato inválido. Use JPEG, PNG, WebP ou GIF.");
+      return;
+    }
 
     setAvatarLoading(true);
     setAvatarMessage("");
@@ -242,7 +257,7 @@ export default function PainelPage() {
       <>
         <TopBar />
         <main className="painel-page">
-          <div className="painel-loader">Carregando portal da ICONICS...</div>
+          <div className="painel-loader"><Spinner texto="Carregando portal da ICONICS..." /></div>
         </main>
       </>
     );
@@ -309,7 +324,7 @@ export default function PainelPage() {
                   />
                 </label>
 
-                {avatarMessage && <p className="avatar-message">{avatarMessage}</p>}
+                {avatarMessage && <Toast mensagem={avatarMessage} onClose={() => setAvatarMessage("")} />}
 
                 <div className="mini-card">
                   <p className="mini-label">Status</p>

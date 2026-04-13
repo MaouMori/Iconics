@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
 export async function GET() {
-  const { data, error } = await supabase
+  const { data, error } = await supabaseAdmin
     .from("events")
     .select("id, titulo, descricao, data_evento, horario, local, imagem_url")
     .order("data_evento", { ascending: true });

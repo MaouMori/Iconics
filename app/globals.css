@@ -2,3 +2,45 @@ html, body {
   margin: 0;
   padding: 0;
 }
+
+@keyframes iconics-spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes toast-shrink {
+  from { width: 100%; }
+  to { width: 0%; }
+}
+
+/* Calendario responsivo */
+.calendario-event-card {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 20px;
+  padding: 22px;
+  border-radius: 22px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.calendario-cell {
+  min-height: 82px;
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.03);
+  color: white;
+  position: relative;
+  cursor: pointer;
+  font-weight: 700;
+  overflow: hidden;
+}
+
+@media (max-width: 768px) {
+  .calendario-event-card {
+    grid-template-columns: 1fr;
+  }
+
+  .calendario-cell {
+    min-height: 48px;
+  }
+}

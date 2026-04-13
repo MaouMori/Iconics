@@ -1,6 +1,7 @@
 "use client";
 
 import TopBar from "@/components/Topbar";
+import Spinner from "@/components/Spinner";
 import { supabase } from "@/lib/supabase";
 import { useEffect, useState } from "react";
 
@@ -61,7 +62,7 @@ export default function AdminPage() {
   }, []);
 
   if (loading) {
-    return <main style={pageStyle}>Carregando...</main>;
+    return <main style={pageStyle}><Spinner /></main>;
   }
 
   if (!permitido) {

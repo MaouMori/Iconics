@@ -559,26 +559,6 @@ function normalizeAccent(value) {
   return "purple";
 }
 
-function normalizeMember(member) {
-  return {
-    id: member?.id || null,
-    name: member?.nome || "Sem nome",
-    age: member?.idade || null,
-    role: member?.cargo || "membro",
-    meta: member?.meta || "",
-    personality: member?.personalidade || "",
-    habits: member?.habitos || "",
-    likes: member?.gostos || "",
-    hobbies: member?.hobbies || "",
-    image: member?.imagem_url || "",
-    accent: normalizeAccent(member?.accent_color),
-    symbol: member?.sigil || "✦",
-    tags: splitTags(member?.tags),
-    stats: splitStats(member?.stats),
-    ordem: member?.ordem || 0
-  };
-}
-
 function renderMemberDetailsModal(member) {
   if (!loreModal) return;
 

@@ -1,6 +1,8 @@
 "use client";
 
 import TopBar from "@/components/Topbar";
+import Spinner from "@/components/Spinner";
+import Toast from "@/components/Toast";
 import { supabase } from "@/lib/supabase";
 import { useEffect, useState } from "react";
 
@@ -75,7 +77,7 @@ export default function AdminUsuariosPage() {
   }
 
   if (loading) {
-    return <main style={pageStyle}>Carregando...</main>;
+    return <main style={pageStyle}><Spinner /></main>;
   }
 
   if (!permitido) {
@@ -114,7 +116,7 @@ export default function AdminUsuariosPage() {
             </button>
           </div>
 
-          {mensagem && <p style={messageStyle}>{mensagem}</p>}
+          {mensagem && <Toast mensagem={mensagem} onClose={() => setMensagem("")} />}
 
           <div style={tableWrap}>
             <table style={tableStyle}>
@@ -169,7 +171,7 @@ export default function AdminUsuariosPage() {
 const pageStyle: React.CSSProperties = {
   minHeight: "100vh",
   background: "linear-gradient(180deg, #090012 0%, #140021 100%)",
-  padding: "28px",
+  padding: "110px 24px 40px",
   color: "white",
 };
 

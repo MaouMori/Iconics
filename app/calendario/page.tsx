@@ -81,8 +81,11 @@ export default function CalendarioPage() {
       <button
         key={dateString + i}
         onClick={() => setSelectedDate(dateString)}
+        className={[
+              "calendario-cell",
+              otherMonth ? "other-month" : "",
+            ].filter(Boolean).join(" ")}
         style={{
-          ...calendarCellStyle,
           ...(otherMonth ? calendarCellOtherMonth : {}),
           ...(isSelected ? calendarCellSelected : {}),
           ...(isToday ? calendarCellToday : {}),
@@ -193,7 +196,7 @@ export default function CalendarioPage() {
               ) : (
                 <div style={eventsListStyle}>
                   {selectedEvents.map((event) => (
-                    <div key={event.id} style={eventCardStyle}>
+                    <div key={event.id} className="calendario-event-card">
                       <div style={eventInfoStyle}>
                         <div style={eventDatePill}>
                           {formatDisplayDate(event.data_evento)} • {event.horario || "Sem horário"}

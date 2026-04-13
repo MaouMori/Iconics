@@ -359,6 +359,26 @@
   font-size: 0.95rem;
 }
 
+.toggle-senha {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  color: #d8b4fe;
+  font-size: 1.15rem;
+  cursor: pointer;
+  padding: 4px;
+  line-height: 1;
+  opacity: 0.8;
+  transition: opacity 0.2s;
+}
+
+.toggle-senha:hover {
+  opacity: 1;
+}
+
 @media (max-width: 900px) {
   .login-column,
   .login-light,

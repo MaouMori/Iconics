@@ -1,6 +1,8 @@
 "use client";
 
 import TopBar from "@/components/Topbar";
+import Spinner from "@/components/Spinner";
+import Toast from "@/components/Toast";
 import { supabase } from "@/lib/supabase";
 import { useEffect, useState } from "react";
 import { uploadPublicImage } from "@/lib/uploadImage";
@@ -323,7 +325,7 @@ export default function AdminMembrosPage() {
   }
 
   if (loading) {
-    return <main style={pageStyle}>Carregando...</main>;
+    return <main style={pageStyle}><Spinner /></main>;
   }
 
   if (!permitido) {
@@ -557,7 +559,7 @@ export default function AdminMembrosPage() {
             </div>
           </form>
 
-          {mensagem && <p style={{ marginTop: 16, color: "#e9d5ff" }}>{mensagem}</p>}
+          {mensagem && <Toast mensagem={mensagem} onClose={() => setMensagem("")} />}
 
           <div style={{ marginTop: 28 }}>
             <h2>Membros cadastrados</h2>
@@ -605,7 +607,7 @@ export default function AdminMembrosPage() {
 const pageStyle: React.CSSProperties = {
   minHeight: "100vh",
   background: "linear-gradient(180deg, #090012 0%, #140021 100%)",
-  padding: "24px",
+  padding: "110px 24px 40px",
   color: "white",
 };
 
@@ -675,6 +677,7 @@ const itemCardStyle: React.CSSProperties = {
   display: "flex",
   justifyContent: "space-between",
   alignItems: "flex-start",
+  flexWrap: "wrap",
   gap: 16,
   padding: "18px",
   borderRadius: "16px",
@@ -728,9 +731,6 @@ const galleryEmptyPreviewStyle: React.CSSProperties = {
   placeItems: "center",
   color: "#d8b4fe",
   background: "rgba(255,255,255,0.02)",
-};
-const galleryPreviewHover = {
-  transform: "scale(1.03)",
 };
 const modalOverlayStyle: React.CSSProperties = {
   position: "fixed",
