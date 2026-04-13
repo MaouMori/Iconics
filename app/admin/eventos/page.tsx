@@ -192,133 +192,141 @@ export default function AdminEventosPage() {
             </button>
           </div>
 
-          <form onSubmit={criarEvento} style={{ display: "grid", gap: 12 }}>
-            <input
-              style={inputStyle}
-              placeholder="Título do evento"
-              value={titulo}
-              onChange={(e) => setTitulo(e.target.value)}
-              required
-            />
-
-            <textarea
-              style={textareaStyle}
-              placeholder="Descrição"
-              value={descricao}
-              onChange={(e) => setDescricao(e.target.value)}
-            />
-
-            <div style={twoColStyle}>
-              <input
-                style={inputStyle}
-                type="date"
-                value={dataEvento}
-                onChange={(e) => setDataEvento(e.target.value)}
-                required
-              />
-
-              <input
-                style={inputStyle}
-                placeholder="Horário (ex: 22h)"
-                value={horario}
-                onChange={(e) => setHorario(e.target.value)}
-              />
-            </div>
-
-            <input
-              style={inputStyle}
-              placeholder="Local"
-              value={local}
-              onChange={(e) => setLocal(e.target.value)}
-            />
-
-            <input
-              style={inputStyle}
-              type="file"
-              accept="image/*"
-              onChange={(e) => setImagemFile(e.target.files?.[0] || null)}
-            />
-
-            <input
-              style={inputStyle}
-              placeholder="Ou cole uma URL da imagem (opcional)"
-              value={imagemUrl}
-              onChange={(e) => setImagemUrl(e.target.value)}
-            />
-
-            {(imagemFile || imagemUrl) && (
-              <div style={{ marginTop: 8 }}>
-                <img
-                  src={imagemFile ? URL.createObjectURL(imagemFile) : imagemUrl}
-                  alt="Preview"
-                  style={{
-                    width: 240,
-                    height: 150,
-                    objectFit: "cover",
-                    borderRadius: 16,
-                    border: "1px solid rgba(255,255,255,.08)",
-                  }}
-                />
-              </div>
-            )}
-
-            <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-              <button type="submit" style={primaryButton}>
-                {uploading ? "Enviando imagem..." : "Criar evento"}
-              </button>
-
-              <button type="button" style={secondaryButton} onClick={limparFormulario}>
-                Limpar
-              </button>
-            </div>
-          </form>
-
           {mensagem && <Toast mensagem={mensagem} onClose={() => setMensagem("")} />}
 
-          <div style={{ marginTop: 32 }}>
-            <h2 style={sectionTitle}>Eventos cadastrados</h2>
+          <div style={twoColumnLayout}>
+            {/* Coluna esquerda - Formulário */}
+            <div style={leftColumn}>
+              <h2 style={sectionTitle}>Criar novo evento</h2>
 
-            <div style={{ display: "grid", gap: 16, marginTop: 18 }}>
-              {eventos.map((evento) => (
-                <div key={evento.id} style={eventCardStyle}>
-                  <div style={{ flex: 1 }}>
-                    <strong style={{ fontSize: "1.05rem" }}>{evento.titulo}</strong>
+              <form onSubmit={criarEvento} style={{ display: "grid", gap: 12 }}>
+                <input
+                  style={inputStyle}
+                  placeholder="Título do evento"
+                  value={titulo}
+                  onChange={(e) => setTitulo(e.target.value)}
+                  required
+                />
 
-                    <p style={mutedP}>
-                      {evento.data_evento} • {evento.horario || "Sem horário"}
-                    </p>
+                <textarea
+                  style={textareaStyle}
+                  placeholder="Descrição"
+                  value={descricao}
+                  onChange={(e) => setDescricao(e.target.value)}
+                />
 
-                    <p style={mutedP}>{evento.local || "Sem local"}</p>
-                    <p style={mutedP}>{evento.descricao || "Sem descrição"}</p>
+                <div style={twoColStyle}>
+                  <input
+                    style={inputStyle}
+                    type="date"
+                    value={dataEvento}
+                    onChange={(e) => setDataEvento(e.target.value)}
+                    required
+                  />
 
-                    {evento.imagem_url && (
-                      <img
-                        src={evento.imagem_url}
-                        alt={evento.titulo}
-                        style={{
-                          marginTop: 12,
-                          width: 220,
-                          height: 140,
-                          objectFit: "cover",
-                          borderRadius: 14,
-                          border: "1px solid rgba(255,255,255,.08)",
-                        }}
-                      />
-                    )}
+                  <input
+                    style={inputStyle}
+                    placeholder="Horário (ex: 22h)"
+                    value={horario}
+                    onChange={(e) => setHorario(e.target.value)}
+                  />
+                </div>
+
+                <input
+                  style={inputStyle}
+                  placeholder="Local"
+                  value={local}
+                  onChange={(e) => setLocal(e.target.value)}
+                />
+
+                <input
+                  style={inputStyle}
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setImagemFile(e.target.files?.[0] || null)}
+                />
+
+                <input
+                  style={inputStyle}
+                  placeholder="Ou cole uma URL da imagem (opcional)"
+                  value={imagemUrl}
+                  onChange={(e) => setImagemUrl(e.target.value)}
+                />
+
+                {(imagemFile || imagemUrl) && (
+                  <div style={{ marginTop: 8 }}>
+                    <img
+                      src={imagemFile ? URL.createObjectURL(imagemFile) : imagemUrl}
+                      alt="Preview"
+                      style={{
+                        width: "100%",
+                        height: 150,
+                        objectFit: "cover",
+                        borderRadius: 16,
+                        border: "1px solid rgba(255,255,255,.08)",
+                      }}
+                    />
                   </div>
+                )}
 
-                  <button
-                    style={deleteButtonStyle}
-                    onClick={() => excluirEvento(evento.id)}
-                  >
-                    Excluir
+                <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+                  <button type="submit" style={primaryButton}>
+                    {uploading ? "Enviando imagem..." : "Criar evento"}
+                  </button>
+
+                  <button type="button" style={secondaryButton} onClick={limparFormulario}>
+                    Limpar
                   </button>
                 </div>
-              ))}
+              </form>
+            </div>
 
-              {eventos.length === 0 && (
-                <p style={mutedText}>Nenhum evento cadastrado ainda.</p>
-              )}
+            {/* Coluna direita - Eventos cadastrados */}
+            <div style={rightColumn}>
+              <h2 style={sectionTitle}>Eventos cadastrados ({eventos.length})</h2>
+
+              <div style={eventsListStyle}>
+                {eventos.map((evento) => (
+                  <div key={evento.id} style={eventCardStyle}>
+                    <div>
+                      <strong style={{ fontSize: "1.05rem" }}>{evento.titulo}</strong>
+
+                      <p style={mutedP}>
+                        {evento.data_evento} • {evento.horario || "Sem horário"}
+                      </p>
+
+                      <p style={mutedP}>{evento.local || "Sem local"}</p>
+                      <p style={mutedP}>{evento.descricao || "Sem descrição"}</p>
+
+                      {evento.imagem_url && (
+                        <img
+                          src={evento.imagem_url}
+                          alt={evento.titulo}
+                          style={{
+                            marginTop: 12,
+                            width: "100%",
+                            height: 120,
+                            objectFit: "cover",
+                            borderRadius: 14,
+                            border: "1px solid rgba(255,255,255,.08)",
+                          }}
+                        />
+                      )}
+                    </div>
+
+                    <button
+                      style={deleteButtonStyle}
+                      onClick={() => excluirEvento(evento.id)}
+                    >
+                      Excluir
+                    </button>
+                  </div>
+                ))}
+
+                {eventos.length === 0 && (
+                  <p style={mutedText}>Nenhum evento cadastrado ainda.</p>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -336,7 +344,7 @@ const pageStyle: React.CSSProperties = {
 
 const panelStyle: React.CSSProperties = {
   width: "100%",
-  maxWidth: "1280px",
+  maxWidth: "1400px",
   margin: "0 auto",
   marginTop: "26px",
   borderRadius: "26px",
@@ -377,14 +385,25 @@ const mutedText: React.CSSProperties = {
 };
 
 const sectionTitle: React.CSSProperties = {
-  margin: 0,
+  margin: "0 0 16px",
   fontFamily: 'Georgia,"Times New Roman",serif',
-  fontSize: "1.6rem",
+  fontSize: "1.4rem",
 };
 
-const messageStyle: React.CSSProperties = {
-  marginTop: "16px",
-  color: "#e9d5ff",
+const twoColumnLayout: React.CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "1fr 1fr",
+  gap: "32px",
+};
+
+const leftColumn: React.CSSProperties = {
+  minWidth: 0,
+};
+
+const rightColumn: React.CSSProperties = {
+  minWidth: 0,
+  borderLeft: "1px solid rgba(255,255,255,0.08)",
+  paddingLeft: "32px",
 };
 
 const twoColStyle: React.CSSProperties = {
@@ -444,13 +463,22 @@ const deleteButtonStyle: React.CSSProperties = {
   color: "white",
   fontWeight: 700,
   cursor: "pointer",
+  marginTop: "12px",
+};
+
+const eventsListStyle: React.CSSProperties = {
+  display: "flex",
+  flexDirection: "column",
+  gap: "16px",
+  maxHeight: "700px",
+  overflowY: "auto",
+  paddingRight: "8px",
 };
 
 const eventCardStyle: React.CSSProperties = {
   display: "flex",
-  justifyContent: "space-between",
-  alignItems: "flex-start",
-  gap: 16,
+  flexDirection: "column",
+  gap: "8px",
   padding: "18px",
   borderRadius: "16px",
   background: "rgba(255,255,255,0.03)",
@@ -458,6 +486,7 @@ const eventCardStyle: React.CSSProperties = {
 };
 
 const mutedP: React.CSSProperties = {
-  margin: "8px 0",
+  margin: "4px 0",
   color: "#d8b4fe",
+  fontSize: "0.95rem",
 };
