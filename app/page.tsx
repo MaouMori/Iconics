@@ -295,6 +295,16 @@ export default function HomePage() {
   </div>
 </section>
 
+        <section className="formulario" id="parcerias-preview" style={{ textAlign: "center", padding: "80px 24px" }}>
+          <div className="form-box">
+            <h2>Nossos Parceiros</h2>
+            <p>Conheça as empresas e comunidades que caminham ao lado da Iconics.</p>
+            <div className="botao"><Link href="/parcerias" className="portal-btn">
+              Ver parcerias
+            </Link></div>
+          </div>
+        </section>
+
         <footer className="footer">
           <div className="footer-mist"></div>
 

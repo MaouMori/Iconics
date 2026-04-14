@@ -1,4 +1,5 @@
 import "./globals.css";
+import PartnersBar from "@/components/PartnersBar";
 
 export const metadata = {
   title: "ICONICS",
@@ -12,7 +13,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR">
-      <body>{children}</body>
+      <body>
+        {children}
+        <PartnersBar />
+      </body>
     </html>
   );
 }

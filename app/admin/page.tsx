@@ -144,6 +144,12 @@ export default function AdminPage() {
                 >
                   Usuários
                 </button>
+                <button
+                  style={smallButtonStyle}
+                  onClick={() => (window.location.href = "/admin/parcerias")}
+                >
+                  Parcerias
+                </button>
               </div>
             </div>
           </div>

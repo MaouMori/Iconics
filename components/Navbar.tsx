@@ -48,6 +48,7 @@ export default function Navbar() {
 
         <a href="#formulario" className="nav-link">Formulario</a>
         <Link href="/lore" className="nav-link">Lore</Link>
+        <Link href="/parcerias" className="nav-link">Parcerias</Link>
 
         {!loading && !isLogged && (
           <Link href="/login" className="nav-link nav-login">
