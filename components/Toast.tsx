@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useCallback, useState } from "react";
+import { useEffect, useCallback } from "react";
 
 type ToastTipo = "sucesso" | "erro" | "info";
 
@@ -44,23 +44,16 @@ export default function Toast({
   duracao = 4000,
   onClose,
 }: ToastProps) {
-  const [visible, setVisible] = useState(true);
-
   const handleClose = useCallback(() => {
-    setVisible(false);
     onClose();
   }, [onClose]);
-
-  useEffect(() => {
-    setVisible(true);
-  }, [mensagem]);
 
   useEffect(() => {
     const timer = setTimeout(handleClose, duracao);
     return () => clearTimeout(timer);
   }, [duracao, handleClose, mensagem]);
 
-  if (!visible || !mensagem) return null;
+  if (!mensagem) return null;
 
   const tipoFinal = tipo || detectarTipo(mensagem);
   const cor = cores[tipoFinal];

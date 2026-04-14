@@ -37,7 +37,7 @@ export default function Navbar() {
   return (
     <header className="header">
       <nav className="navbar">
-        <a href="/" className="nav-link active">Home</a>
+        <Link href="/" className="nav-link active">Home</Link>
 
         <div className="logo-wrap" aria-label="Logo ICONICS">
           <div className="logo-core"></div>

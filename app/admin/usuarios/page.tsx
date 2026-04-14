@@ -19,6 +19,20 @@ export default function AdminUsuariosPage() {
   const [mensagem, setMensagem] = useState("");
   const [usuarios, setUsuarios] = useState<ProfileRow[]>([]);
 
+  const carregarUsuarios = async () => {
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("id, nome, email, cargo")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      setMensagem(error.message);
+      return;
+    }
+
+    setUsuarios(data || []);
+  };
+
   useEffect(() => {
     async function init() {
       const { data: userData } = await supabase.auth.getUser();
@@ -44,20 +58,6 @@ export default function AdminUsuariosPage() {
 
     init();
   }, []);
-
-  async function carregarUsuarios() {
-    const { data, error } = await supabase
-      .from("profiles")
-      .select("id, nome, email, cargo")
-      .order("created_at", { ascending: false });
-
-    if (error) {
-      setMensagem(error.message);
-      return;
-    }
-
-    setUsuarios(data || []);
-  }
 
   async function alterarCargo(id: string, novoCargo: string) {
     setMensagem("");
@@ -215,11 +215,6 @@ const mutedText: React.CSSProperties = {
   margin: 0,
   color: "#d8cceb",
   lineHeight: 1.7,
-};
-
-const messageStyle: React.CSSProperties = {
-  marginBottom: "18px",
-  color: "#e9d5ff",
 };
 
 const primaryButton: React.CSSProperties = {

@@ -62,7 +62,7 @@ export async function POST(req: NextRequest) {
         return `**${field.label}:** ${String(value)}`;
       });
 
-      await fetch(webhook, {
+      const discordResponse = await fetch(webhook, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -82,6 +82,13 @@ export async function POST(req: NextRequest) {
           ],
         }),
       });
+
+      if (!discordResponse.ok) {
+        return NextResponse.json(
+          { error: "Candidatura salva, mas falhou ao enviar notificação no Discord." },
+          { status: 502 }
+        );
+      }
     }
 
     return NextResponse.json({ ok: true });

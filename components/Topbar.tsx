@@ -63,9 +63,9 @@ export default function TopBar({
           boxShadow: "0 0 40px rgba(91,33,182,.18)",
         }}
       >
-        <a href="/" style={linkStyle}>
+        <Link href="/" style={linkStyle}>
           Voltar ao site
-        </a>
+        </Link>
 
         {!loading && isLogged && showPainel && (
           <Link href="/painel" style={linkStyle}>
