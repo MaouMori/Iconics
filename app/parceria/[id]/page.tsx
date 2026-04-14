@@ -136,7 +136,8 @@ export default function ParceriaPage() {
           </div>
 
           <div style={contentGrid}>
-            <div style={mainCol}>
+            {/* Coluna Esquerda - Informações */}
+            <div style={leftCol}>
               <div style={cardStyle}>
                 <h3 style={sectionTitle}>Sobre a empresa</h3>
                 <p style={textStyle}>
@@ -154,10 +155,13 @@ export default function ParceriaPage() {
                   </ul>
                 </div>
               )}
+            </div>
 
-              {galeria.length > 0 && (
-                <div style={cardStyle}>
-                  <h3 style={sectionTitle}>Galeria</h3>
+            {/* Coluna Central - Galeria */}
+            {galeria.length > 0 && (
+              <div style={centerCol}>
+                <div style={galleryCard}>
+                  <h3 style={galleryTitle}>📸 Galeria</h3>
                   <div style={galleryGrid}>
                     {galeria.map((src, index) => (
                       <button
@@ -167,14 +171,18 @@ export default function ParceriaPage() {
                         onClick={() => openLightbox(index)}
                       >
                         <img src={src} alt={`Foto ${index + 1}`} style={galleryImg} />
+                        <div style={galleryOverlay}>
+                          <span style={galleryZoomIcon}>🔍</span>
+                        </div>
                       </button>
                     ))}
                   </div>
                 </div>
-              )}
-            </div>
+              </div>
+            )}
 
-            <aside style={sideCol}>
+            {/* Coluna Direita - Ações */}
+            <aside style={rightCol}>
               {partner.codigo_desconto && (
                 <div style={cardStyle}>
                   <h3 style={sectionTitle}>Código exclusivo</h3>
@@ -276,7 +284,7 @@ const heroGlow: React.CSSProperties = {
 const shellStyle: React.CSSProperties = {
   position: "relative",
   zIndex: 2,
-  maxWidth: "1100px",
+  maxWidth: "1400px",
   margin: "0 auto",
 };
 
@@ -336,19 +344,26 @@ const titleStyle: React.CSSProperties = {
   fontFamily: 'Georgia, "Times New Roman", serif',
 };
 
+// Grid de 3 colunas: esquerda (info), centro (galeria), direita (ações)
 const contentGrid: React.CSSProperties = {
   display: "grid",
-  gridTemplateColumns: "1fr 360px",
+  gridTemplateColumns: "320px 1fr 280px",
   gap: 24,
+  alignItems: "start",
 };
 
-const mainCol: React.CSSProperties = {
+const leftCol: React.CSSProperties = {
   display: "flex",
   flexDirection: "column",
   gap: 20,
 };
 
-const sideCol: React.CSSProperties = {
+const centerCol: React.CSSProperties = {
+  display: "flex",
+  flexDirection: "column",
+};
+
+const rightCol: React.CSSProperties = {
   display: "flex",
   flexDirection: "column",
   gap: 20,
@@ -451,27 +466,61 @@ const errorCard: React.CSSProperties = {
   textAlign: "center",
 };
 
+// Galeria estilizada - card maior e central
+const galleryCard: React.CSSProperties = {
+  borderRadius: 24,
+  border: "1px solid rgba(255,255,255,0.1)",
+  background: "linear-gradient(135deg, rgba(168,85,247,0.08) 0%, rgba(91,33,182,0.08) 100%)",
+  padding: "28px",
+};
+
+const galleryTitle: React.CSSProperties = {
+  margin: "0 0 20px",
+  fontSize: "1.25rem",
+  fontWeight: 800,
+  fontFamily: 'Georgia, "Times New Roman", serif',
+  textAlign: "center",
+  color: "#e9d5ff",
+};
+
 const galleryGrid: React.CSSProperties = {
   display: "grid",
-  gridTemplateColumns: "repeat(3, 1fr)",
-  gap: 12,
+  gridTemplateColumns: "repeat(2, 1fr)",
+  gap: 16,
 };
 
 const galleryItem: React.CSSProperties = {
   aspectRatio: "1",
-  borderRadius: 14,
+  borderRadius: 16,
   overflow: "hidden",
   border: "none",
   padding: 0,
   cursor: "pointer",
   background: "transparent",
+  position: "relative",
 };
 
 const galleryImg: React.CSSProperties = {
   width: "100%",
   height: "100%",
   objectFit: "cover",
-  transition: "transform 0.2s",
+  transition: "transform 0.3s ease, filter 0.3s ease",
+};
+
+const galleryOverlay: React.CSSProperties = {
+  position: "absolute",
+  inset: 0,
+  background: "rgba(0,0,0,0.4)",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  opacity: 0,
+  transition: "opacity 0.3s ease",
+};
+
+const galleryZoomIcon: React.CSSProperties = {
+  fontSize: "2rem",
+  filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.5))",
 };
 
 const lightboxOverlay: React.CSSProperties = {
