@@ -15,6 +15,7 @@ type Partner = {
   discord_link: string | null;
   codigo_desconto: string | null;
   cor_destaque: string | null;
+  galeria?: string[] | null;
 };
 
 export default function ParceriaPage() {
@@ -23,6 +24,8 @@ export default function ParceriaPage() {
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState("");
   const [copiado, setCopiado] = useState(false);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
 
   useEffect(() => {
     async function load() {
@@ -49,6 +52,25 @@ export default function ParceriaPage() {
     navigator.clipboard.writeText(partner.codigo_desconto);
     setCopiado(true);
     setTimeout(() => setCopiado(false), 2000);
+  }
+
+  const galeria = partner?.galeria?.filter(Boolean) || [];
+
+  function openLightbox(index: number) {
+    setLightboxIndex(index);
+    setLightboxOpen(true);
+  }
+
+  function closeLightbox() {
+    setLightboxOpen(false);
+  }
+
+  function prevLightbox() {
+    setLightboxIndex((prev) => (prev === 0 ? galeria.length - 1 : prev - 1));
+  }
+
+  function nextLightbox() {
+    setLightboxIndex((prev) => (prev === galeria.length - 1 ? 0 : prev + 1));
   }
 
   if (loading) {
@@ -132,6 +154,24 @@ export default function ParceriaPage() {
                   </ul>
                 </div>
               )}
+
+              {galeria.length > 0 && (
+                <div style={cardStyle}>
+                  <h3 style={sectionTitle}>Galeria</h3>
+                  <div style={galleryGrid}>
+                    {galeria.map((src, index) => (
+                      <button
+                        key={index}
+                        type="button"
+                        style={galleryItem}
+                        onClick={() => openLightbox(index)}
+                      >
+                        <img src={src} alt={`Foto ${index + 1}`} style={galleryImg} />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             <aside style={sideCol}>
@@ -177,6 +217,39 @@ export default function ParceriaPage() {
             </aside>
           </div>
         </div>
+
+        {lightboxOpen && galeria.length > 0 && (
+          <div style={lightboxOverlay} onClick={closeLightbox}>
+            <button type="button" style={lightboxClose} onClick={closeLightbox}>×</button>
+
+            {galeria.length > 1 && (
+              <>
+                <button
+                  type="button"
+                  style={{ ...lightboxNav, left: 20 }}
+                  onClick={(e) => { e.stopPropagation(); prevLightbox(); }}
+                >
+                  ←
+                </button>
+                <button
+                  type="button"
+                  style={{ ...lightboxNav, right: 20 }}
+                  onClick={(e) => { e.stopPropagation(); nextLightbox(); }}
+                >
+                  →
+                </button>
+              </>
+            )}
+
+            <div style={lightboxContent} onClick={(e) => e.stopPropagation()}>
+              <img
+                src={galeria[lightboxIndex]}
+                alt={`Foto ${lightboxIndex + 1}`}
+                style={lightboxImage}
+              />
+            </div>
+          </div>
+        )}
       </main>
     </>
   );
@@ -376,4 +449,82 @@ const errorCard: React.CSSProperties = {
   background: "rgba(255,255,255,0.04)",
   padding: "32px",
   textAlign: "center",
+};
+
+const galleryGrid: React.CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "repeat(3, 1fr)",
+  gap: 12,
+};
+
+const galleryItem: React.CSSProperties = {
+  aspectRatio: "1",
+  borderRadius: 14,
+  overflow: "hidden",
+  border: "none",
+  padding: 0,
+  cursor: "pointer",
+  background: "transparent",
+};
+
+const galleryImg: React.CSSProperties = {
+  width: "100%",
+  height: "100%",
+  objectFit: "cover",
+  transition: "transform 0.2s",
+};
+
+const lightboxOverlay: React.CSSProperties = {
+  position: "fixed",
+  inset: 0,
+  background: "rgba(0,0,0,0.92)",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  zIndex: 9999,
+  cursor: "zoom-out",
+};
+
+const lightboxClose: React.CSSProperties = {
+  position: "absolute",
+  top: 20,
+  right: 20,
+  width: 48,
+  height: 48,
+  borderRadius: "50%",
+  border: "none",
+  background: "rgba(255,255,255,0.1)",
+  color: "white",
+  fontSize: "2rem",
+  cursor: "pointer",
+  display: "grid",
+  placeItems: "center",
+};
+
+const lightboxNav: React.CSSProperties = {
+  position: "absolute",
+  top: "50%",
+  transform: "translateY(-50%)",
+  width: 48,
+  height: 48,
+  borderRadius: "50%",
+  border: "none",
+  background: "rgba(255,255,255,0.1)",
+  color: "white",
+  fontSize: "1.5rem",
+  cursor: "pointer",
+  display: "grid",
+  placeItems: "center",
+};
+
+const lightboxContent: React.CSSProperties = {
+  maxWidth: "90%",
+  maxHeight: "90%",
+};
+
+const lightboxImage: React.CSSProperties = {
+  maxWidth: "100%",
+  maxHeight: "90vh",
+  borderRadius: 16,
+  boxShadow: "0 0 60px rgba(168,85,247,0.3)",
 };
