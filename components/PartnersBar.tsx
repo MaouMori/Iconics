@@ -32,8 +32,10 @@ export default function PartnersBar() {
   if (partners.length === 0) return null;
 
   return (
-    <div style={barStyle}>
-      <span style={labelStyle}>Parceiros oficiais</span>
+    <div style={sidebarStyle}>
+      <div style={headerStyle}>
+        <span style={labelStyle}>Parceiros</span>
+      </div>
 
       <div style={trackStyle}>
         {partners.map((p) => (
@@ -43,6 +45,7 @@ export default function PartnersBar() {
                 src={p.logo_url}
                 alt={p.nome}
                 style={logoStyle}
+                title={p.nome}
               />
             ) : (
               <div
@@ -50,11 +53,11 @@ export default function PartnersBar() {
                   ...placeholderStyle,
                   borderColor: p.cor_destaque || "#7c3aed",
                 }}
+                title={p.nome}
               >
                 {p.nome.charAt(0)}
               </div>
             )}
-            <span style={nameStyle}>{p.nome}</span>
           </Link>
         ))}
       </div>
@@ -66,84 +69,90 @@ export default function PartnersBar() {
   );
 }
 
-const barStyle: React.CSSProperties = {
+const sidebarStyle: React.CSSProperties = {
   position: "fixed",
-  bottom: 0,
-  left: 0,
-  right: 0,
+  left: 12,
+  top: "50%",
+  transform: "translateY(-50%)",
   zIndex: 90,
   display: "flex",
+  flexDirection: "column",
   alignItems: "center",
-  gap: 16,
-  padding: "10px 20px",
-  background: "rgba(5,2,12,0.92)",
-  borderTop: "1px solid rgba(168,85,247,0.18)",
-  backdropFilter: "blur(16px)",
+  gap: 12,
+  padding: "16px 10px",
+  background: "rgba(5,2,12,0.85)",
+  borderRadius: 20,
+  border: "1px solid rgba(168,85,247,0.2)",
+  backdropFilter: "blur(12px)",
+  boxShadow: "0 0 30px rgba(168,85,247,0.15)",
+  maxHeight: "80vh",
+};
+
+const headerStyle: React.CSSProperties = {
+  writingMode: "vertical-rl",
+  textOrientation: "mixed",
+  transform: "rotate(180deg)",
 };
 
 const labelStyle: React.CSSProperties = {
   color: "#c99cff",
-  fontSize: "0.72rem",
+  fontSize: "0.7rem",
   fontWeight: 700,
   textTransform: "uppercase",
-  letterSpacing: "0.12em",
+  letterSpacing: "0.15em",
   whiteSpace: "nowrap",
 };
 
 const trackStyle: React.CSSProperties = {
   display: "flex",
+  flexDirection: "column",
   alignItems: "center",
   gap: 14,
-  flex: 1,
-  overflowX: "auto",
+  overflowY: "auto",
   scrollbarWidth: "none",
+  padding: "8px 0",
 };
 
 const itemStyle: React.CSSProperties = {
   display: "flex",
   alignItems: "center",
-  gap: 8,
+  justifyContent: "center",
   textDecoration: "none",
-  padding: "6px 12px",
-  borderRadius: 999,
-  background: "rgba(255,255,255,0.04)",
-  border: "1px solid rgba(255,255,255,0.08)",
-  transition: "0.2s",
-  whiteSpace: "nowrap",
-  flexShrink: 0,
+  transition: "transform 0.2s",
 };
 
 const logoStyle: React.CSSProperties = {
-  width: 24,
-  height: 24,
+  width: 56,
+  height: 56,
   borderRadius: "50%",
   objectFit: "cover",
+  border: "2px solid rgba(168,85,247,0.3)",
+  boxShadow: "0 0 15px rgba(168,85,247,0.2)",
+  transition: "all 0.2s",
 };
 
 const placeholderStyle: React.CSSProperties = {
-  width: 24,
-  height: 24,
+  width: 56,
+  height: 56,
   borderRadius: "50%",
   display: "grid",
   placeItems: "center",
-  fontSize: "0.7rem",
+  fontSize: "1.4rem",
   fontWeight: 900,
   color: "#d8b4fe",
   background: "rgba(168,85,247,0.15)",
-  border: "1px solid",
-};
-
-const nameStyle: React.CSSProperties = {
-  color: "#e9d5ff",
-  fontSize: "0.85rem",
-  fontWeight: 600,
+  border: "2px solid",
+  transition: "all 0.2s",
 };
 
 const verTodosStyle: React.CSSProperties = {
   color: "#a855f7",
-  fontSize: "0.82rem",
+  fontSize: "0.7rem",
   fontWeight: 700,
   textDecoration: "none",
   whiteSpace: "nowrap",
-  flexShrink: 0,
+  writingMode: "vertical-rl",
+  textOrientation: "mixed",
+  transform: "rotate(180deg)",
+  padding: "8px 0",
 };
