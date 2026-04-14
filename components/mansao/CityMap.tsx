@@ -18,7 +18,7 @@ const MANSION = {
   district: "Vinewood Hills",
 };
 
-const MAP_IMAGE_PATH = "/images/mapa-cidade-fivem.png";
+const MAP_IMAGE_CANDIDATES = ["/images/mapa-cidade-fivem.png", "/images/asdsa.png"];
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
@@ -28,7 +28,9 @@ export default function CityMap() {
   const [view, setView] = useState<ViewState>({ zoom: 1.2, x: 0, y: 0 });
   const [dragging, setDragging] = useState(false);
   const [lastPos, setLastPos] = useState<{ x: number; y: number } | null>(null);
+  const [imageIndex, setImageIndex] = useState(0);
   const [imageLoaded, setImageLoaded] = useState(true);
+  const currentImage = MAP_IMAGE_CANDIDATES[imageIndex];
 
   const onWheel: React.WheelEventHandler<HTMLDivElement> = (event) => {
     event.preventDefault();
@@ -85,14 +87,22 @@ export default function CityMap() {
           <div className="map-image-shell">
             <img
               className="map-image"
-              src={MAP_IMAGE_PATH}
+              src={currentImage}
               alt="Mapa da cidade do servidor FiveM"
-              onError={() => setImageLoaded(false)}
+              onError={() => {
+                const nextIndex = imageIndex + 1;
+                if (nextIndex < MAP_IMAGE_CANDIDATES.length) {
+                  setImageIndex(nextIndex);
+                  setImageLoaded(true);
+                } else {
+                  setImageLoaded(false);
+                }
+              }}
               style={{ display: imageLoaded ? "block" : "none" }}
             />
             {!imageLoaded && (
               <div className="map-missing-image">
-                Mapa real nao encontrado em <code>{MAP_IMAGE_PATH}</code>
+                Mapa real nao encontrado. Coloque um arquivo em <code>/public/images/mapa-cidade-fivem.png</code>
               </div>
             )}
 
