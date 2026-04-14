@@ -1,0 +1,161 @@
+﻿.mansao-page {
+  min-height: 100vh;
+  background:
+    radial-gradient(80% 60% at 15% 0%, rgba(111, 40, 167, 0.35), transparent 70%),
+    radial-gradient(85% 65% at 85% 100%, rgba(37, 61, 166, 0.28), transparent 74%),
+    linear-gradient(180deg, #060312 0%, #0e0a1f 55%, #05030f 100%);
+  color: #f9f0ff;
+  padding: 120px 24px 40px;
+}
+
+.mansao-hero {
+  max-width: 1180px;
+  margin: 0 auto 26px;
+  padding: 32px;
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: linear-gradient(145deg, rgba(23, 11, 44, 0.88), rgba(10, 10, 26, 0.9));
+  position: relative;
+  overflow: hidden;
+}
+
+.mansao-hero-glow {
+  position: absolute;
+  inset: -35% auto auto -15%;
+  width: 420px;
+  height: 420px;
+  background: radial-gradient(circle, rgba(197, 107, 255, 0.3), transparent 68%);
+  pointer-events: none;
+}
+
+.mansao-tag {
+  display: inline-block;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  padding: 6px 14px;
+  font-size: 0.75rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: #dfbfff;
+  margin: 0 0 10px;
+}
+
+.mansao-hero h1 {
+  margin: 0;
+  font-size: clamp(2rem, 5vw, 3.4rem);
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+.mansao-hero p {
+  max-width: 760px;
+  margin: 14px 0 0;
+  color: #ddcdeb;
+  line-height: 1.7;
+}
+
+.mansao-grid {
+  max-width: 1180px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 22px;
+}
+
+.mansao-panel {
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(10, 7, 20, 0.82);
+  box-shadow: 0 28px 60px rgba(0, 0, 0, 0.35);
+  padding: 18px;
+}
+
+.mansao-panel-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.mansao-kicker {
+  margin: 0;
+  font-size: 0.76rem;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: #ce9fff;
+}
+
+.mansao-panel h2 {
+  margin: 6px 0 0;
+  font-size: 1.42rem;
+}
+
+.map-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.map-actions button {
+  height: 34px;
+  min-width: 34px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.06);
+  color: #f6e8ff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.map-stage,
+.viewer-stage {
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+.map-stage {
+  height: min(54vw, 510px);
+  background: #05070f;
+  position: relative;
+  cursor: grab;
+  touch-action: none;
+}
+
+.map-stage.dragging {
+  cursor: grabbing;
+}
+
+.map-canvas {
+  width: 100%;
+  height: 100%;
+  transform-origin: center center;
+  transition: transform 0.08s linear;
+}
+
+.map-canvas svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.viewer-stage {
+  height: min(54vw, 510px);
+  background: #070510;
+}
+
+.map-hint {
+  margin: 10px 0 0;
+  color: #cab2dd;
+  font-size: 0.92rem;
+}
+
+@media (min-width: 1024px) {
+  .mansao-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .map-stage,
+  .viewer-stage {
+    height: 460px;
+  }
+}
