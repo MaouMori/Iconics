@@ -457,8 +457,9 @@ export default function AdminMembrosPage() {
 
             <input
               style={inputStyle}
-              placeholder="Stats (separadas por | ) Ex: Influência:10 | Presença:9"
+              placeholder="Stats (separadas por | ) Ex: Influência:10 | Presença:9 - MÁX 100 CARACTERES"
               value={stats}
+              maxLength={100}
               onChange={(e) => setStats(e.target.value)}
             />
 
