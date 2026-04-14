@@ -191,11 +191,12 @@ function nextLightbox() {
 
             <div className="member-wiki-meta">
               <span>{member.idade ? `${member.idade} anos` : "Idade não informada"}</span>
-              <span>{member.meta || "Presença marcante"}</span>
+              <span>•</span>
+              <span>{member.meta || "Presença marcante que define o ambiente"}</span>
             </div>
 
             <p className="member-wiki-description">
-              {member.personalidade || "Sem descrição cadastrada para este membro."}
+              {member.personalidade || "Uma presença marcante que define o ambiente. Personalidade única e inconfundível."}
             </p>
 
             <div className="member-wiki-tags">
@@ -206,7 +207,11 @@ function nextLightbox() {
                   </span>
                 ))
               ) : (
-                <span className="member-wiki-tag">Sem tags</span>
+                <>
+                  <span className="member-wiki-tag">Misterioso</span>
+                  <span className="member-wiki-tag">Único</span>
+                  <span className="member-wiki-tag">Iconic</span>
+                </>
               )}
             </div>
           </div>
@@ -224,17 +229,17 @@ function nextLightbox() {
         <section className="member-wiki-grid">
           <article className="member-wiki-card">
             <h3>Personalidade</h3>
-            <p>{member.personalidade || "Não informado."}</p>
+            <p>{member.personalidade || "Presença marcante e personalidade única que define cada movimento. Uma aura de mistério e poder."}</p>
           </article>
 
           <article className="member-wiki-card">
             <h3>Hábitos</h3>
-            <p>{member.habitos || "Não informado."}</p>
+            <p>{member.habitos || "Hábitos definidos pela busca constante de excelência. Cada ação é calculada para manter a presença dominante."}</p>
           </article>
 
           <article className="member-wiki-card">
             <h3>Gostos</h3>
-            <p>{member.gostos || "Não informado."}</p>
+            <p>{member.gostos || "Aprecia o que é raro, exclusivo e imponente. Tem gosto refinado para tudo que representa poder e elegância."}</p>
           </article>
 
           <article className="member-wiki-card">
@@ -248,13 +253,17 @@ function nextLightbox() {
                 ))}
               </div>
             ) : (
-              <p>Não informado.</p>
+              <div className="member-wiki-tag-list">
+                <span className="member-wiki-chip">Dominar ambientes</span>
+                <span className="member-wiki-chip">Estratégia</span>
+                <span className="member-wiki-chip">Arte do poder</span>
+              </div>
             )}
           </article>
 
           <article className="member-wiki-card member-wiki-card-wide">
             <h3>Lore Pessoal</h3>
-            <p>{member.meta || "Sem lore cadastrada."}</p>
+            <p>{member.meta || "Uma jornada de transformação e ascensão. Cada passo foi dado com propósito, construindo uma presença que não passa despercebida."}</p>
           </article>
 
           <article className="member-wiki-card member-wiki-card-wide">
@@ -309,7 +318,24 @@ function nextLightbox() {
                 ))}
               </div>
             ) : (
-              <p>Sem estatísticas cadastradas.</p>
+              <div className="member-wiki-stats">
+                <div className="member-wiki-stat">
+                  <span className="member-wiki-stat-value">10</span>
+                  <span className="member-wiki-stat-label">Presença</span>
+                </div>
+                <div className="member-wiki-stat">
+                  <span className="member-wiki-stat-value">10</span>
+                  <span className="member-wiki-stat-label">Influência</span>
+                </div>
+                <div className="member-wiki-stat">
+                  <span className="member-wiki-stat-value">10</span>
+                  <span className="member-wiki-stat-label">Estratégia</span>
+                </div>
+                <div className="member-wiki-stat">
+                  <span className="member-wiki-stat-value">10</span>
+                  <span className="member-wiki-stat-label">Carisma</span>
+                </div>
+              </div>
             )}
           </article>
         </section>

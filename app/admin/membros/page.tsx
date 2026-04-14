@@ -166,6 +166,28 @@ export default function AdminMembrosPage() {
     e.preventDefault();
     setMensagem("");
 
+    // Validação de campos obrigatórios
+    if (!nome.trim()) {
+      setMensagem("O nome é obrigatório.");
+      return;
+    }
+    if (!idade.trim()) {
+      setMensagem("A idade é obrigatória.");
+      return;
+    }
+    if (!meta.trim()) {
+      setMensagem("A meta/subtítulo é obrigatória.");
+      return;
+    }
+    if (!personalidade.trim()) {
+      setMensagem("A personalidade é obrigatória.");
+      return;
+    }
+    if (!tags.trim()) {
+      setMensagem("As tags são obrigatórias (mínimo 3).");
+      return;
+    }
+
     const { data: userData } = await supabase.auth.getUser();
 
     if (!userData.user) {
@@ -355,6 +377,10 @@ export default function AdminMembrosPage() {
             </p>
           )}
 
+          <p style={{ color: "#a78bfa", marginTop: 12, fontSize: 14 }}>
+            * Campos obrigatórios para criar um card completo
+          </p>
+
           <form onSubmit={salvarMembro} style={{ display: "grid", gap: 12, marginTop: 20 }}>
             <input
               style={inputStyle}
@@ -366,15 +392,17 @@ export default function AdminMembrosPage() {
 
             <input
               style={inputStyle}
-              placeholder="Idade"
+              placeholder="Idade *"
               value={idade}
               onChange={(e) => setIdade(e.target.value)}
+              required
             />
 
             <select
               style={inputStyle}
               value={cargo}
               onChange={(e) => setCargo(e.target.value)}
+              required
             >
               <option value="membro">Membro</option>
               <option value="veterano">Veterano</option>
@@ -384,16 +412,18 @@ export default function AdminMembrosPage() {
 
             <input
               style={inputStyle}
-              placeholder="Meta / subtítulo"
+              placeholder="Meta / subtítulo * (ex: Dominar, evoluir e ser estrela)"
               value={meta}
               onChange={(e) => setMeta(e.target.value)}
+              required
             />
 
             <textarea
               style={textareaStyle}
-              placeholder="Personalidade"
+              placeholder="Personalidade * (descrição do personagem)"
               value={personalidade}
               onChange={(e) => setPersonalidade(e.target.value)}
+              required
             />
 
             <textarea
@@ -419,9 +449,10 @@ export default function AdminMembrosPage() {
 
             <input
               style={inputStyle}
-              placeholder="Tags (separadas por | ) Ex: frio | misterioso | elegante"
+              placeholder="Tags * (separadas por | ) Ex: frio | misterioso | elegante | estratégica"
               value={tags}
               onChange={(e) => setTags(e.target.value)}
+              required
             />
 
             <input
