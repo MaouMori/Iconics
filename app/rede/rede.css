@@ -40,15 +40,14 @@
   letter-spacing: 0.12em;
 }
 
-.brand-flame {
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  background: radial-gradient(circle at 30% 30%, #f1d4ff 0%, #b870ff 40%, #6422b9 100%);
-  color: #130522;
-  font-weight: 900;
+.brand-logo {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  object-fit: cover;
+  border: 1px solid rgba(202, 159, 255, 0.35);
+  background: rgba(255, 255, 255, 0.04);
+  padding: 4px;
 }
 
 .social-topbar h1 {
@@ -117,21 +116,31 @@
   flex-direction: column;
   gap: 8px;
   padding: 10px;
-  align-items: center;
+  align-items: stretch;
 }
 
 .icon-rail button,
 .icon-rail a {
-  width: 42px;
-  height: 42px;
+  width: 100%;
+  min-height: 42px;
   border-radius: 12px;
   border: 1px solid rgba(198, 155, 255, 0.22);
   background: rgba(255, 255, 255, 0.03);
   color: #eddcff;
   text-decoration: none;
-  display: grid;
-  place-items: center;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
   cursor: pointer;
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+.icon-rail button span:first-child,
+.icon-rail a span:first-child {
+  width: 16px;
+  text-align: center;
 }
 
 .profile-panel {
@@ -544,7 +553,7 @@
 .chat-side {
   display: flex;
   flex-direction: column;
-  min-height: 340px;
+  min-height: 300px;
 }
 
 .chat-placeholder p {

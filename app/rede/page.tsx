@@ -74,6 +74,14 @@ type Notification = {
   created_at: string;
 };
 
+type TrendingItem = {
+  id: string;
+  nome: string;
+  username: string | null;
+  avatar_url: string | null;
+  postCount: number;
+};
+
 type FollowState = {
   followersCount: number;
   followingCount: number;
@@ -482,7 +490,26 @@ export default function RedePage() {
     [members, selectedMemberId]
   );
 
-  const trendingMembers = useMemo(() => members.slice(0, 4), [members]);
+  const trendingMembers = useMemo<TrendingItem[]>(() => {
+    const map = new Map<string, TrendingItem>();
+    feed.forEach((post) => {
+      const existing = map.get(post.author.id);
+      if (existing) {
+        existing.postCount += 1;
+        return;
+      }
+      map.set(post.author.id, {
+        id: post.author.id,
+        nome: post.author.nome || "Membro",
+        username: post.author.username || null,
+        avatar_url: post.author.avatar_url || null,
+        postCount: 1,
+      });
+    });
+    return Array.from(map.values())
+      .sort((a, b) => b.postCount - a.postCount)
+      .slice(0, 4);
+  }, [feed]);
 
   if (loading) {
     return (
@@ -497,10 +524,14 @@ export default function RedePage() {
       <section className="social-shell">
         <header className="social-topbar">
           <div className="brand-left">
-            <div className="brand-flame">◉</div>
+            <img
+              src="/images/iconics-logo.png"
+              alt="Logo Iconics"
+              className="brand-logo"
+            />
             <strong>ICONICS</strong>
           </div>
-          <h1>A rede esta observando voce...</h1>
+          <h1>Bem-vindo a rede social da Iconics, {me?.nome || "membro"}.</h1>
           <div className="top-actions">
             <Link href="/" className="top-btn">Voltar ao site</Link>
             <Link href="/painel" className="top-btn">Painel</Link>
@@ -515,12 +546,30 @@ export default function RedePage() {
         <div className="social-grid">
           <aside className="left-column">
             <div className="icon-rail">
-              <Link href="/rede">⌂</Link>
-              <button onClick={() => document.querySelector<HTMLTextAreaElement>(".composer-panel textarea")?.focus()}>◎</button>
-              <button onClick={() => document.querySelector<HTMLTextAreaElement>(".chat-compose input")?.focus()}>⌕</button>
-              <button onClick={() => document.querySelector<HTMLElement>(".left-list-panel")?.scrollIntoView({ behavior: "smooth" })}>👥</button>
-              <button onClick={() => document.querySelector<HTMLElement>(".side-card")?.scrollIntoView({ behavior: "smooth" })}>✚</button>
-              <Link href="/rede/config">⚙</Link>
+              <Link href="/rede">
+                <span aria-hidden>⌂</span>
+                <span>Inicio</span>
+              </Link>
+              <button onClick={() => document.querySelector<HTMLTextAreaElement>(".composer-panel textarea")?.focus()}>
+                <span aria-hidden>✎</span>
+                <span>Publicar</span>
+              </button>
+              <button onClick={() => document.querySelector<HTMLElement>(".chat-side")?.scrollIntoView({ behavior: "smooth" })}>
+                <span aria-hidden>💬</span>
+                <span>Mensagens</span>
+              </button>
+              <button onClick={() => document.querySelector<HTMLElement>(".left-list-panel")?.scrollIntoView({ behavior: "smooth" })}>
+                <span aria-hidden>👥</span>
+                <span>Membros</span>
+              </button>
+              <button onClick={() => document.querySelector<HTMLElement>(".activity-list")?.scrollIntoView({ behavior: "smooth" })}>
+                <span aria-hidden>🔔</span>
+                <span>Atividades</span>
+              </button>
+              <Link href="/rede/config">
+                <span aria-hidden>⚙</span>
+                <span>Config</span>
+              </Link>
             </div>
 
             <section className="profile-panel">
@@ -557,6 +606,7 @@ export default function RedePage() {
                       setSelectedMemberId(member.id);
                       setNewMessageText("");
                       setNewMessageImage("");
+                      if (token) loadMessages(token, member.id);
                     }}
                   >
                     <img src={member.avatar_url || "/images/logo.png"} alt="" />
@@ -622,6 +672,61 @@ export default function RedePage() {
               {newPostImage ? <img src={newPostImage} alt="" className="preview-image" /> : null}
             </section>
 
+            {selectedMember ? (
+              <section className="side-card chat-side">
+                <div className="side-head">
+                  <p className="section-title">Conversa com {selectedMember.nome}</p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedMemberId("");
+                      setMessages([]);
+                      setNewMessageText("");
+                      setNewMessageImage("");
+                    }}
+                  >
+                    Fechar
+                  </button>
+                </div>
+                <div className="chat-scroll">
+                  {messages.map((msg) => (
+                    <div key={msg.id} className={`bubble ${msg.sender_profile_id === me?.id ? "me" : "other"}`}>
+                      <p>{msg.content}</p>
+                      {msg.image_url ? <img src={msg.image_url} alt="" /> : null}
+                    </div>
+                  ))}
+                </div>
+                <div className="chat-compose">
+                  <input
+                    placeholder={`Mensagem para ${selectedMember.nome}`}
+                    value={newMessageText}
+                    onChange={(e) => setNewMessageText(e.target.value)}
+                  />
+                  <button onClick={sendMessage} disabled={isMuted}>Enviar</button>
+                </div>
+                <div className="composer-row">
+                  <label className="chip-btn">
+                    Upload imagem do chat
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        try {
+                          const url = await uploadFile(file, "chat");
+                          setNewMessageImage(url);
+                        } catch (error) {
+                          setStatus(error instanceof Error ? error.message : "Falha no upload.");
+                        }
+                      }}
+                    />
+                  </label>
+                </div>
+                {newMessageImage ? <img src={newMessageImage} alt="" className="preview-image" /> : null}
+              </section>
+            ) : null}
+
             <div className="feed-list">
               {feed.map((post) => (
                 <article key={post.id} className="post-card-premium">
@@ -673,7 +778,7 @@ export default function RedePage() {
                     <img src={member.avatar_url || "/images/logo.png"} alt="" />
                     <div>
                       <strong>{member.nome}</strong>
-                      <p>{member.username ? `@${member.username}` : member.cargo}</p>
+                      <p>{member.postCount} postagens</p>
                     </div>
                     <span>#{idx + 1}</span>
                   </div>
@@ -700,65 +805,10 @@ export default function RedePage() {
               <button className="quick-btn" onClick={() => document.querySelector<HTMLInputElement>(".comment-input-row input")?.focus()}>Comentar</button>
             </section>
 
-            {selectedMember ? (
-              <section className="side-card chat-side">
-                <div className="side-head">
-                  <p className="section-title">Conversa com {selectedMember.nome}</p>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSelectedMemberId("");
-                      setMessages([]);
-                      setNewMessageText("");
-                      setNewMessageImage("");
-                    }}
-                  >
-                    Fechar
-                  </button>
-                </div>
-                <div className="chat-scroll">
-                  {messages.map((msg) => (
-                    <div key={msg.id} className={`bubble ${msg.sender_profile_id === me?.id ? "me" : "other"}`}>
-                      <p>{msg.content}</p>
-                      {msg.image_url ? <img src={msg.image_url} alt="" /> : null}
-                    </div>
-                  ))}
-                </div>
-                <div className="chat-compose">
-                  <input
-                    placeholder="Digite sua mensagem"
-                    value={newMessageText}
-                    onChange={(e) => setNewMessageText(e.target.value)}
-                  />
-                  <button onClick={sendMessage} disabled={isMuted}>Enviar</button>
-                </div>
-                <div className="composer-row">
-                  <label className="chip-btn">
-                    Upload imagem do chat
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={async (e) => {
-                        const file = e.target.files?.[0];
-                        if (!file) return;
-                        try {
-                          const url = await uploadFile(file, "chat");
-                          setNewMessageImage(url);
-                        } catch (error) {
-                          setStatus(error instanceof Error ? error.message : "Falha no upload.");
-                        }
-                      }}
-                    />
-                  </label>
-                </div>
-                {newMessageImage ? <img src={newMessageImage} alt="" className="preview-image" /> : null}
-              </section>
-            ) : (
-              <section className="side-card chat-placeholder">
-                <p className="section-title">Chat privado</p>
-                <p>Clique em um membro na coluna esquerda para abrir a conversa.</p>
-              </section>
-            )}
+            <section className="side-card chat-placeholder">
+              <p className="section-title">Chat privado</p>
+              <p>Clique em um membro na coluna esquerda para abrir a conversa.</p>
+            </section>
           </aside>
         </div>
       </section>
