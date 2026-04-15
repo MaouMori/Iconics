@@ -350,9 +350,11 @@ export default function PainelVinculoPage() {
               </div>
 
               <h4 style={subtitle}>Galeria (ate 16 fotos)</h4>
+              <p style={muted}>Cada foto tem um ID de 1 a 16. Use esse ID para controle rapido.</p>
               <div style={galleryGrid}>
                 {Array.from({ length: 16 }).map((_, index) => (
                   <div key={index} style={galleryItem}>
+                    <p style={{ margin: "0 0 8px", fontWeight: 700 }}>ID da foto: {index + 1}</p>
                     {galleryPreview[index] && (
                       <img src={galleryPreview[index]} alt={`Galeria ${index + 1}`} style={galleryPreviewStyle} />
                     )}
@@ -388,6 +390,20 @@ export default function PainelVinculoPage() {
                     </button>
                   </div>
                 ))}
+              </div>
+
+              <div style={{ marginTop: 14, display: "grid", gap: 6 }}>
+                <h4 style={{ margin: 0 }}>Lista de imagens com ID</h4>
+                {galleryPreview.filter(Boolean).length === 0 && (
+                  <p style={muted}>Nenhuma imagem cadastrada.</p>
+                )}
+                {galleryPreview.map((src, index) =>
+                  src ? (
+                    <p key={`list-${index}`} style={line}>
+                      <strong>ID {index + 1}:</strong> {src}
+                    </p>
+                  ) : null
+                )}
               </div>
 
               <button style={primaryBtn} onClick={saveMyCard} disabled={saving}>
