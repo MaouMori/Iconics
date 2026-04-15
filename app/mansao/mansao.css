@@ -312,6 +312,27 @@
   font-size: 1.6rem;
 }
 
+.maps-modal-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.maps-tab {
+  height: 34px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.17);
+  background: rgba(255, 255, 255, 0.08);
+  color: #f5e9ff;
+  cursor: pointer;
+  padding: 0 12px;
+  font-weight: 700;
+}
+
+.maps-tab.active {
+  border-color: rgba(209, 140, 255, 0.75);
+  background: rgba(180, 95, 255, 0.28);
+}
+
 .maps-close {
   height: 36px;
   border-radius: 10px;
@@ -330,6 +351,20 @@
 
 .viewer-stage.viewer-stage-modal {
   height: min(68vh, 620px);
+}
+
+.maps-photo-view {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.maps-photo-view img {
+  width: 100%;
+  height: min(68vh, 620px);
+  object-fit: cover;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 @media (max-width: 1024px) {

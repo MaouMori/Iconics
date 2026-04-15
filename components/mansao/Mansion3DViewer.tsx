@@ -24,12 +24,13 @@ export default function Mansion3DViewer({
     scene.background = new THREE.Color("#dfe5ea");
     scene.fog = new THREE.Fog("#dfe5ea", 80, 220);
 
-    const camera = new THREE.PerspectiveCamera(46, 1, 0.1, 600);
+    const camera = new THREE.PerspectiveCamera(46, 1, 0.2, 320);
     camera.position.set(58, 36, 56);
 
     const renderer = new THREE.WebGLRenderer({
       antialias: true,
       alpha: false,
+      logarithmicDepthBuffer: true,
     });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.setSize(mount.clientWidth, Math.max(mount.clientHeight, 320));
@@ -63,6 +64,8 @@ export default function Mansion3DViewer({
     sun.shadow.camera.right = 120;
     sun.shadow.camera.top = 120;
     sun.shadow.camera.bottom = -120;
+    sun.shadow.bias = -0.00025;
+    sun.shadow.normalBias = 0.03;
     scene.add(sun);
 
     const fillLight = new THREE.DirectionalLight("#d7e6f4", 0.65);
@@ -428,7 +431,7 @@ export default function Mansion3DViewer({
     );
     ocean.rotation.x = -Math.PI / 2;
     ocean.position.set(0, -1.5, 58);
-    ocean.receiveShadow = true;
+    ocean.receiveShadow = false;
     scene.add(ocean);
 
     const foamBand = new THREE.Mesh(
@@ -455,6 +458,7 @@ export default function Mansion3DViewer({
     );
     terrain.rotation.x = -Math.PI / 2;
     terrain.position.y = -0.02;
+    terrain.receiveShadow = false;
     scene.add(terrain);
 
     const beachInset = new THREE.Mesh(
@@ -466,7 +470,8 @@ export default function Mansion3DViewer({
       })
     );
     beachInset.rotation.x = -Math.PI / 2;
-    beachInset.position.set(0, 0.01, 20);
+    beachInset.position.set(0, 0.03, 20);
+    beachInset.receiveShadow = false;
     scene.add(beachInset);
 
     const road = new THREE.Mesh(

@@ -9,6 +9,7 @@ import "./mansao.css";
 
 export default function MansaoPage() {
   const [viewerOpen, setViewerOpen] = useState(false);
+  const [viewerMode, setViewerMode] = useState<"3d" | "foto">("3d");
 
   useEffect(() => {
     const previousHtmlOverflow = document.documentElement.style.overflow;
@@ -44,13 +45,25 @@ export default function MansaoPage() {
             </ul>
           </div>
 
-          <button type="button" className="maps-open-3d" onClick={() => setViewerOpen(true)}>
+          <button
+            type="button"
+            className="maps-open-3d"
+            onClick={() => {
+              setViewerMode("3d");
+              setViewerOpen(true);
+            }}
+          >
             Abrir visualizacao 3D
           </button>
         </aside>
 
         <section className="maps-main">
-          <CityMap onView3D={() => setViewerOpen(true)} />
+          <CityMap
+            onView3D={() => {
+              setViewerMode("3d");
+              setViewerOpen(true);
+            }}
+          />
         </section>
       </main>
 
@@ -60,13 +73,38 @@ export default function MansaoPage() {
             <div className="maps-modal-top">
               <div>
                 <p className="maps-kicker">Visao Orbital</p>
-                <h2>Mansao em 3D</h2>
+                <h2>{viewerMode === "3d" ? "Mansao em 3D" : "Foto da Mansao"}</h2>
+              </div>
+              <div className="maps-modal-actions">
+                <button
+                  type="button"
+                  className={`maps-tab ${viewerMode === "3d" ? "active" : ""}`}
+                  onClick={() => setViewerMode("3d")}
+                >
+                  3D
+                </button>
+                <button
+                  type="button"
+                  className={`maps-tab ${viewerMode === "foto" ? "active" : ""}`}
+                  onClick={() => setViewerMode("foto")}
+                >
+                  Foto
+                </button>
               </div>
               <button type="button" className="maps-close" onClick={() => setViewerOpen(false)}>
                 Fechar
               </button>
             </div>
-            <Mansion3DViewer minimal />
+            {viewerMode === "3d" ? (
+              <Mansion3DViewer minimal />
+            ) : (
+              <div className="maps-photo-view">
+                <img src="/images/mansao.png" alt="Foto de referência da mansão" />
+                <p className="map-hint">
+                  Para usar a foto exata que você me enviou, substitua o arquivo em <code>/public/images/mansao.png</code>.
+                </p>
+              </div>
+            )}
           </div>
         </div>
       )}
