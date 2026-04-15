@@ -24,8 +24,8 @@ export default function Mansion3DViewer({
     scene.background = new THREE.Color("#dfe5ea");
     scene.fog = new THREE.Fog("#dfe5ea", 80, 220);
 
-    const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 600);
-    camera.position.set(42, 28, 42);
+    const camera = new THREE.PerspectiveCamera(46, 1, 0.1, 600);
+    camera.position.set(58, 36, 56);
 
     const renderer = new THREE.WebGLRenderer({
       antialias: true,
@@ -34,13 +34,15 @@ export default function Mansion3DViewer({
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.setSize(mount.clientWidth, Math.max(mount.clientHeight, 320));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.12;
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     mount.appendChild(renderer.domElement);
 
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
-    controls.target.set(0, 10, 0);
+    controls.target.set(4, 7, 5);
     controls.minDistance = 18;
     controls.maxDistance = 130;
     controls.maxPolarAngle = Math.PI / 2.05;
@@ -48,11 +50,11 @@ export default function Mansion3DViewer({
     // -----------------------------
     // Lights
     // -----------------------------
-    const hemiLight = new THREE.HemisphereLight("#ffffff", "#9aa5b1", 1.15);
+    const hemiLight = new THREE.HemisphereLight("#f4f8ff", "#96a4b3", 1.28);
     scene.add(hemiLight);
 
-    const sun = new THREE.DirectionalLight("#ffffff", 1.6);
-    sun.position.set(55, 70, 25);
+    const sun = new THREE.DirectionalLight("#fff6e9", 2.05);
+    sun.position.set(82, 94, 18);
     sun.castShadow = true;
     sun.shadow.mapSize.set(2048, 2048);
     sun.shadow.camera.near = 1;
@@ -63,9 +65,13 @@ export default function Mansion3DViewer({
     sun.shadow.camera.bottom = -120;
     scene.add(sun);
 
-    const fillLight = new THREE.DirectionalLight("#d9e6f5", 0.5);
-    fillLight.position.set(-40, 30, -20);
+    const fillLight = new THREE.DirectionalLight("#d7e6f4", 0.65);
+    fillLight.position.set(-44, 36, -24);
     scene.add(fillLight);
+
+    const bounceLight = new THREE.PointLight("#c6d8ea", 1.2, 220, 2);
+    bounceLight.position.set(-20, 10, 68);
+    scene.add(bounceLight);
 
     // -----------------------------
     // Materials
@@ -157,6 +163,16 @@ export default function Mansion3DViewer({
     // -----------------------------
     const model = new THREE.Group();
     scene.add(model);
+
+    const skyDome = new THREE.Mesh(
+      new THREE.SphereGeometry(420, 48, 24),
+      new THREE.MeshBasicMaterial({
+        color: "#d8e0e9",
+        side: THREE.BackSide,
+      })
+    );
+    skyDome.position.y = 35;
+    scene.add(skyDome);
 
     const setShadow = (obj: THREE.Object3D) => {
       obj.traverse((child) => {
@@ -283,31 +299,48 @@ export default function Mansion3DViewer({
 
     const createPalm = (x: number, z: number, scale = 1) => {
       const palm = new THREE.Group();
+      const seed = Math.abs(Math.sin(x * 12.9898 + z * 78.233) * 43758.5453) % 1;
+      const heightMul = 0.82 + seed * 0.5;
+      const crownMul = 0.86 + seed * 0.42;
+      const lean = (seed - 0.5) * 0.14;
 
       const trunk = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.22 * scale, 0.34 * scale, 5.8 * scale, 10),
+        new THREE.CylinderGeometry(
+          0.2 * scale * heightMul,
+          0.34 * scale * heightMul,
+          5.8 * scale * heightMul,
+          10
+        ),
         trunkMat
       );
-      trunk.position.y = 2.9 * scale;
+      trunk.position.y = 2.9 * scale * heightMul;
+      trunk.rotation.z = lean;
       trunk.castShadow = true;
       trunk.receiveShadow = true;
       palm.add(trunk);
 
       for (let i = 0; i < 7; i += 1) {
         const leaf = new THREE.Mesh(
-          new THREE.CylinderGeometry(0.02 * scale, 0.12 * scale, 3.4 * scale, 6),
+          new THREE.CylinderGeometry(
+            0.02 * scale * crownMul,
+            0.12 * scale * crownMul,
+            3.2 * scale * crownMul,
+            6
+          ),
           plantMat
         );
         const angle = (i / 7) * Math.PI * 2;
-        leaf.position.y = 5.8 * scale;
-        leaf.rotation.z = Math.PI / 2.6;
-        leaf.rotation.y = angle;
-        leaf.position.x = Math.cos(angle) * 1.2 * scale;
-        leaf.position.z = Math.sin(angle) * 1.2 * scale;
+        const jitter = ((seed + i * 0.17) % 1) - 0.5;
+        leaf.position.y = 5.7 * scale * heightMul;
+        leaf.rotation.z = Math.PI / (2.55 + jitter * 0.2);
+        leaf.rotation.y = angle + jitter * 0.3;
+        leaf.position.x = Math.cos(angle) * 1.15 * scale * crownMul;
+        leaf.position.z = Math.sin(angle) * 1.15 * scale * crownMul;
         palm.add(leaf);
       }
 
       palm.position.set(x, 0, z);
+      palm.rotation.y = seed * Math.PI * 2;
       setShadow(palm);
       return palm;
     };
@@ -381,22 +414,41 @@ export default function Mansion3DViewer({
     // Environment
     // -----------------------------
     const ocean = new THREE.Mesh(
-      new THREE.PlaneGeometry(500, 500, 1, 1),
-      new THREE.MeshStandardMaterial({
-        color: "#aebfcc",
-        roughness: 0.2,
-        metalness: 0.08,
+      new THREE.PlaneGeometry(560, 560, 120, 120),
+      new THREE.MeshPhysicalMaterial({
+        color: "#8ba4b7",
+        roughness: 0.16,
+        metalness: 0.06,
+        transmission: 0.25,
+        transparent: true,
+        opacity: 0.96,
+        clearcoat: 1,
+        clearcoatRoughness: 0.09,
       })
     );
     ocean.rotation.x = -Math.PI / 2;
-    ocean.position.set(0, -1.6, 40);
+    ocean.position.set(0, -1.5, 58);
     ocean.receiveShadow = true;
     scene.add(ocean);
 
-    const terrain = new THREE.Mesh(
-      new THREE.CircleGeometry(150, 96),
+    const foamBand = new THREE.Mesh(
+      new THREE.PlaneGeometry(260, 28),
       new THREE.MeshStandardMaterial({
-        color: "#ddd6ca",
+        color: "#edf4fa",
+        roughness: 0.5,
+        metalness: 0,
+        transparent: true,
+        opacity: 0.42,
+      })
+    );
+    foamBand.rotation.x = -Math.PI / 2;
+    foamBand.position.set(10, -1.43, 88);
+    scene.add(foamBand);
+
+    const terrain = new THREE.Mesh(
+      new THREE.CircleGeometry(165, 112),
+      new THREE.MeshStandardMaterial({
+        color: "#e6dfd4",
         roughness: 1,
         metalness: 0,
       })
@@ -404,6 +456,18 @@ export default function Mansion3DViewer({
     terrain.rotation.x = -Math.PI / 2;
     terrain.position.y = -0.02;
     scene.add(terrain);
+
+    const beachInset = new THREE.Mesh(
+      new THREE.RingGeometry(72, 162, 96),
+      new THREE.MeshStandardMaterial({
+        color: "#d5cab8",
+        roughness: 0.98,
+        metalness: 0,
+      })
+    );
+    beachInset.rotation.x = -Math.PI / 2;
+    beachInset.position.set(0, 0.01, 20);
+    scene.add(beachInset);
 
     const road = new THREE.Mesh(
       new THREE.PlaneGeometry(180, 18),
@@ -413,6 +477,52 @@ export default function Mansion3DViewer({
     road.position.set(0, 0.01, -46);
     road.receiveShadow = true;
     scene.add(road);
+
+    const pier = new THREE.Group();
+    const pierDeck = new THREE.Mesh(
+      new THREE.BoxGeometry(54, 0.55, 6),
+      new THREE.MeshStandardMaterial({
+        color: "#bca88d",
+        roughness: 0.9,
+      })
+    );
+    pierDeck.position.set(102, 0.35, 106);
+    pier.add(pierDeck);
+
+    for (let i = 0; i < 18; i += 1) {
+      const post = new THREE.Mesh(
+        new THREE.BoxGeometry(0.38, 4.3, 0.38),
+        new THREE.MeshStandardMaterial({ color: "#8f795f", roughness: 0.95 })
+      );
+      post.position.set(78 + i * 3, -1.7, 106);
+      pier.add(post);
+    }
+
+    const hutBase1 = new THREE.Mesh(
+      new THREE.BoxGeometry(5, 1.8, 4),
+      new THREE.MeshStandardMaterial({ color: "#f1f3f5", roughness: 0.86 })
+    );
+    hutBase1.position.set(118, 1.5, 104.4);
+    pier.add(hutBase1);
+
+    const hutRoof1 = new THREE.Mesh(
+      new THREE.ConeGeometry(3, 1.2, 6),
+      new THREE.MeshStandardMaterial({ color: "#9ca5af", roughness: 0.75 })
+    );
+    hutRoof1.position.set(118, 2.9, 104.4);
+    hutRoof1.rotation.y = Math.PI / 6;
+    pier.add(hutRoof1);
+
+    const hutBase2 = hutBase1.clone();
+    hutBase2.position.set(128, 1.5, 107.2);
+    pier.add(hutBase2);
+
+    const hutRoof2 = hutRoof1.clone();
+    hutRoof2.position.set(128, 2.9, 107.2);
+    pier.add(hutRoof2);
+
+    setShadow(pier);
+    scene.add(pier);
 
     // -----------------------------
     // Mansion layout
@@ -491,8 +601,8 @@ export default function Mansion3DViewer({
     });
 
     // Pool block
-    addBox(mansion, [20, 1.4, 11], [6, 2.1, 28], concreteMat);
-    addBox(mansion, [16.5, 0.5, 7.5], [6, 2.65, 28], waterMat);
+    addBox(mansion, [18, 1.3, 10], [8, 2.0, 24.5], concreteMat);
+    addBox(mansion, [14.8, 0.45, 7], [8, 2.55, 24.5], waterMat);
 
     // Pool dark privacy wall
     addBox(
@@ -533,14 +643,14 @@ export default function Mansion3DViewer({
     addBox(mansion, [16, 0.45, 5.5], [18, 6.2, 10], concreteMat);
 
     // Basketball court
-    addBox(mansion, [22, 0.5, 16], [-22, 1.1, 10], courtMat);
+    addBox(mansion, [18, 0.5, 13], [-22, 1.1, 10], courtMat);
     const courtLineMat = new THREE.LineBasicMaterial({ color: "#ffffff" });
     const courtShape = [
-      [-31, 10],
-      [-13, 10],
-      [-13, 2],
-      [-31, 2],
-      [-31, 10],
+      [-29, 9],
+      [-15, 9],
+      [-15, 3],
+      [-29, 3],
+      [-29, 9],
     ];
     const linePoints = courtShape.map(([x, z]) => new THREE.Vector3(x, 1.37, z));
     const courtOutline = new THREE.Line(
@@ -552,13 +662,13 @@ export default function Mansion3DViewer({
     const hoopPole1 = addBox(
       mansion,
       [0.15, 3.2, 0.15],
-      [-30, 2.6, 6],
+      [-28.3, 2.6, 6],
       darkTrimMat
     );
     const hoopBoard1 = addBox(
       mansion,
       [1.2, 0.8, 0.08],
-      [-29.3, 4.2, 6],
+      [-27.7, 4.2, 6],
       whiteWallMat
     );
     const hoopRim1 = new THREE.Mesh(
@@ -566,19 +676,19 @@ export default function Mansion3DViewer({
       new THREE.MeshStandardMaterial({ color: "#d85c3f", roughness: 0.5 })
     );
     hoopRim1.rotation.x = Math.PI / 2;
-    hoopRim1.position.set(-28.7, 3.8, 6);
+    hoopRim1.position.set(-27.1, 3.8, 6);
     mansion.add(hoopRim1);
 
     const hoopPole2 = hoopPole1.clone();
-    hoopPole2.position.set(-14, 2.6, 6);
+    hoopPole2.position.set(-15.7, 2.6, 6);
     mansion.add(hoopPole2);
 
     const hoopBoard2 = hoopBoard1.clone();
-    hoopBoard2.position.set(-14.7, 4.2, 6);
+    hoopBoard2.position.set(-16.3, 4.2, 6);
     mansion.add(hoopBoard2);
 
     const hoopRim2 = hoopRim1.clone();
-    hoopRim2.position.set(-15.3, 3.8, 6);
+    hoopRim2.position.set(-16.9, 3.8, 6);
     mansion.add(hoopRim2);
 
     // Entry ramp and gate zone
@@ -604,7 +714,7 @@ export default function Mansion3DViewer({
     createGlassRail(17.5, 10.5, 8.35, mansion, [1, 9.5]);
 
     // Rear loungers deck
-    addBox(mansion, [10, 0.35, 5], [31, 1.45, 22], woodMat);
+    addBox(mansion, [12, 0.35, 5], [29, 1.45, 19], woodMat);
 
     // Green strips and planters
     addBox(mansion, [12, 0.45, 1.8], [-2, 1.35, 36], hedgeMat);
@@ -702,7 +812,9 @@ export default function Mansion3DViewer({
       frameId = requestAnimationFrame(animate);
       t += 0.003;
 
-      ocean.position.y = -1.6 + Math.sin(t) * 0.05;
+      ocean.position.y = -1.5 + Math.sin(t) * 0.06;
+      ocean.rotation.z = Math.sin(t * 0.35) * 0.01;
+      foamBand.material.opacity = 0.3 + (Math.sin(t * 2.2) + 1) * 0.08;
       controls.update();
       renderer.render(scene, camera);
     };
