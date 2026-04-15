@@ -394,6 +394,16 @@ export default function PainelPage() {
                         {selectedEvent.local || "Sem local"} •{" "}
                         {selectedEvent.horario || "Sem horário"}
                       </p>
+
+                      <button
+                        type="button"
+                        className="btn btn-secondary"
+                        onClick={() => {
+                          window.location.href = `/evento/${selectedEvent.id}`;
+                        }}
+                      >
+                        Saiba mais
+                      </button>
                     </div>
                   </div>
                 ) : (
@@ -490,11 +500,7 @@ export default function PainelPage() {
                         type="button"
                         className={`event-card ${selectedEventId === event.id ? "active" : ""}`}
                         onClick={() => {
-                          setSelectedEventId(event.id);
-                          const eventDate = new Date(`${event.data_evento}T00:00:00`);
-                          setCalendarDate(
-                            new Date(eventDate.getFullYear(), eventDate.getMonth(), 1)
-                          );
+                          window.location.href = `/evento/${event.id}`;
                         }}
                       >
                         <div className="event-card-image-wrap">
@@ -578,7 +584,9 @@ export default function PainelPage() {
                             );
                           });
 
-                          if (foundEvent) setSelectedEventId(foundEvent.id);
+                          if (foundEvent) {
+                            window.location.href = `/evento/${foundEvent.id}`;
+                          }
                         }}
                         className={[
                           "calendar-cell",
@@ -611,7 +619,9 @@ export default function PainelPage() {
                         return (
                           <button
                             key={item.id}
-                            onClick={() => setSelectedEventId(item.id)}
+                            onClick={() => {
+                              window.location.href = `/evento/${item.id}`;
+                            }}
                             className="next-item"
                           >
                             <span className="next-dot" />

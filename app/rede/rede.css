@@ -235,12 +235,13 @@
 }
 
 .member-scroll {
-  max-height: 540px;
+  max-height: clamp(380px, 58vh, 760px);
   overflow: auto;
   display: flex;
   flex-direction: column;
   gap: 8px;
   padding-right: 4px;
+  margin-top: 10px;
 }
 
 .member-tile {
@@ -427,10 +428,12 @@
 }
 
 .feed-list {
+  flex: 1;
+  min-height: clamp(620px, 76vh, 1200px);
   display: flex;
   flex-direction: column;
   gap: 12px;
-  max-height: clamp(420px, 62vh, 760px);
+  max-height: none;
   overflow: auto;
   padding-right: 4px;
 }
@@ -1137,6 +1140,7 @@
   }
 
   .feed-list {
+    min-height: 0;
     max-height: none;
     overflow: visible;
     padding-right: 0;

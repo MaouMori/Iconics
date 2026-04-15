@@ -87,7 +87,6 @@ export default function RedePage() {
   const [me, setMe] = useState<Profile | null>(null);
   const [feed, setFeed] = useState<FeedPost[]>([]);
   const [members, setMembers] = useState<MemberLite[]>([]);
-  const [selectedMemberId, setSelectedMemberId] = useState("");
   const [follows, setFollows] = useState<FollowState>({
     followersCount: 0,
     followingCount: 0,
@@ -246,7 +245,7 @@ export default function RedePage() {
       await Promise.all([
         loadProfile(token),
         loadFeed(token),
-        loadMessages(token, selectedMemberId || undefined),
+        loadMessages(token),
         loadFollows(token),
         loadNotifications(token),
       ]);
@@ -256,7 +255,7 @@ export default function RedePage() {
     return () => {
       mounted = false;
     };
-  }, [token, selectedMemberId]);
+  }, [token]);
 
   useEffect(() => {
     if (!token) return;
@@ -269,7 +268,8 @@ export default function RedePage() {
         loadFeed(token);
       })
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "social_direct_messages" }, () => {
-        if (selectedMemberId) loadMessages(token, selectedMemberId);
+        loadMessages(token);
+        loadNotifications(token);
       })
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "site_notifications" }, () => {
         loadNotifications(token);
@@ -292,7 +292,7 @@ export default function RedePage() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [token, selectedMemberId]);
+  }, [token]);
 
   async function createPost() {
     if (!token || !newPostText.trim()) return;
@@ -449,11 +449,6 @@ export default function RedePage() {
     setStatus(alreadyFollowing ? "Voce deixou de seguir." : "Agora voce esta seguindo.");
   }
 
-  const selectedMember = useMemo(
-    () => members.find((item) => item.id === selectedMemberId) || null,
-    [members, selectedMemberId]
-  );
-
   const trendingMembers = useMemo<TrendingItem[]>(() => {
     const map = new Map<string, TrendingItem>();
     feed.forEach((post) => {
@@ -531,13 +526,9 @@ export default function RedePage() {
                 <span aria-hidden>✎</span>
                 <span>Publicar</span>
               </button>
-              <Link href="/rede/mensagens">
-                <span aria-hidden>💬</span>
-                <span>Mensagens</span>
-              </Link>
               <button onClick={() => document.querySelector<HTMLElement>(".left-list-panel")?.scrollIntoView({ behavior: "smooth" })}>
                 <span aria-hidden>👥</span>
-                <span>Membros</span>
+                <span>Pesquisar</span>
               </button>
               <button onClick={() => document.querySelector<HTMLElement>(".activity-list")?.scrollIntoView({ behavior: "smooth" })}>
                 <span aria-hidden>🔔</span>
@@ -574,33 +565,27 @@ export default function RedePage() {
 
             <section className="left-list-panel">
               <div className="left-list-head">
-                <p className="section-title">Mensagens</p>
-                <Link href="/rede/mensagens" className="mini-link-btn">
-                  Abrir inbox
-                </Link>
+                <p className="section-title">Pesquisar membros</p>
               </div>
+              <input
+                className="member-search-input"
+                placeholder="Buscar por nome ou @username"
+                value={memberSearch}
+                onChange={(e) => setMemberSearch(e.target.value)}
+              />
               <div className="member-scroll">
-                {members.map((member) => (
-                  <article key={member.id} className={`member-tile ${selectedMemberId === member.id ? "active" : ""}`}>
-                    <button
-                      className="member-main-hit"
-                      onClick={() => {
-                        setSelectedMemberId(member.id);
-                        if (token) loadMessages(token, member.id);
-                      }}
-                    >
+                {searchedMembers.map((member) => (
+                  <article key={member.id} className="member-tile">
+                    <div className="member-main-hit">
                       <img src={member.avatar_url || "/images/logo.png"} alt="" />
                       <div>
                         <strong>{member.nome}</strong>
                         <span>@{member.username || "membro"}</span>
                       </div>
-                    </button>
+                    </div>
                     <div className="member-row-actions">
                       <Link className="mini-link-btn" href={`/rede/perfil/${member.id}`}>
                         Perfil
-                      </Link>
-                      <Link className="mini-link-btn" href={`/rede/mensagens?with=${member.id}`}>
-                        Chat
                       </Link>
                       {member.id !== me?.id ? (
                         <button
@@ -629,6 +614,11 @@ export default function RedePage() {
                     </div>
                   </article>
                 ))}
+                {searchedMembers.length === 0 ? (
+                  <p style={{ color: "#baa0d8", margin: "6px 2px 0" }}>
+                    Nenhum membro encontrado.
+                  </p>
+                ) : null}
               </div>
             </section>
           </aside>
@@ -669,21 +659,6 @@ export default function RedePage() {
               </div>
               {newPostImage ? <img src={newPostImage} alt="" className="preview-image" /> : null}
             </section>
-
-            {selectedMember ? (
-              <section className="side-card messages-shortcut-card">
-                <div className="side-head">
-                  <p className="section-title">Conversa selecionada</p>
-                  <Link href={`/rede/mensagens?with=${selectedMember.id}`} className="mini-link-btn">
-                    Abrir inbox
-                  </Link>
-                </div>
-                <p>
-                  Conversa com <strong>{selectedMember.nome}</strong> selecionada.
-                  Abra a inbox para responder e ver todo o histórico.
-                </p>
-              </section>
-            ) : null}
 
             <div className="feed-list">
               {feed.map((post) => (
@@ -763,32 +738,6 @@ export default function RedePage() {
               <button className="quick-btn" onClick={() => document.querySelector<HTMLInputElement>(".comment-input-row input")?.focus()}>Comentar</button>
             </section>
 
-            <section className="side-card member-search-card">
-              <div className="side-head">
-                <strong>Pesquisar membros</strong>
-              </div>
-              <input
-                className="member-search-input"
-                placeholder="Buscar por nome ou @username"
-                value={memberSearch}
-                onChange={(e) => setMemberSearch(e.target.value)}
-              />
-              <div className="member-search-results">
-                {searchedMembers.map((member) => (
-                  <article key={`search-${member.id}`} className="member-search-item">
-                    <img src={member.avatar_url || "/images/logo.png"} alt="" />
-                    <div>
-                      <strong>{member.nome}</strong>
-                      <p>@{member.username || "membro"}</p>
-                    </div>
-                    <Link href={`/rede/perfil/${member.id}`} className="mini-link-btn">
-                      Perfil
-                    </Link>
-                  </article>
-                ))}
-                {searchedMembers.length === 0 ? <p>Nenhum membro encontrado.</p> : null}
-              </div>
-            </section>
           </aside>
         </div>
       </section>

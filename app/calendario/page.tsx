@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import TopBar from "@/components/Topbar";
+import Link from "next/link";
 
 type EventItem = {
   id: number;
@@ -210,6 +211,12 @@ export default function CalendarioPage() {
 
                         <div style={eventDescriptionStyle}>
                           {event.descricao || "Sem descrição"}
+                        </div>
+
+                        <div style={eventActionsRowStyle}>
+                          <Link href={`/evento/${event.id}`} style={eventDetailsBtnStyle}>
+                            Saiba mais
+                          </Link>
                         </div>
                       </div>
 
@@ -592,6 +599,24 @@ const eventDescriptionStyle: React.CSSProperties = {
   marginTop: 14,
   lineHeight: 1.8,
   color: "#e6dff3",
+};
+
+const eventActionsRowStyle: React.CSSProperties = {
+  marginTop: 14,
+  display: "flex",
+  alignItems: "center",
+  gap: 10,
+  flexWrap: "wrap",
+};
+
+const eventDetailsBtnStyle: React.CSSProperties = {
+  border: "1px solid rgba(203,161,255,.35)",
+  borderRadius: "999px",
+  padding: "8px 14px",
+  background: "rgba(255,255,255,.05)",
+  color: "#f2e8ff",
+  textDecoration: "none",
+  fontWeight: 700,
 };
 
 const imageBoxStyle: React.CSSProperties = {
