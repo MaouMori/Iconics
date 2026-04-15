@@ -56,16 +56,6 @@ type MemberLite = {
   cargo: string;
 };
 
-type Message = {
-  id: number;
-  sender_profile_id: string;
-  recipient_profile_id: string;
-  content: string;
-  image_url: string | null;
-  created_at: string;
-  read_at: string | null;
-};
-
 type Notification = {
   id: number;
   kind: string;
@@ -98,7 +88,6 @@ export default function RedePage() {
   const [feed, setFeed] = useState<FeedPost[]>([]);
   const [members, setMembers] = useState<MemberLite[]>([]);
   const [selectedMemberId, setSelectedMemberId] = useState("");
-  const [messages, setMessages] = useState<Message[]>([]);
   const [follows, setFollows] = useState<FollowState>({
     followersCount: 0,
     followingCount: 0,
@@ -110,12 +99,11 @@ export default function RedePage() {
 
   const [newPostText, setNewPostText] = useState("");
   const [newPostImage, setNewPostImage] = useState("");
-  const [newMessageText, setNewMessageText] = useState("");
-  const [newMessageImage, setNewMessageImage] = useState("");
   const [commentDraft, setCommentDraft] = useState<Record<number, string>>({});
   const [savingProfile, setSavingProfile] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [status, setStatus] = useState("");
+  const [memberSearch, setMemberSearch] = useState("");
 
   const [editNome, setEditNome] = useState("");
   const [editUsername, setEditUsername] = useState("");
@@ -223,7 +211,6 @@ export default function RedePage() {
     const payload = await response.json();
     const fetchedMembers = (payload.members || []) as MemberLite[];
     setMembers(fetchedMembers);
-    setMessages(payload.messages || []);
   }
 
   async function loadNotifications(currentToken: string) {
@@ -357,30 +344,6 @@ export default function RedePage() {
     loadFeed(token);
   }
 
-  async function sendMessage() {
-    if (!token || !selectedMemberId || (!newMessageText.trim() && !newMessageImage)) return;
-    const response = await fetch("/api/social/messages", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        recipientId: selectedMemberId,
-        content: newMessageText || "[imagem]",
-        imageUrl: newMessageImage || null,
-      }),
-    });
-    const payload = await response.json();
-    if (!response.ok) {
-      setStatus(payload.error || "Erro ao enviar mensagem.");
-      return;
-    }
-    setNewMessageText("");
-    setNewMessageImage("");
-    loadMessages(token, selectedMemberId);
-  }
-
   async function saveProfile() {
     if (!token) return;
     setSavingProfile(true);
@@ -512,6 +475,18 @@ export default function RedePage() {
       .slice(0, 4);
   }, [feed]);
 
+  const searchedMembers = useMemo(() => {
+    const query = memberSearch.trim().toLowerCase();
+    if (!query) return members.slice(0, 12);
+    return members
+      .filter((item) => {
+        const nome = String(item.nome || "").toLowerCase();
+        const username = String(item.username || "").toLowerCase();
+        return nome.includes(query) || username.includes(query);
+      })
+      .slice(0, 20);
+  }, [memberSearch, members]);
+
   if (loading) {
     return (
       <main className="rede-loader">
@@ -611,8 +586,6 @@ export default function RedePage() {
                       className="member-main-hit"
                       onClick={() => {
                         setSelectedMemberId(member.id);
-                        setNewMessageText("");
-                        setNewMessageImage("");
                         if (token) loadMessages(token, member.id);
                       }}
                     >
@@ -698,57 +671,17 @@ export default function RedePage() {
             </section>
 
             {selectedMember ? (
-              <section className="side-card chat-side">
+              <section className="side-card messages-shortcut-card">
                 <div className="side-head">
-                  <p className="section-title">Conversa com {selectedMember.nome}</p>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSelectedMemberId("");
-                      setMessages([]);
-                      setNewMessageText("");
-                      setNewMessageImage("");
-                    }}
-                  >
-                    Fechar
-                  </button>
+                  <p className="section-title">Conversa selecionada</p>
+                  <Link href={`/rede/mensagens?with=${selectedMember.id}`} className="mini-link-btn">
+                    Abrir inbox
+                  </Link>
                 </div>
-                <div className="chat-scroll">
-                  {messages.map((msg) => (
-                    <div key={msg.id} className={`bubble ${msg.sender_profile_id === me?.id ? "me" : "other"}`}>
-                      <p>{msg.content}</p>
-                      {msg.image_url ? <img src={msg.image_url} alt="" /> : null}
-                    </div>
-                  ))}
-                </div>
-                <div className="chat-compose">
-                  <input
-                    placeholder={`Mensagem para ${selectedMember.nome}`}
-                    value={newMessageText}
-                    onChange={(e) => setNewMessageText(e.target.value)}
-                  />
-                  <button onClick={sendMessage} disabled={isMuted}>Enviar</button>
-                </div>
-                <div className="composer-row">
-                  <label className="chip-btn">
-                    Upload imagem do chat
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={async (e) => {
-                        const file = e.target.files?.[0];
-                        if (!file) return;
-                        try {
-                          const url = await uploadFile(file, "chat");
-                          setNewMessageImage(url);
-                        } catch (error) {
-                          setStatus(error instanceof Error ? error.message : "Falha no upload.");
-                        }
-                      }}
-                    />
-                  </label>
-                </div>
-                {newMessageImage ? <img src={newMessageImage} alt="" className="preview-image" /> : null}
+                <p>
+                  Conversa com <strong>{selectedMember.nome}</strong> selecionada.
+                  Abra a inbox para responder e ver todo o histórico.
+                </p>
               </section>
             ) : null}
 
@@ -811,7 +744,7 @@ export default function RedePage() {
               </div>
             </section>
 
-            <section className="side-card">
+            <section className="side-card activities-card">
               <div className="side-head"><strong>Atividades</strong><button onClick={markNotificationsRead}>Marcar lidas</button></div>
               <p className="notif-count">Nao lidas: {unreadCount} {adminPendingCount > 0 ? `| Pendencias: ${adminPendingCount}` : ""}</p>
               <div className="activity-list">
@@ -830,9 +763,31 @@ export default function RedePage() {
               <button className="quick-btn" onClick={() => document.querySelector<HTMLInputElement>(".comment-input-row input")?.focus()}>Comentar</button>
             </section>
 
-            <section className="side-card chat-placeholder">
-              <p className="section-title">Chat privado</p>
-              <p>Clique em um membro na coluna esquerda para abrir a conversa.</p>
+            <section className="side-card member-search-card">
+              <div className="side-head">
+                <strong>Pesquisar membros</strong>
+              </div>
+              <input
+                className="member-search-input"
+                placeholder="Buscar por nome ou @username"
+                value={memberSearch}
+                onChange={(e) => setMemberSearch(e.target.value)}
+              />
+              <div className="member-search-results">
+                {searchedMembers.map((member) => (
+                  <article key={`search-${member.id}`} className="member-search-item">
+                    <img src={member.avatar_url || "/images/logo.png"} alt="" />
+                    <div>
+                      <strong>{member.nome}</strong>
+                      <p>@{member.username || "membro"}</p>
+                    </div>
+                    <Link href={`/rede/perfil/${member.id}`} className="mini-link-btn">
+                      Perfil
+                    </Link>
+                  </article>
+                ))}
+                {searchedMembers.length === 0 ? <p>Nenhum membro encontrado.</p> : null}
+              </div>
             </section>
           </aside>
         </div>
