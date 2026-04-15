@@ -23,6 +23,7 @@ const DEFAULT_MANSION: Point = {
 };
 
 const MAP_IMAGE_CANDIDATES = ["/images/mapa-cidade-fivem.png", "/images/asdsa.png"];
+const ALLOWED_MARK_ROLES = new Set(["admin", "lider", "vice_lider"]);
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
@@ -177,7 +178,7 @@ export default function CityMap() {
         .maybeSingle();
 
       const cargo = String(profile?.cargo || "").trim().toLowerCase();
-      setCanMark(cargo === "admin");
+      setCanMark(ALLOWED_MARK_ROLES.has(cargo));
     };
 
     checkAdmin();
