@@ -2,7 +2,7 @@
 
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
-import type { ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 
 type AdminKey =
   | "dashboard"
@@ -40,6 +40,42 @@ export default function AdminShell({
   userName,
   children,
 }: AdminShellProps) {
+  const [displayName, setDisplayName] = useState(userName || "");
+
+  useEffect(() => {
+    let mounted = true;
+
+    async function loadCurrentProfile() {
+      const { data: userData } = await supabase.auth.getUser();
+      const user = userData.user;
+      if (!user || !mounted) return;
+
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("nome")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      const fallbackEmailName = user.email?.split("@")[0] || "";
+      const finalName = String(profile?.nome || userName || fallbackEmailName || "Iconics").trim();
+
+      if (mounted) {
+        setDisplayName(finalName || "Iconics");
+      }
+    }
+
+    loadCurrentProfile();
+
+    return () => {
+      mounted = false;
+    };
+  }, [userName]);
+
+  const displayInitial = useMemo(() => {
+    const value = String(displayName || "I").trim();
+    return value.charAt(0).toUpperCase() || "I";
+  }, [displayName]);
+
   async function handleLogout() {
     await supabase.auth.signOut();
     window.location.href = "/";
@@ -69,8 +105,8 @@ export default function AdminShell({
         </nav>
 
         <div className="admin-user-chip">
-          <span>{(userName || "I").charAt(0).toUpperCase()}</span>
-          <p>{userName || "Iconics"}</p>
+          <span>{displayInitial}</span>
+          <p>{displayName || "Iconics"}</p>
         </div>
       </aside>
 
