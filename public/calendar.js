@@ -10,6 +10,11 @@
       return;
     }
 
+    if (calendarGrid.dataset.calendarBound === "1") {
+      return;
+    }
+    calendarGrid.dataset.calendarBound = "1";
+
     const monthNames = [
       "Janeiro", "Fevereiro", "Marco", "Abril", "Maio", "Junho",
       "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
@@ -244,9 +249,27 @@
     loadEventsFromApi();
   }
 
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", initCalendar);
-  } else {
-    initCalendar();
+  function bootstrapCalendarAutoInit() {
+    const tryInit = () => {
+      initCalendar();
+    };
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", tryInit, { once: true });
+    } else {
+      tryInit();
+    }
+
+    if (document.body) {
+      const observer = new MutationObserver(() => {
+        tryInit();
+      });
+      observer.observe(document.body, { childList: true, subtree: true });
+    }
+
+    window.addEventListener("pageshow", tryInit);
+    window.addEventListener("popstate", tryInit);
   }
+
+  bootstrapCalendarAutoInit();
 })();

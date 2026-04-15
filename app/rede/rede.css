@@ -736,6 +736,17 @@
   padding: 6px 4px 10px;
 }
 
+.messages-search {
+  width: 100%;
+  border: 1px solid rgba(203, 161, 255, 0.25);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  color: #fff;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  outline: none;
+}
+
 .messages-list {
   display: flex;
   flex-direction: column;
@@ -777,6 +788,9 @@
 
 .conversation-text strong {
   display: block;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .conversation-text p {
@@ -799,6 +813,25 @@
   font-weight: 700;
   display: grid;
   place-items: center;
+}
+
+.messages-empty-list {
+  margin: 8px 2px;
+  color: #c9b0e5;
+  font-size: 0.88rem;
+}
+
+.online-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #6b7280;
+  display: inline-block;
+}
+
+.online-dot.on {
+  background: #22c55e;
+  box-shadow: 0 0 10px rgba(34, 197, 94, 0.7);
 }
 
 .messages-chat {
@@ -934,6 +967,12 @@
   margin: 0;
   color: #ccb4e9;
   text-transform: capitalize;
+}
+
+.messages-profile-status {
+  margin: 0;
+  color: #cdb7e8;
+  font-size: 0.9rem;
 }
 
 .profile-view-layout {

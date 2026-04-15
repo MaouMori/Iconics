@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Spinner from "@/components/Spinner";
 import NotificationBell from "@/components/NotificationBell";
 import { supabase } from "@/lib/supabase";
@@ -43,12 +43,21 @@ export default function RedeMensagensPage() {
   const [loading, setLoading] = useState(true);
   const [members, setMembers] = useState<MemberLite[]>([]);
   const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [selectedId, setSelectedId] = useState("");
+  const [selectedId, setSelectedId] = useState(() => {
+    if (typeof window === "undefined") return "";
+    const queryWith = new URLSearchParams(window.location.search).get("with");
+    return String(queryWith || "").trim();
+  });
   const [messages, setMessages] = useState<Message[]>([]);
   const [draft, setDraft] = useState("");
   const [draftImage, setDraftImage] = useState("");
   const [status, setStatus] = useState("");
   const [uploading, setUploading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [onlineIds, setOnlineIds] = useState<string[]>([]);
+  const [typingIds, setTypingIds] = useState<string[]>([]);
+  const presenceChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+  const typingOffTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -83,13 +92,6 @@ export default function RedeMensagensPage() {
     return () => {
       mounted = false;
     };
-  }, []);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const queryWith = new URLSearchParams(window.location.search).get("with");
-    const withId = String(queryWith || "").trim();
-    if (withId) setSelectedId(withId);
   }, []);
 
   async function loadMessages(currentToken: string, withId?: string) {
@@ -130,6 +132,94 @@ export default function RedeMensagensPage() {
       supabase.removeChannel(channel);
     };
   }, [token, selectedId]);
+
+  useEffect(() => {
+    if (!token || !me?.id) return;
+
+    const channel = supabase.channel("rede-presence-chat", {
+      config: { presence: { key: me.id } },
+    });
+    presenceChannelRef.current = channel;
+
+    channel
+      .on("presence", { event: "sync" }, () => {
+        const rawState = channel.presenceState();
+        const ids = Object.keys(rawState).filter((id) => id !== me.id);
+        setOnlineIds(ids);
+      })
+      .on("broadcast", { event: "typing" }, ({ payload }) => {
+        const from = String(payload?.from || "");
+        const to = String(payload?.to || "");
+        const typing = Boolean(payload?.typing);
+        if (!from || to !== me.id) return;
+
+        setTypingIds((prev) => {
+          if (typing) {
+            if (prev.includes(from)) return prev;
+            return [...prev, from];
+          }
+          return prev.filter((id) => id !== from);
+        });
+      })
+      .subscribe(async (status) => {
+        if (status !== "SUBSCRIBED") return;
+        await channel.track({
+          profileId: me.id,
+          ts: Date.now(),
+        });
+      });
+
+    const touchPresence = () => {
+      channel.track({ profileId: me.id, ts: Date.now() });
+    };
+    document.addEventListener("visibilitychange", touchPresence);
+
+    return () => {
+      document.removeEventListener("visibilitychange", touchPresence);
+      presenceChannelRef.current = null;
+      supabase.removeChannel(channel);
+    };
+  }, [token, me?.id]);
+
+  const emitTyping = useCallback((targetId: string, typing: boolean) => {
+    const channel = presenceChannelRef.current;
+    if (!channel || !me?.id || !targetId) return;
+    channel.send({
+      type: "broadcast",
+      event: "typing",
+      payload: {
+        from: me.id,
+        to: targetId,
+        typing,
+      },
+    });
+  }, [me]);
+
+  useEffect(() => {
+    if (!selectedId) return;
+    if (!draft.trim()) {
+      emitTyping(selectedId, false);
+      if (typingOffTimerRef.current) {
+        window.clearTimeout(typingOffTimerRef.current);
+        typingOffTimerRef.current = null;
+      }
+      return;
+    }
+
+    emitTyping(selectedId, true);
+    if (typingOffTimerRef.current) window.clearTimeout(typingOffTimerRef.current);
+    typingOffTimerRef.current = window.setTimeout(() => {
+      emitTyping(selectedId, false);
+      typingOffTimerRef.current = null;
+    }, 1400);
+
+    return () => {
+      if (typingOffTimerRef.current) {
+        window.clearTimeout(typingOffTimerRef.current);
+        typingOffTimerRef.current = null;
+      }
+    };
+  }, [draft, selectedId, emitTyping]);
 
   async function uploadChatImage(file: File) {
     if (!token) throw new Error("Nao autenticado.");
@@ -172,6 +262,7 @@ export default function RedeMensagensPage() {
 
     setDraft("");
     setDraftImage("");
+    emitTyping(selectedId, false);
     setStatus("");
     await loadMessages(token, selectedId);
   }
@@ -188,6 +279,16 @@ export default function RedeMensagensPage() {
     if (conversations.length > 0) return conversations.map((c) => c.with);
     return members;
   }, [conversations, members]);
+
+  const filteredList = useMemo(() => {
+    const q = searchTerm.trim().toLowerCase();
+    if (!q) return list;
+    return list.filter((item) => {
+      const nome = String(item.nome || "").toLowerCase();
+      const username = String(item.username || "").toLowerCase();
+      return nome.includes(q) || username.includes(q);
+    });
+  }, [list, searchTerm]);
 
   if (loading) {
     return (
@@ -221,12 +322,20 @@ export default function RedeMensagensPage() {
           <aside className="messages-sidebar">
             <div className="messages-sidebar-head">
               <strong>Conversas</strong>
-              <span>{list.length}</span>
+              <span>{filteredList.length}</span>
             </div>
+            <input
+              className="messages-search"
+              placeholder="Buscar por nome ou @username"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
             <div className="messages-list">
-              {list.map((member) => {
+              {filteredList.map((member) => {
                 const convo = conversations.find((c) => c.with.id === member.id);
                 const unread = convo?.unreadCount || 0;
+                const isOnline = onlineIds.includes(member.id);
+                const isTyping = typingIds.includes(member.id);
                 return (
                   <button
                     key={member.id}
@@ -239,13 +348,19 @@ export default function RedeMensagensPage() {
                   >
                     <img src={member.avatar_url || "/images/logo.png"} alt="" />
                     <div className="conversation-text">
-                      <strong>{member.nome}</strong>
-                      <p>{convo?.lastMessage || `@${member.username || "membro"}`}</p>
+                      <strong>
+                        {member.nome}
+                        <span className={`online-dot ${isOnline ? "on" : ""}`} />
+                      </strong>
+                      <p>{isTyping ? "digitando..." : (convo?.lastMessage || `@${member.username || "membro"}`)}</p>
                     </div>
                     {unread > 0 ? <span className="conversation-unread">{unread}</span> : null}
                   </button>
                 );
               })}
+              {filteredList.length === 0 ? (
+                <p className="messages-empty-list">Nenhuma conversa encontrada.</p>
+              ) : null}
             </div>
           </aside>
 
@@ -262,7 +377,11 @@ export default function RedeMensagensPage() {
                     <img src={selectedMember.avatar_url || "/images/logo.png"} alt="" />
                     <div>
                       <strong>{selectedMember.nome}</strong>
-                      <p>@{selectedMember.username || "membro"}</p>
+                      <p>
+                        @{selectedMember.username || "membro"} •{" "}
+                        {onlineIds.includes(selectedMember.id) ? "online" : "offline"}
+                        {typingIds.includes(selectedMember.id) ? " • digitando..." : ""}
+                      </p>
                     </div>
                   </div>
                   <div className="chat-head-actions">
@@ -332,6 +451,9 @@ export default function RedeMensagensPage() {
                 <h3>{selectedMember.nome}</h3>
                 <p>@{selectedMember.username || "membro"}</p>
                 <p className="messages-profile-role">{selectedMember.cargo}</p>
+                <p className="messages-profile-status">
+                  {onlineIds.includes(selectedMember.id) ? "Online agora" : "Offline"}
+                </p>
                 <Link href={`/rede/perfil/${selectedMember.id}`} className="quick-btn">
                   Abrir perfil completo
                 </Link>
