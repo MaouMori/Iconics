@@ -16,6 +16,7 @@ export default function PartnersBar() {
   const [isMobile, setIsMobile] = useState(false);
   const pathname = usePathname();
   const isMansaoPage = pathname === "/mansao";
+  const hiddenByRoute = pathname?.startsWith("/admin") || pathname?.startsWith("/painel");
 
   useEffect(() => {
     async function load() {
@@ -40,7 +41,7 @@ export default function PartnersBar() {
     return () => window.removeEventListener("resize", syncMobile);
   }, []);
 
-  if (partners.length === 0 || isMobile) return null;
+  if (partners.length === 0 || isMobile || hiddenByRoute) return null;
 
   return (
     <div
