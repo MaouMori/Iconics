@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import { useEffect, useRef, useState } from "react";
+import { supabase } from "@/lib/supabase";
 
 type ViewState = {
   zoom: number;
@@ -8,14 +9,17 @@ type ViewState = {
   y: number;
 };
 
+type Point = {
+  x: number;
+  y: number;
+};
+
 const MIN_ZOOM = 1;
 const MAX_ZOOM = 8;
 
-const MANSION = {
+const DEFAULT_MANSION: Point = {
   x: 0.685,
   y: 0.442,
-  label: "Mansao Iconics",
-  district: "Vinewood Hills",
 };
 
 const MAP_IMAGE_CANDIDATES = ["/images/mapa-cidade-fivem.png", "/images/asdsa.png"];
@@ -27,11 +31,17 @@ function clamp(value: number, min: number, max: number) {
 export default function CityMap() {
   const [view, setView] = useState<ViewState>({ zoom: 1, x: 0, y: 0 });
   const [dragging, setDragging] = useState(false);
+  const [markMode, setMarkMode] = useState(false);
+  const [mansionPos, setMansionPos] = useState<Point>(DEFAULT_MANSION);
+  const [saveState, setSaveState] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [lastPos, setLastPos] = useState<{ x: number; y: number } | null>(null);
   const [imageIndex, setImageIndex] = useState(0);
   const [imageLoaded, setImageLoaded] = useState(true);
+  const [canMark, setCanMark] = useState(false);
+
   const currentImage = MAP_IMAGE_CANDIDATES[imageIndex];
   const stageRef = useRef<HTMLDivElement | null>(null);
+  const movedRef = useRef(false);
 
   const clampView = (next: ViewState): ViewState => {
     const stage = stageRef.current;
@@ -59,6 +69,7 @@ export default function CityMap() {
   };
 
   const onPointerDown: React.PointerEventHandler<HTMLDivElement> = (event) => {
+    movedRef.current = false;
     setDragging(true);
     setLastPos({ x: event.clientX, y: event.clientY });
   };
@@ -68,6 +79,11 @@ export default function CityMap() {
 
     const dx = event.clientX - lastPos.x;
     const dy = event.clientY - lastPos.y;
+
+    if (Math.abs(dx) > 1 || Math.abs(dy) > 1) {
+      movedRef.current = true;
+    }
+
     setLastPos({ x: event.clientX, y: event.clientY });
     setView((current) => clampView({ ...current, x: current.x + dx, y: current.y + dy }));
   };
@@ -77,10 +93,94 @@ export default function CityMap() {
     setLastPos(null);
   };
 
+  const onMapClick: React.MouseEventHandler<HTMLDivElement> = (event) => {
+    if (!markMode || !canMark) return;
+
+    if (movedRef.current) {
+      movedRef.current = false;
+      return;
+    }
+
+    const rect = event.currentTarget.getBoundingClientRect();
+    const x = clamp((event.clientX - rect.left) / rect.width, 0, 1);
+    const y = clamp((event.clientY - rect.top) / rect.height, 0, 1);
+
+    setMansionPos({ x, y });
+    setSaveState("idle");
+  };
+
+  const copyCoords = async () => {
+    const text = `x: ${mansionPos.x.toFixed(4)}, y: ${mansionPos.y.toFixed(4)}`;
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch {
+      // ignore clipboard failures
+    }
+  };
+
+  const saveLocation = async () => {
+    setSaveState("saving");
+
+    const { data } = await supabase.auth.getSession();
+    const token = data.session?.access_token;
+
+    if (!token) {
+      setSaveState("error");
+      return;
+    }
+
+    const response = await fetch("/api/mansion-location", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(mansionPos),
+    });
+
+    setSaveState(response.ok ? "saved" : "error");
+  };
+
   useEffect(() => {
     const onResize = () => setView((current) => clampView(current));
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  useEffect(() => {
+    const loadLocation = async () => {
+      try {
+        const response = await fetch("/api/mansion-location", { cache: "no-store" });
+        if (!response.ok) return;
+        const point = (await response.json()) as Point;
+        if (typeof point.x === "number" && typeof point.y === "number") {
+          setMansionPos({ x: clamp(point.x, 0, 1), y: clamp(point.y, 0, 1) });
+        }
+      } catch {
+        // keep defaults
+      }
+    };
+
+    loadLocation();
+  }, []);
+
+  useEffect(() => {
+    const checkAdmin = async () => {
+      const { data: userData } = await supabase.auth.getUser();
+      const userId = userData.user?.id;
+      if (!userId) return;
+
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("cargo")
+        .eq("id", userId)
+        .maybeSingle();
+
+      const cargo = String(profile?.cargo || "").trim().toLowerCase();
+      setCanMark(cargo === "admin");
+    };
+
+    checkAdmin();
   }, []);
 
   return (
@@ -94,7 +194,29 @@ export default function CityMap() {
         <div className="map-actions">
           <button type="button" onClick={() => setView((v) => clampView({ ...v, zoom: clamp(v.zoom + 0.2, MIN_ZOOM, MAX_ZOOM) }))}>+</button>
           <button type="button" onClick={() => setView((v) => clampView({ ...v, zoom: clamp(v.zoom - 0.2, MIN_ZOOM, MAX_ZOOM) }))}>-</button>
-          <button type="button" onClick={() => setView({ zoom: 1, x: 0, y: 0 })}>Reset</button>
+          {canMark && (
+            <button type="button" onClick={() => setMarkMode((v) => !v)} className={markMode ? "map-action-active" : ""}>Marcar</button>
+          )}
+          {canMark && (
+            <button type="button" onClick={copyCoords}>Copiar</button>
+          )}
+          {canMark && (
+            <button type="button" onClick={saveLocation} disabled={saveState === "saving"}>
+              {saveState === "saving" ? "Salvando..." : "Salvar"}
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => {
+              setView({ zoom: 1, x: 0, y: 0 });
+              if (canMark) {
+                setMansionPos(DEFAULT_MANSION);
+                setSaveState("idle");
+              }
+            }}
+          >
+            Reset
+          </button>
         </div>
       </div>
 
@@ -111,7 +233,7 @@ export default function CityMap() {
           className="map-canvas"
           style={{ transform: `translate(${view.x}px, ${view.y}px) scale(${view.zoom})` }}
         >
-          <div className="map-image-shell">
+          <div className="map-image-shell" onClick={onMapClick}>
             <img
               className="map-image"
               src={currentImage}
@@ -136,8 +258,8 @@ export default function CityMap() {
             <div
               className="mansion-pin"
               style={{
-                left: `${MANSION.x * 100}%`,
-                top: `${MANSION.y * 100}%`,
+                left: `${mansionPos.x * 100}%`,
+                top: `${mansionPos.y * 100}%`,
               }}
             >
               <div className="mansion-pin-pulse" />
@@ -147,18 +269,24 @@ export default function CityMap() {
             <div
               className="mansion-label"
               style={{
-                left: `${MANSION.x * 100}%`,
-                top: `${MANSION.y * 100}%`,
+                left: `${mansionPos.x * 100}%`,
+                top: `${mansionPos.y * 100}%`,
               }}
             >
-              <strong>{MANSION.label}</strong>
-              <span>{MANSION.district}</span>
+              <strong>Mansao Iconics</strong>
+              <span>Vinewood Hills</span>
             </div>
           </div>
         </div>
       </div>
 
-      <p className="map-hint">Arraste para navegar no mapa e use o scroll para zoom. O movimento agora fica limitado ao tamanho da imagem.</p>
+      <p className="map-hint">
+        Arraste para navegar e use o scroll para zoom.
+        {canMark ? " Clique em Marcar e depois no mapa para posicionar." : ""}
+      </p>
+      {canMark && <p className="map-hint">Coordenadas atuais: x {mansionPos.x.toFixed(4)} | y {mansionPos.y.toFixed(4)}</p>}
+      {canMark && saveState === "saved" && <p className="map-hint">Localizacao salva no banco com sucesso.</p>}
+      {canMark && saveState === "error" && <p className="map-hint">Erro ao salvar localizacao. Verifique permissao admin e tabela no Supabase.</p>}
     </section>
   );
 }
