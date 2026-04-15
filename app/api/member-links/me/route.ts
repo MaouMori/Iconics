@@ -153,3 +153,37 @@ export async function PATCH(req: NextRequest) {
 
   return NextResponse.json({ ok: true, card: updated });
 }
+
+export async function DELETE(req: NextRequest) {
+  const auth = await getAuthedProfileId(req);
+  if ("error" in auth) return auth.error;
+
+  const { userId } = auth;
+  const now = new Date().toISOString();
+
+  const { data: activeLinks, error: fetchError } = await supabaseAdmin
+    .from("member_card_links")
+    .select("id")
+    .eq("profile_id", userId)
+    .eq("status", "active");
+
+  if (fetchError) {
+    return NextResponse.json({ error: fetchError.message }, { status: 500 });
+  }
+
+  if (!activeLinks || activeLinks.length === 0) {
+    return NextResponse.json({ error: "Nenhum vínculo ativo encontrado." }, { status: 404 });
+  }
+
+  const linkIds = activeLinks.map((item) => item.id).filter(Boolean);
+  const { error: revokeError } = await supabaseAdmin
+    .from("member_card_links")
+    .update({ status: "revoked", can_edit: false, updated_at: now })
+    .in("id", linkIds);
+
+  if (revokeError) {
+    return NextResponse.json({ error: revokeError.message }, { status: 500 });
+  }
+
+  return NextResponse.json({ ok: true, revoked: linkIds.length });
+}
