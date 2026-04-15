@@ -180,9 +180,15 @@ export default function AdminParceriasPage() {
 
   if (loading) {
     return (
-      <main className="admin-page-loader">
-        <Spinner />
-      </main>
+      <AdminShell
+        active="parcerias"
+        title="Gerenciar Parcerias"
+        description="Cadastre, edite e organize as parcerias exibidas no site."
+      >
+        <div style={contentLoadingStyle}>
+          <Spinner texto="Carregando parcerias..." />
+        </div>
+      </AdminShell>
     );
   }
 
@@ -400,4 +406,10 @@ const deleteBtn: React.CSSProperties = {
   color: "white",
   fontWeight: 700,
   cursor: "pointer",
+};
+
+const contentLoadingStyle: React.CSSProperties = {
+  minHeight: "46vh",
+  display: "grid",
+  placeItems: "center",
 };

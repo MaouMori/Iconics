@@ -153,9 +153,15 @@ export default function AdminEventosPage() {
 
   if (loading) {
     return (
-      <main className="admin-page-loader">
-        <Spinner />
-      </main>
+      <AdminShell
+        active="eventos"
+        title="Gerenciar Eventos"
+        description="Crie e organize os eventos que aparecem no calendario do site."
+      >
+        <div style={contentLoadingStyle}>
+          <Spinner texto="Carregando eventos..." />
+        </div>
+      </AdminShell>
     );
   }
 
@@ -446,4 +452,10 @@ const mutedP: React.CSSProperties = {
   margin: "4px 0",
   color: "#d8b4fe",
   fontSize: "0.95rem",
+};
+
+const contentLoadingStyle: React.CSSProperties = {
+  minHeight: "46vh",
+  display: "grid",
+  placeItems: "center",
 };

@@ -79,9 +79,15 @@ export default function AdminUsuariosPage() {
 
   if (loading) {
     return (
-      <main className="admin-page-loader">
-        <Spinner />
-      </main>
+      <AdminShell
+        active="usuarios"
+        title="Usuarios e Hierarquia"
+        description="Gerencie nome, email e cargo de todos os usuarios cadastrados."
+      >
+        <div style={contentLoadingStyle}>
+          <Spinner texto="Carregando usuarios..." />
+        </div>
+      </AdminShell>
     );
   }
 
@@ -240,3 +246,9 @@ function badgeStyle(cargo: string): React.CSSProperties {
     textTransform: "capitalize",
   };
 }
+
+const contentLoadingStyle: React.CSSProperties = {
+  minHeight: "46vh",
+  display: "grid",
+  placeItems: "center",
+};

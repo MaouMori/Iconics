@@ -1,6 +1,7 @@
 "use client";
 
 import { supabase } from "@/lib/supabase";
+import Link from "next/link";
 import type { ReactNode } from "react";
 
 type AdminKey =
@@ -57,13 +58,13 @@ export default function AdminShell({
 
         <nav className="admin-nav">
           {NAV_ITEMS.map((item) => (
-            <button
+            <Link
               key={item.key}
+              href={item.href}
               className={`admin-nav-item ${item.key === active ? "active" : ""}`}
-              onClick={() => (window.location.href = item.href)}
             >
               {item.label}
-            </button>
+            </Link>
           ))}
         </nav>
 
@@ -75,12 +76,12 @@ export default function AdminShell({
 
       <section className="admin-main">
         <header className="admin-top-actions">
-          <button onClick={() => (window.location.href = "/")} className="admin-top-btn">
+          <Link href="/" className="admin-top-btn">
             Voltar ao site
-          </button>
-          <button onClick={() => (window.location.href = "/painel")} className="admin-top-btn">
+          </Link>
+          <Link href="/painel" className="admin-top-btn">
             Painel
-          </button>
+          </Link>
           <button onClick={handleLogout} className="admin-top-btn danger">
             Sair
           </button>

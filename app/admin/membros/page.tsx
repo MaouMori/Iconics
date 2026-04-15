@@ -349,9 +349,15 @@ export default function AdminMembrosPage() {
 
   if (loading) {
     return (
-      <main className="admin-page-loader">
-        <Spinner />
-      </main>
+      <AdminShell
+        active="membros"
+        title="Gerenciar Membros"
+        description="Cadastre, edite e organize todos os cards de membros."
+      >
+        <div style={contentLoadingStyle}>
+          <Spinner texto="Carregando membros..." />
+        </div>
+      </AdminShell>
     );
   }
 
@@ -780,6 +786,12 @@ const modalImageStyle: React.CSSProperties = {
   maxHeight: "90%",
   borderRadius: 20,
   boxShadow: "0 0 40px rgba(168,85,247,.4)",
+};
+
+const contentLoadingStyle: React.CSSProperties = {
+  minHeight: "46vh",
+  display: "grid",
+  placeItems: "center",
 };
 
 

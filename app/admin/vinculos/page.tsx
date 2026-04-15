@@ -123,9 +123,15 @@ export default function AdminVinculosPage() {
 
   if (loading) {
     return (
-      <main className="admin-page-loader">
-        <Spinner texto="Carregando aprovacoes..." />
-      </main>
+      <AdminShell
+        active="vinculos"
+        title="Solicitacoes Pendentes de Vinculos"
+        description="Aprove ou rejeite vinculacoes de card. Aprovado libera edicao apenas do card vinculado."
+      >
+        <div style={contentLoadingStyle}>
+          <Spinner texto="Carregando aprovacoes..." />
+        </div>
+      </AdminShell>
     );
   }
 
@@ -221,3 +227,9 @@ const itemCard: React.CSSProperties = {
 };
 const primaryBtn: React.CSSProperties = { borderRadius: 10, border: "1px solid rgba(114,247,159,.4)", background: "rgba(43,124,78,.45)", color: "#fff", padding: "8px 12px", fontWeight: 700 };
 const dangerBtn: React.CSSProperties = { borderRadius: 10, border: "1px solid rgba(255,122,122,.45)", background: "rgba(130,32,32,.45)", color: "#fff", padding: "8px 12px", fontWeight: 700 };
+
+const contentLoadingStyle: React.CSSProperties = {
+  minHeight: "46vh",
+  display: "grid",
+  placeItems: "center",
+};

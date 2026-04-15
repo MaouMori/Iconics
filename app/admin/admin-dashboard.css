@@ -72,6 +72,8 @@
 }
 
 .admin-nav-item {
+  display: flex;
+  align-items: center;
   border: 1px solid rgba(255,255,255,.08);
   border-radius: 15px;
   background: rgba(255,255,255,.03);
@@ -79,6 +81,7 @@
   min-height: 50px;
   padding: 0 14px;
   text-align: left;
+  text-decoration: none;
   font-weight: 700;
   cursor: pointer;
   transition: .2s ease;
@@ -134,12 +137,16 @@
 }
 
 .admin-top-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   min-height: 44px;
   border-radius: 999px;
   padding: 0 16px;
   border: 1px solid rgba(255,255,255,.12);
   background: rgba(255,255,255,.05);
   color: #fff;
+  text-decoration: none;
   font-weight: 700;
   cursor: pointer;
 }
