@@ -38,6 +38,12 @@ type LinkResponse = {
   pendingRequests?: LinkRequest[];
 };
 
+type PublicMemberListItem = {
+  id: number;
+  nome: string;
+  cargo?: string | null;
+};
+
 type EditableForm = {
   nome: string;
   idade: string;
@@ -80,6 +86,8 @@ export default function PainelVinculoPage() {
   const [requestMemberId, setRequestMemberId] = useState("");
   const [requestCode, setRequestCode] = useState("");
   const [data, setData] = useState<LinkResponse>({ linked: false, pendingRequests: [] });
+  const [availableCards, setAvailableCards] = useState<PublicMemberListItem[]>([]);
+  const [cardsLoading, setCardsLoading] = useState(true);
   const [form, setForm] = useState<EditableForm>(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -116,6 +124,34 @@ export default function PainelVinculoPage() {
     }
 
     init();
+  }, []);
+
+  useEffect(() => {
+    async function loadCards() {
+      try {
+        const response = await fetch("/api/public-members", { cache: "no-store" });
+        const payload = (await response.json()) as MemberCardRow[] | { error?: string };
+        if (!response.ok || !Array.isArray(payload)) {
+          setCardsLoading(false);
+          return;
+        }
+
+        const simplified = payload
+          .map((item) => ({
+            id: Number(item.id),
+            nome: String(item.nome || `Membro #${item.id}`),
+            cargo: item.cargo || null,
+          }))
+          .filter((item) => Number.isInteger(item.id))
+          .sort((a, b) => a.id - b.id);
+
+        setAvailableCards(simplified);
+      } finally {
+        setCardsLoading(false);
+      }
+    }
+
+    loadCards();
   }, []);
 
   function formFromCard(card: MemberCardRow): EditableForm {
@@ -311,6 +347,26 @@ export default function PainelVinculoPage() {
                 Enviar solicitação
               </button>
 
+              <div style={cardsListWrap}>
+                <h4 style={{ margin: "0 0 8px" }}>Cards disponiveis (ID + nome)</h4>
+                {cardsLoading && <p style={muted}>Carregando lista de cards...</p>}
+                {!cardsLoading && availableCards.length === 0 && (
+                  <p style={muted}>Nenhum card encontrado no momento.</p>
+                )}
+                {!cardsLoading &&
+                  availableCards.map((card) => (
+                    <div key={card.id} style={cardListRow}>
+                      <p style={{ margin: 0, color: "#fff" }}>
+                        <strong>ID {card.id}</strong> - {card.nome}
+                        {card.cargo ? ` (${card.cargo})` : ""}
+                      </p>
+                      <button style={secondaryBtn} onClick={() => setRequestMemberId(String(card.id))}>
+                        Usar ID
+                      </button>
+                    </div>
+                  ))}
+              </div>
+
               {pending.length > 0 && (
                 <div style={{ marginTop: 12 }}>
                   <p style={muted}>Solicitações pendentes:</p>
@@ -470,3 +526,22 @@ const editorWrap: React.CSSProperties = { border: "1px solid rgba(201,156,255,.2
 const galleryGrid: React.CSSProperties = { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 10 };
 const galleryItem: React.CSSProperties = { border: "1px solid rgba(201,156,255,.2)", borderRadius: 10, padding: 10 };
 const galleryPreviewStyle: React.CSSProperties = { width: "100%", height: 130, objectFit: "cover", borderRadius: 8, marginBottom: 8 };
+const cardsListWrap: React.CSSProperties = {
+  marginTop: 14,
+  display: "grid",
+  gap: 8,
+  maxHeight: 320,
+  overflowY: "auto",
+  paddingRight: 4,
+};
+const cardListRow: React.CSSProperties = {
+  border: "1px solid rgba(201,156,255,.2)",
+  borderRadius: 10,
+  padding: "10px 12px",
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  gap: 10,
+  flexWrap: "wrap",
+  background: "rgba(255,255,255,.02)",
+};
