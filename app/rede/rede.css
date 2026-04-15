@@ -120,13 +120,17 @@
   align-items: center;
 }
 
-.icon-rail button {
+.icon-rail button,
+.icon-rail a {
   width: 42px;
   height: 42px;
   border-radius: 12px;
   border: 1px solid rgba(198, 155, 255, 0.22);
   background: rgba(255, 255, 255, 0.03);
   color: #eddcff;
+  text-decoration: none;
+  display: grid;
+  place-items: center;
   cursor: pointer;
 }
 
@@ -163,6 +167,15 @@
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 10px;
+}
+
+.profile-stats button {
+  border: 1px solid rgba(203, 161, 255, 0.2);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  color: #f3e7ff;
+  text-align: left;
+  padding: 8px 10px;
 }
 
 .profile-stats div strong {
@@ -260,6 +273,27 @@
   border: 1px solid rgba(239, 170, 255, 0.36);
   border-radius: 999px;
   padding: 4px 8px;
+}
+
+.member-tile-actions {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+}
+
+.follow-btn {
+  border: 1px solid rgba(203, 161, 255, 0.28);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  color: #f3e4ff;
+  padding: 6px 10px;
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+
+.follow-btn.on {
+  background: linear-gradient(180deg, rgba(163, 90, 240, 0.56), rgba(117, 55, 209, 0.36));
+  border-color: rgba(225, 196, 255, 0.56);
 }
 
 .composer-panel {
@@ -513,6 +547,60 @@
   min-height: 340px;
 }
 
+.chat-placeholder p {
+  margin: 0;
+  color: #c8afdf;
+  line-height: 1.7;
+}
+
+.config-panel {
+  padding: 20px;
+}
+
+.config-avatar-row {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.config-avatar-actions {
+  display: grid;
+  gap: 10px;
+  flex: 1;
+}
+
+.config-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.config-panel input,
+.config-panel textarea {
+  width: 100%;
+  border: 1px solid rgba(203, 161, 255, 0.25);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  color: #fff;
+  padding: 11px 12px;
+  outline: none;
+}
+
+.config-panel input:focus,
+.config-panel textarea:focus {
+  border-color: rgba(225, 199, 255, 0.56);
+  box-shadow: 0 0 0 3px rgba(136, 72, 218, 0.26);
+}
+
+.config-actions {
+  margin-top: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .chat-scroll {
   flex: 1;
   max-height: 250px;
@@ -597,6 +685,10 @@
   }
 
   .social-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .config-grid {
     grid-template-columns: 1fr;
   }
 }

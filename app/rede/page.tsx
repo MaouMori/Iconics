@@ -74,6 +74,12 @@ type Notification = {
   created_at: string;
 };
 
+type FollowState = {
+  followersCount: number;
+  followingCount: number;
+  followingIds: string[];
+};
+
 const MOD_ROLES = new Set(["admin", "lider", "vice_lider", "staff"]);
 
 export default function RedePage() {
@@ -84,6 +90,11 @@ export default function RedePage() {
   const [members, setMembers] = useState<MemberLite[]>([]);
   const [selectedMemberId, setSelectedMemberId] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
+  const [follows, setFollows] = useState<FollowState>({
+    followersCount: 0,
+    followingCount: 0,
+    followingIds: [],
+  });
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [adminPendingCount, setAdminPendingCount] = useState(0);
@@ -204,9 +215,6 @@ export default function RedePage() {
     const fetchedMembers = (payload.members || []) as MemberLite[];
     setMembers(fetchedMembers);
     setMessages(payload.messages || []);
-    if (!withId && fetchedMembers.length > 0 && !selectedMemberId) {
-      setSelectedMemberId(fetchedMembers[0].id);
-    }
   }
 
   async function loadNotifications(currentToken: string) {
@@ -220,6 +228,21 @@ export default function RedePage() {
     setAdminPendingCount(payload.adminPendingCount || 0);
   }
 
+  async function loadFollows(currentToken: string) {
+    const response = await fetch("/api/social/follows", {
+      headers: { Authorization: `Bearer ${currentToken}` },
+    });
+    if (!response.ok) return;
+    const payload = await response.json();
+    setFollows({
+      followersCount: Number(payload.followersCount || 0),
+      followingCount: Number(payload.followingCount || 0),
+      followingIds: Array.isArray(payload.followingIds)
+        ? payload.followingIds.map((id: unknown) => String(id))
+        : [],
+    });
+  }
+
   useEffect(() => {
     if (!token) return;
     let mounted = true;
@@ -228,6 +251,7 @@ export default function RedePage() {
         loadProfile(token),
         loadFeed(token),
         loadMessages(token, selectedMemberId || undefined),
+        loadFollows(token),
         loadNotifications(token),
       ]);
       if (mounted) setLoading(false);
@@ -253,6 +277,12 @@ export default function RedePage() {
       })
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "site_notifications" }, () => {
         loadNotifications(token);
+      })
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "social_follows" }, () => {
+        loadFollows(token);
+      })
+      .on("postgres_changes", { event: "DELETE", schema: "public", table: "social_follows" }, () => {
+        loadFollows(token);
       })
       .on(
         "postgres_changes",
@@ -431,6 +461,22 @@ export default function RedePage() {
     setStatus("Membro silenciado por 60 minutos.");
   }
 
+  async function toggleFollow(targetProfileId: string) {
+    if (!token || !targetProfileId || targetProfileId === me?.id) return;
+    const alreadyFollowing = follows.followingIds.includes(targetProfileId);
+    const response = await fetch(`/api/social/follows/${targetProfileId}`, {
+      method: alreadyFollowing ? "DELETE" : "POST",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const payload = await response.json().catch(() => null);
+    if (!response.ok) {
+      setStatus(payload?.error || "Falha ao atualizar seguimento.");
+      return;
+    }
+    await loadFollows(token);
+    setStatus(alreadyFollowing ? "Voce deixou de seguir." : "Agora voce esta seguindo.");
+  }
+
   const selectedMember = useMemo(
     () => members.find((item) => item.id === selectedMemberId) || null,
     [members, selectedMemberId]
@@ -469,12 +515,12 @@ export default function RedePage() {
         <div className="social-grid">
           <aside className="left-column">
             <div className="icon-rail">
-              <button>⌂</button>
-              <button>◎</button>
-              <button>⌕</button>
-              <button>👥</button>
-              <button>✚</button>
-              <button>⚙</button>
+              <Link href="/rede">⌂</Link>
+              <button onClick={() => document.querySelector<HTMLTextAreaElement>(".composer-panel textarea")?.focus()}>◎</button>
+              <button onClick={() => document.querySelector<HTMLTextAreaElement>(".chat-compose input")?.focus()}>⌕</button>
+              <button onClick={() => document.querySelector<HTMLElement>(".left-list-panel")?.scrollIntoView({ behavior: "smooth" })}>👥</button>
+              <button onClick={() => document.querySelector<HTMLElement>(".side-card")?.scrollIntoView({ behavior: "smooth" })}>✚</button>
+              <Link href="/rede/config">⚙</Link>
             </div>
 
             <section className="profile-panel">
@@ -483,8 +529,14 @@ export default function RedePage() {
               <p>@{me?.username || "semusername"}</p>
               <p className="bio">{editBio || me?.bio || "Nos criamos icones."}</p>
               <div className="profile-stats">
-                <div><strong>{(feed.length * 112 + 1200) / 1000}k</strong><span>seguidores</span></div>
-                <div><strong>{members.length}</strong><span>seguindo</span></div>
+                <button type="button">
+                  <strong>{follows.followersCount}</strong>
+                  <span>seguidores</span>
+                </button>
+                <button type="button">
+                  <strong>{follows.followingCount}</strong>
+                  <span>seguindo</span>
+                </button>
               </div>
               <div className="profile-actions-mini">
                 <button>👤</button>
@@ -501,13 +553,31 @@ export default function RedePage() {
                   <button
                     key={member.id}
                     className={`member-tile ${selectedMemberId === member.id ? "active" : ""}`}
-                    onClick={() => setSelectedMemberId(member.id)}
+                    onClick={() => {
+                      setSelectedMemberId(member.id);
+                      setNewMessageText("");
+                      setNewMessageImage("");
+                    }}
                   >
                     <img src={member.avatar_url || "/images/logo.png"} alt="" />
                     <div>
                       <strong>{member.nome}</strong>
                       <span>@{member.username || "membro"}</span>
                     </div>
+                    <span className="member-tile-actions">
+                      {member.id !== me?.id ? (
+                        <button
+                          type="button"
+                          className={`follow-btn ${follows.followingIds.includes(member.id) ? "on" : ""}`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleFollow(member.id);
+                          }}
+                        >
+                          {follows.followingIds.includes(member.id) ? "Seguindo" : "Seguir"}
+                        </button>
+                      ) : null}
+                    </span>
                     {canModerate ? <em onClick={(e) => { e.stopPropagation(); muteMember(member.id); }}>Silenciar</em> : null}
                   </button>
                 ))}
@@ -630,45 +700,65 @@ export default function RedePage() {
               <button className="quick-btn" onClick={() => document.querySelector<HTMLInputElement>(".comment-input-row input")?.focus()}>Comentar</button>
             </section>
 
-            <section className="side-card chat-side">
-              <p className="section-title">Conversa {selectedMember ? `com ${selectedMember.nome}` : ""}</p>
-              <div className="chat-scroll">
-                {messages.map((msg) => (
-                  <div key={msg.id} className={`bubble ${msg.sender_profile_id === me?.id ? "me" : "other"}`}>
-                    <p>{msg.content}</p>
-                    {msg.image_url ? <img src={msg.image_url} alt="" /> : null}
-                  </div>
-                ))}
-              </div>
-              <div className="chat-compose">
-                <input
-                  placeholder="Digite sua mensagem"
-                  value={newMessageText}
-                  onChange={(e) => setNewMessageText(e.target.value)}
-                />
-                <button onClick={sendMessage} disabled={isMuted}>Enviar</button>
-              </div>
-              <div className="composer-row">
-                <label className="chip-btn">
-                  Upload imagem do chat
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={async (e) => {
-                      const file = e.target.files?.[0];
-                      if (!file) return;
-                      try {
-                        const url = await uploadFile(file, "chat");
-                        setNewMessageImage(url);
-                      } catch (error) {
-                        setStatus(error instanceof Error ? error.message : "Falha no upload.");
-                      }
+            {selectedMember ? (
+              <section className="side-card chat-side">
+                <div className="side-head">
+                  <p className="section-title">Conversa com {selectedMember.nome}</p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedMemberId("");
+                      setMessages([]);
+                      setNewMessageText("");
+                      setNewMessageImage("");
                     }}
+                  >
+                    Fechar
+                  </button>
+                </div>
+                <div className="chat-scroll">
+                  {messages.map((msg) => (
+                    <div key={msg.id} className={`bubble ${msg.sender_profile_id === me?.id ? "me" : "other"}`}>
+                      <p>{msg.content}</p>
+                      {msg.image_url ? <img src={msg.image_url} alt="" /> : null}
+                    </div>
+                  ))}
+                </div>
+                <div className="chat-compose">
+                  <input
+                    placeholder="Digite sua mensagem"
+                    value={newMessageText}
+                    onChange={(e) => setNewMessageText(e.target.value)}
                   />
-                </label>
-              </div>
-              {newMessageImage ? <img src={newMessageImage} alt="" className="preview-image" /> : null}
-            </section>
+                  <button onClick={sendMessage} disabled={isMuted}>Enviar</button>
+                </div>
+                <div className="composer-row">
+                  <label className="chip-btn">
+                    Upload imagem do chat
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        try {
+                          const url = await uploadFile(file, "chat");
+                          setNewMessageImage(url);
+                        } catch (error) {
+                          setStatus(error instanceof Error ? error.message : "Falha no upload.");
+                        }
+                      }}
+                    />
+                  </label>
+                </div>
+                {newMessageImage ? <img src={newMessageImage} alt="" className="preview-image" /> : null}
+              </section>
+            ) : (
+              <section className="side-card chat-placeholder">
+                <p className="section-title">Chat privado</p>
+                <p>Clique em um membro na coluna esquerda para abrir a conversa.</p>
+              </section>
+            )}
           </aside>
         </div>
       </section>
