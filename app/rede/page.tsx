@@ -1,8 +1,8 @@
-"use client";
+﻿"use client";
 
-import TopBar from "@/components/Topbar";
 import Spinner from "@/components/Spinner";
 import { supabase } from "@/lib/supabase";
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import "./rede.css";
 
@@ -107,12 +107,16 @@ export default function RedePage() {
   const mutedUntil = me?.social_muted_until ? String(me.social_muted_until) : "";
   const isMuted = Boolean(mutedUntil && mutedUntil > nowIso);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setNowIso(new Date().toISOString());
-    }, 30000);
-    return () => clearInterval(interval);
-  }, []);
+  function fmtShortTime(iso?: string | null) {
+    if (!iso) return "agora";
+    const diffMs = new Date(nowIso).getTime() - new Date(iso).getTime();
+    const min = Math.max(1, Math.floor(diffMs / 60000));
+    if (min < 60) return `${min}m`;
+    const h = Math.floor(min / 60);
+    if (h < 24) return `${h}h`;
+    const d = Math.floor(h / 24);
+    return `${d}d`;
+  }
 
   async function uploadFile(file: File, folder: "posts" | "chat" | "avatars") {
     if (!token) throw new Error("Nao autenticado.");
@@ -131,6 +135,13 @@ export default function RedePage() {
     if (!response.ok) throw new Error(payload.error || "Falha no upload.");
     return String(payload.url || "");
   }
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setNowIso(new Date().toISOString());
+    }, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     let mounted = true;
@@ -425,61 +436,102 @@ export default function RedePage() {
     [members, selectedMemberId]
   );
 
+  const trendingMembers = useMemo(() => members.slice(0, 4), [members]);
+
   if (loading) {
     return (
-      <>
-        <TopBar />
-        <main className="rede-loader">
-          <Spinner texto="Carregando Rede Iconics..." />
-        </main>
-      </>
+      <main className="rede-loader">
+        <Spinner texto="Carregando Rede Iconics..." />
+      </main>
     );
   }
 
   return (
-    <>
-      <TopBar />
-      <main className="rede-page">
-        <div className="rede-hero">
+    <main className="social-app">
+      <section className="social-shell">
+        <header className="social-topbar">
+          <div className="brand-left">
+            <div className="brand-flame">◉</div>
+            <strong>ICONICS</strong>
+          </div>
           <h1>A rede esta observando voce...</h1>
-          <p>Feed, chat, perfil editavel, notificacoes ao vivo e moderacao integrada.</p>
-        </div>
+          <div className="top-actions">
+            <Link href="/" className="top-btn">Voltar ao site</Link>
+            <Link href="/painel" className="top-btn">Painel</Link>
+            <Link href="/rede" className="top-btn active">Rede</Link>
+            <button className="top-btn danger" onClick={async () => {
+              await supabase.auth.signOut();
+              window.location.href = "/";
+            }}>Sair</button>
+          </div>
+        </header>
 
-        <div className="rede-shell">
-          <aside className="rede-left">
-            <section className="rede-card profile-card">
-              <p className="rede-kicker">Meu perfil</p>
-              <div className="profile-head">
-                <img
-                  src={editAvatar || me?.avatar_url || "/images/logo.png"}
-                  alt="Avatar"
-                  className="profile-avatar"
-                />
-                <div>
-                  <h2>{me?.nome || "Membro"}</h2>
-                  <p>@{me?.username || "semusername"}</p>
-                  {isMuted ? (
-                    <span className="muted-chip">
-                      Silenciado ate {new Date(mutedUntil).toLocaleTimeString("pt-BR")}
-                    </span>
-                  ) : null}
-                </div>
+        <div className="social-grid">
+          <aside className="left-column">
+            <div className="icon-rail">
+              <button>⌂</button>
+              <button>◎</button>
+              <button>⌕</button>
+              <button>👥</button>
+              <button>✚</button>
+              <button>⚙</button>
+            </div>
+
+            <section className="profile-panel">
+              <img className="profile-cover" src={editAvatar || me?.avatar_url || "/images/logo.png"} alt="" />
+              <h2>{me?.nome || "Membro"}</h2>
+              <p>@{me?.username || "semusername"}</p>
+              <p className="bio">{editBio || me?.bio || "Nos criamos icones."}</p>
+              <div className="profile-stats">
+                <div><strong>{(feed.length * 112 + 1200) / 1000}k</strong><span>seguidores</span></div>
+                <div><strong>{members.length}</strong><span>seguindo</span></div>
               </div>
+              <div className="profile-actions-mini">
+                <button>👤</button>
+                <button>💬</button>
+                <button>🖼</button>
+                <button>👁</button>
+              </div>
+            </section>
 
-              <div className="form-stack">
-                <input value={editNome} onChange={(e) => setEditNome(e.target.value)} placeholder="Nome" />
-                <input
-                  value={editUsername}
-                  onChange={(e) => setEditUsername(e.target.value)}
-                  placeholder="username"
-                />
-                <input
-                  value={editAvatar}
-                  onChange={(e) => setEditAvatar(e.target.value)}
-                  placeholder="URL da foto"
-                />
-                <label className="file-btn">
-                  Upload avatar
+            <section className="left-list-panel">
+              <p className="section-title">Mensagens</p>
+              <div className="member-scroll">
+                {members.map((member) => (
+                  <button
+                    key={member.id}
+                    className={`member-tile ${selectedMemberId === member.id ? "active" : ""}`}
+                    onClick={() => setSelectedMemberId(member.id)}
+                  >
+                    <img src={member.avatar_url || "/images/logo.png"} alt="" />
+                    <div>
+                      <strong>{member.nome}</strong>
+                      <span>@{member.username || "membro"}</span>
+                    </div>
+                    {canModerate ? <em onClick={(e) => { e.stopPropagation(); muteMember(member.id); }}>Silenciar</em> : null}
+                  </button>
+                ))}
+              </div>
+            </section>
+          </aside>
+
+          <section className="center-column">
+            <section className="composer-panel">
+              <div className="composer-head">💬 Criar publicacao <span>📷</span></div>
+              <textarea
+                placeholder="O que voce esta pensando?..."
+                value={newPostText}
+                onChange={(e) => setNewPostText(e.target.value)}
+                rows={2}
+              />
+              <input
+                placeholder="URL da imagem (opcional)"
+                value={newPostImage}
+                onChange={(e) => setNewPostImage(e.target.value)}
+              />
+              <div className="composer-row">
+                <label className="chip-btn">
+                  Upload imagem
                   <input
                     type="file"
                     accept="image/*"
@@ -487,152 +539,84 @@ export default function RedePage() {
                       const file = e.target.files?.[0];
                       if (!file) return;
                       try {
-                        const url = await uploadFile(file, "avatars");
-                        setEditAvatar(url);
+                        const url = await uploadFile(file, "posts");
+                        setNewPostImage(url);
                       } catch (error) {
                         setStatus(error instanceof Error ? error.message : "Falha no upload.");
                       }
                     }}
                   />
                 </label>
-                <textarea
-                  value={editBio}
-                  onChange={(e) => setEditBio(e.target.value)}
-                  placeholder="Bio"
-                  rows={3}
-                />
-                <button className="btn-primary" onClick={saveProfile} disabled={savingProfile || uploading}>
-                  {savingProfile ? "Salvando..." : "Salvar meu perfil"}
-                </button>
+                <button className="publish-btn" onClick={createPost} disabled={uploading || isMuted}>Publicar</button>
               </div>
+              {newPostImage ? <img src={newPostImage} alt="" className="preview-image" /> : null}
             </section>
 
-            <section className="rede-card">
-              <p className="rede-kicker">Mensagens</p>
-              <div className="member-list">
-                {members.map((member) => (
-                  <button
-                    key={member.id}
-                    className={`member-item ${selectedMemberId === member.id ? "active" : ""}`}
-                    onClick={() => setSelectedMemberId(member.id)}
-                  >
+            <div className="feed-list">
+              {feed.map((post) => (
+                <article key={post.id} className="post-card-premium">
+                  <div className="post-head">
+                    <img src={post.author.avatar_url || "/images/logo.png"} alt="" />
+                    <div>
+                      <strong>{post.author.nome || "Membro"}</strong>
+                      <p>@{post.author.username || "membro"} • {fmtShortTime(post.created_at)}</p>
+                    </div>
+                    {canModerate ? <button className="mod-x" onClick={() => removePost(post.id)}>✕</button> : null}
+                  </div>
+
+                  <p className="post-content">{post.content}</p>
+                  {post.image_url ? <img src={post.image_url} alt="" className="post-cover" /> : null}
+
+                  <div className="post-metrics">
+                    <button onClick={() => toggleLike(post.id)}>💜 {post.like_count}</button>
+                    <span>💬 {post.comment_count}</span>
+                  </div>
+
+                  <div className="comments-mini">
+                    {post.recent_comments.map((comment) => (
+                      <div key={comment.id} className="comment-mini">
+                        <b>{comment.author.nome || "Membro"}:</b> {comment.content}
+                        {canModerate ? <button onClick={() => removeComment(comment.id)}>Remover</button> : null}
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="comment-input-row">
+                    <input
+                      placeholder="Comentar..."
+                      value={commentDraft[post.id] || ""}
+                      onChange={(e) => setCommentDraft((prev) => ({ ...prev, [post.id]: e.target.value }))}
+                    />
+                    <button onClick={() => addComment(post.id)} disabled={isMuted}>Enviar</button>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </section>
+
+          <aside className="right-column">
+            <section className="side-card">
+              <div className="side-head"><strong>Trending 🔥</strong><button>Ver tudo</button></div>
+              <div className="trend-list">
+                {trendingMembers.map((member, idx) => (
+                  <div key={member.id} className="trend-item">
                     <img src={member.avatar_url || "/images/logo.png"} alt="" />
                     <div>
                       <strong>{member.nome}</strong>
-                      <p>@{member.username || "membro"}</p>
+                      <p>{member.username ? `@${member.username}` : member.cargo}</p>
                     </div>
-                  </button>
+                    <span>#{idx + 1}</span>
+                  </div>
                 ))}
               </div>
             </section>
-          </aside>
 
-          <section className="rede-center">
-            <section className="rede-card composer-card">
-              <p className="rede-kicker">Criar publicacao</p>
-              <textarea
-                placeholder="O que voce esta pensando?"
-                value={newPostText}
-                onChange={(e) => setNewPostText(e.target.value)}
-                rows={3}
-              />
-              <input
-                placeholder="URL da imagem (opcional)"
-                value={newPostImage}
-                onChange={(e) => setNewPostImage(e.target.value)}
-              />
-              <label className="file-btn">
-                Upload imagem do post
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={async (e) => {
-                    const file = e.target.files?.[0];
-                    if (!file) return;
-                    try {
-                      const url = await uploadFile(file, "posts");
-                      setNewPostImage(url);
-                    } catch (error) {
-                      setStatus(error instanceof Error ? error.message : "Falha no upload.");
-                    }
-                  }}
-                />
-              </label>
-              {newPostImage ? <img src={newPostImage} alt="" className="preview-image" /> : null}
-              <button className="btn-primary" onClick={createPost} disabled={uploading || isMuted}>
-                Publicar
-              </button>
-            </section>
-
-            {feed.map((post) => (
-              <article key={post.id} className="rede-card post-card">
-                <div className="post-head">
-                  <img src={post.author.avatar_url || "/images/logo.png"} alt="" />
-                  <div>
-                    <strong>{post.author.nome || "Membro"}</strong>
-                    <p>@{post.author.username || "membro"}</p>
-                  </div>
-                  <span>{new Date(post.created_at).toLocaleString("pt-BR")}</span>
-                </div>
-                <p className="post-content">{post.content}</p>
-                {post.image_url ? <img src={post.image_url} alt="" className="post-image" /> : null}
-
-                <div className="post-actions">
-                  <button onClick={() => toggleLike(post.id)}>
-                    {post.liked_by_me ? "Descurtir" : "Curtir"} ({post.like_count})
-                  </button>
-                  <span>{post.comment_count} comentarios</span>
-                  {canModerate ? (
-                    <button className="danger-btn" onClick={() => removePost(post.id)}>
-                      Remover post
-                    </button>
-                  ) : null}
-                </div>
-
-                <div className="comment-list">
-                  {post.recent_comments.map((comment) => (
-                    <div key={comment.id} className="comment-item">
-                      <div>
-                        <strong>{comment.author.nome || "Membro"}:</strong> {comment.content}
-                      </div>
-                      {canModerate ? (
-                        <button className="danger-mini" onClick={() => removeComment(comment.id)}>
-                          Remover
-                        </button>
-                      ) : null}
-                    </div>
-                  ))}
-                </div>
-
-                <div className="comment-box">
-                  <input
-                    placeholder="Escreva um comentario"
-                    value={commentDraft[post.id] || ""}
-                    onChange={(e) => setCommentDraft((prev) => ({ ...prev, [post.id]: e.target.value }))}
-                  />
-                  <button onClick={() => addComment(post.id)} disabled={isMuted}>
-                    Comentar
-                  </button>
-                </div>
-              </article>
-            ))}
-          </section>
-
-          <aside className="rede-right">
-            <section className="rede-card">
-              <div className="row-between">
-                <p className="rede-kicker">Notificacoes</p>
-                <button className="btn-ghost" onClick={markNotificationsRead}>
-                  Marcar lidas
-                </button>
-              </div>
-              <p className="notif-count">
-                Nao lidas: {unreadCount}
-                {adminPendingCount > 0 ? ` | Pendencias vinculo: ${adminPendingCount}` : ""}
-              </p>
-              <div className="notif-list">
+            <section className="side-card">
+              <div className="side-head"><strong>Atividades</strong><button onClick={markNotificationsRead}>Marcar lidas</button></div>
+              <p className="notif-count">Nao lidas: {unreadCount} {adminPendingCount > 0 ? `| Pendencias: ${adminPendingCount}` : ""}</p>
+              <div className="activity-list">
                 {notifications.map((item) => (
-                  <div key={item.id} className={`notif-item ${item.is_read ? "" : "unread"}`}>
+                  <div key={item.id} className={`activity-item ${item.is_read ? "" : "unread"}`}>
                     <strong>{item.title}</strong>
                     <p>{item.body || "-"}</p>
                   </div>
@@ -640,38 +624,32 @@ export default function RedePage() {
               </div>
             </section>
 
-            <section className="rede-card chat-card">
-              <p className="rede-kicker">
-                {selectedMember ? `Conversa com ${selectedMember.nome}` : "Selecione alguem para conversar"}
-              </p>
-              {canModerate && selectedMember ? (
-                <button className="danger-btn" onClick={() => muteMember(selectedMember.id)}>
-                  Silenciar 60m
-                </button>
-              ) : null}
-              <div className="chat-messages">
+            <section className="side-card">
+              <div className="side-head"><strong>Acoes rapidas</strong></div>
+              <button className="quick-btn" onClick={() => document.querySelector<HTMLTextAreaElement>(".composer-panel textarea")?.focus()}>Criar publicacao</button>
+              <button className="quick-btn" onClick={() => document.querySelector<HTMLInputElement>(".comment-input-row input")?.focus()}>Comentar</button>
+            </section>
+
+            <section className="side-card chat-side">
+              <p className="section-title">Conversa {selectedMember ? `com ${selectedMember.nome}` : ""}</p>
+              <div className="chat-scroll">
                 {messages.map((msg) => (
-                  <div
-                    key={msg.id}
-                    className={`chat-bubble ${msg.sender_profile_id === me?.id ? "me" : "other"}`}
-                  >
+                  <div key={msg.id} className={`bubble ${msg.sender_profile_id === me?.id ? "me" : "other"}`}>
                     <p>{msg.content}</p>
-                    {msg.image_url ? <img src={msg.image_url} alt="" className="chat-image" /> : null}
+                    {msg.image_url ? <img src={msg.image_url} alt="" /> : null}
                   </div>
                 ))}
               </div>
-              <div className="chat-input">
+              <div className="chat-compose">
                 <input
                   placeholder="Digite sua mensagem"
                   value={newMessageText}
                   onChange={(e) => setNewMessageText(e.target.value)}
                 />
-                <button onClick={sendMessage} disabled={isMuted}>
-                  Enviar
-                </button>
+                <button onClick={sendMessage} disabled={isMuted}>Enviar</button>
               </div>
-              <div className="chat-actions">
-                <label className="file-btn">
+              <div className="composer-row">
+                <label className="chip-btn">
                   Upload imagem do chat
                   <input
                     type="file"
@@ -688,18 +666,22 @@ export default function RedePage() {
                     }}
                   />
                 </label>
-                {newMessageImage ? (
-                  <div className="chat-preview">
-                    <img src={newMessageImage} alt="" />
-                    <button onClick={() => setNewMessageImage("")}>Remover imagem</button>
-                  </div>
-                ) : null}
               </div>
+              {newMessageImage ? <img src={newMessageImage} alt="" className="preview-image" /> : null}
             </section>
           </aside>
         </div>
-        {status ? <div className="status-toast">{status}</div> : null}
-      </main>
-    </>
+      </section>
+
+      {status ? <div className="status-toast">{status}</div> : null}
+
+      <section className="hidden-profile-editor">
+        <input value={editNome} onChange={(e) => setEditNome(e.target.value)} />
+        <input value={editUsername} onChange={(e) => setEditUsername(e.target.value)} />
+        <input value={editAvatar} onChange={(e) => setEditAvatar(e.target.value)} />
+        <textarea value={editBio} onChange={(e) => setEditBio(e.target.value)} />
+        <button onClick={saveProfile} disabled={savingProfile || uploading}>Salvar meu perfil</button>
+      </section>
+    </main>
   );
 }
