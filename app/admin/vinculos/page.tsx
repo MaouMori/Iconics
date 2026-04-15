@@ -1,10 +1,11 @@
 "use client";
 
-import TopBar from "@/components/Topbar";
 import Spinner from "@/components/Spinner";
 import Toast from "@/components/Toast";
+import AdminShell from "@/components/AdminShell";
 import { supabase } from "@/lib/supabase";
 import { useEffect, useState } from "react";
+import "../admin-dashboard.css";
 
 type PendingRequest = {
   id: number;
@@ -122,47 +123,34 @@ export default function AdminVinculosPage() {
 
   if (loading) {
     return (
-      <>
-        <TopBar />
-        <main style={pageStyle}>
-          <Spinner texto="Carregando aprovações..." />
-        </main>
-      </>
+      <main className="admin-page-loader">
+        <Spinner texto="Carregando aprovacoes..." />
+      </main>
     );
   }
 
   if (!allowed) {
     return (
-      <>
-        <TopBar />
-        <main style={pageStyle}>
-          <section style={panelStyle}>
-            <h1 style={titleStyle}>Acesso negado</h1>
-            <p style={muted}>Somente liderança/staff pode aprovar vínculos.</p>
-          </section>
-        </main>
-      </>
+      <AdminShell
+        active="vinculos"
+        title="Solicitacoes Pendentes"
+        description="Aprove ou rejeite vinculacoes de card para liberar edicao ao membro correto."
+      >
+        <section className="admin-denied">
+          <h2>Acesso negado</h2>
+          <p>Somente lideranca ou staff pode aprovar vinculos.</p>
+        </section>
+      </AdminShell>
     );
   }
 
   return (
-    <>
-      <TopBar />
-      <main style={pageStyle}>
-        <section style={panelStyle}>
-          <div style={headerStyle}>
-            <div>
-              <p style={kicker}>Aprovação de Vínculos</p>
-              <h1 style={titleStyle}>Solicitações Pendentes</h1>
-              <p style={muted}>
-                Aprove ou rejeite vinculações de card. Aprovado libera edição apenas do card vinculado.
-              </p>
-            </div>
-            <button style={secondaryBtn} onClick={() => (window.location.href = "/admin")}>
-              Voltar
-            </button>
-          </div>
-
+    <AdminShell
+      active="vinculos"
+      title="Solicitacoes Pendentes de Vinculos"
+      description="Aprove ou rejeite vinculacoes de card. Aprovado libera edicao apenas do card vinculado."
+    >
+      <section style={panelStyle}>
           {message && <Toast mensagem={message} onClose={() => setMessage("")} />}
           {error && <Toast mensagem={error} onClose={() => setError("")} />}
 
@@ -204,18 +192,10 @@ export default function AdminVinculosPage() {
               </div>
             ))}
           </div>
-        </section>
-      </main>
-    </>
+      </section>
+    </AdminShell>
   );
 }
-
-const pageStyle: React.CSSProperties = {
-  minHeight: "100vh",
-  background: "linear-gradient(180deg, #090012 0%, #140021 100%)",
-  padding: "110px 20px 40px",
-  color: "#fff",
-};
 
 const panelStyle: React.CSSProperties = {
   maxWidth: 1100,
@@ -226,28 +206,6 @@ const panelStyle: React.CSSProperties = {
   padding: 22,
 };
 
-const headerStyle: React.CSSProperties = {
-  display: "flex",
-  justifyContent: "space-between",
-  gap: 16,
-  flexWrap: "wrap",
-  marginBottom: 16,
-};
-
-const kicker: React.CSSProperties = {
-  margin: 0,
-  color: "#c99cff",
-  textTransform: "uppercase",
-  letterSpacing: "0.14em",
-  fontSize: ".78rem",
-  fontWeight: 700,
-};
-
-const titleStyle: React.CSSProperties = {
-  margin: "8px 0",
-  fontFamily: 'Georgia, "Times New Roman", serif',
-  fontSize: "clamp(1.7rem, 4vw, 2.4rem)",
-};
 
 const muted: React.CSSProperties = { margin: 0, color: "#d8cceb", lineHeight: 1.6 };
 const line: React.CSSProperties = { margin: "4px 0", color: "#f0e6ff" };
@@ -263,4 +221,3 @@ const itemCard: React.CSSProperties = {
 };
 const primaryBtn: React.CSSProperties = { borderRadius: 10, border: "1px solid rgba(114,247,159,.4)", background: "rgba(43,124,78,.45)", color: "#fff", padding: "8px 12px", fontWeight: 700 };
 const dangerBtn: React.CSSProperties = { borderRadius: 10, border: "1px solid rgba(255,122,122,.45)", background: "rgba(130,32,32,.45)", color: "#fff", padding: "8px 12px", fontWeight: 700 };
-const secondaryBtn: React.CSSProperties = { borderRadius: 10, border: "1px solid rgba(201,156,255,.35)", background: "rgba(255,255,255,.05)", color: "#fff", padding: "8px 12px" };

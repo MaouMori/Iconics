@@ -1,11 +1,12 @@
-"use client";
+﻿"use client";
 
-import TopBar from "@/components/Topbar";
 import Spinner from "@/components/Spinner";
 import Toast from "@/components/Toast";
+import AdminShell from "@/components/AdminShell";
 import { supabase } from "@/lib/supabase";
 import { useEffect, useState } from "react";
 import { uploadPublicImage } from "@/lib/uploadImage";
+import "../admin-dashboard.css";
 
 type MemberCard = {
   id: number;
@@ -47,7 +48,7 @@ export default function AdminMembrosPage() {
   const [hobbies, setHobbies] = useState("");
   const [tags, setTags] = useState("");
   const [stats, setStats] = useState("");
-  const [sigil, setSigil] = useState("✦");
+  const [sigil, setSigil] = useState("âœ¦");
   const [imagemUrl, setImagemUrl] = useState("");
   const [accentColor, setAccentColor] = useState("#7c3aed");
   const [ordem, setOrdem] = useState(0);
@@ -106,7 +107,7 @@ export default function AdminMembrosPage() {
     setHobbies(membro.hobbies || "");
     setTags(membro.tags || "");
     setStats(membro.stats || "");
-    setSigil(membro.sigil || "✦");
+    setSigil(membro.sigil || "âœ¦");
     setImagemUrl(membro.imagem_url || "");
     setAccentColor(membro.accent_color || "#7c3aed");
     setOrdem(membro.ordem ?? 0);
@@ -154,7 +155,7 @@ export default function AdminMembrosPage() {
     setHobbies("");
     setTags("");
     setStats("");
-    setSigil("✦");
+    setSigil("âœ¦");
     setImagemUrl("");
     setAccentColor("#7c3aed");
     setImagemFile(null);
@@ -166,32 +167,32 @@ export default function AdminMembrosPage() {
     e.preventDefault();
     setMensagem("");
 
-    // Validação de campos obrigatórios
+    // ValidaÃ§Ã£o de campos obrigatÃ³rios
     if (!nome.trim()) {
-      setMensagem("O nome é obrigatório.");
+      setMensagem("O nome Ã© obrigatÃ³rio.");
       return;
     }
     if (!idade.trim()) {
-      setMensagem("A idade é obrigatória.");
+      setMensagem("A idade Ã© obrigatÃ³ria.");
       return;
     }
     if (!meta.trim()) {
-      setMensagem("A meta/subtítulo é obrigatória.");
+      setMensagem("A meta/subtÃ­tulo Ã© obrigatÃ³ria.");
       return;
     }
     if (!personalidade.trim()) {
-      setMensagem("A personalidade é obrigatória.");
+      setMensagem("A personalidade Ã© obrigatÃ³ria.");
       return;
     }
     if (!tags.trim()) {
-      setMensagem("As tags são obrigatórias (mínimo 3).");
+      setMensagem("As tags sÃ£o obrigatÃ³rias (mÃ­nimo 3).");
       return;
     }
 
     const { data: userData } = await supabase.auth.getUser();
 
     if (!userData.user) {
-      setMensagem("Usuário não autenticado.");
+      setMensagem("UsuÃ¡rio nÃ£o autenticado.");
       return;
     }
 
@@ -299,7 +300,7 @@ export default function AdminMembrosPage() {
       limparFormulario();
     }
 
-    setMensagem("Membro excluído.");
+    setMensagem("Membro excluÃ­do.");
     await carregarMembros();
   }
 
@@ -347,38 +348,45 @@ export default function AdminMembrosPage() {
   }
 
   if (loading) {
-    return <main style={pageStyle}><Spinner /></main>;
+    return (
+      <main className="admin-page-loader">
+        <Spinner />
+      </main>
+    );
   }
 
   if (!permitido) {
     return (
-      <>
-        <TopBar />
-        <main style={pageStyle}>
-          <div style={cardStyle}>
-            <h1>Acesso negado</h1>
-            <p>Somente vice-líder ou líder podem gerenciar membros.</p>
-          </div>
-        </main>
-      </>
+      <AdminShell
+        active="membros"
+        title="Gerenciar Membros"
+        description="Cadastre, edite e organize todos os cards de membros."
+      >
+        <section className="admin-denied">
+          <h2>Acesso negado</h2>
+          <p>Somente vice-lider ou lider podem gerenciar membros.</p>
+        </section>
+      </AdminShell>
     );
   }
 
   return (
-    <>
-      <TopBar />
-      <main style={pageStyle}>
-        <div style={{ ...cardStyle, maxWidth: 1100 }}>
+    <AdminShell
+      active="membros"
+      title="Gerenciar Membros"
+      description="Cadastre, edite e organize todos os cards de membros."
+    >
+      <div style={{ ...cardStyle, maxWidth: 1100 }}>
           <h1>Gerenciar Membros</h1>
 
           {editingId && (
             <p style={{ color: "#d8b4fe", marginTop: 8 }}>
-              Você está editando um membro existente.
+              VocÃª estÃ¡ editando um membro existente.
             </p>
           )}
 
           <p style={{ color: "#a78bfa", marginTop: 12, fontSize: 14 }}>
-            * Campos obrigatórios para criar um card completo
+            * Campos obrigatÃ³rios para criar um card completo
           </p>
 
           <form onSubmit={salvarMembro} style={{ display: "grid", gap: 12, marginTop: 20 }}>
@@ -406,13 +414,13 @@ export default function AdminMembrosPage() {
             >
               <option value="membro">Membro</option>
               <option value="veterano">Veterano</option>
-              <option value="vice_lider">Vice líder</option>
-              <option value="lider">Líder</option>
+              <option value="vice_lider">Vice lÃ­der</option>
+              <option value="lider">LÃ­der</option>
             </select>
 
             <input
               style={inputStyle}
-              placeholder="Meta / subtítulo * (ex: Dominar, evoluir e ser estrela)"
+              placeholder="Meta / subtÃ­tulo * (ex: Dominar, evoluir e ser estrela)"
               value={meta}
               onChange={(e) => setMeta(e.target.value)}
               required
@@ -420,7 +428,7 @@ export default function AdminMembrosPage() {
 
             <textarea
               style={textareaStyle}
-              placeholder="Personalidade * (descrição do personagem)"
+              placeholder="Personalidade * (descriÃ§Ã£o do personagem)"
               value={personalidade}
               onChange={(e) => setPersonalidade(e.target.value)}
               required
@@ -428,7 +436,7 @@ export default function AdminMembrosPage() {
 
             <textarea
               style={textareaStyle}
-              placeholder="Hábitos"
+              placeholder="HÃ¡bitos"
               value={habitos}
               onChange={(e) => setHabitos(e.target.value)}
             />
@@ -449,7 +457,7 @@ export default function AdminMembrosPage() {
 
             <input
               style={inputStyle}
-              placeholder="Tags * (separadas por | ) Ex: frio | misterioso | elegante | estratégica"
+              placeholder="Tags * (separadas por | ) Ex: frio | misterioso | elegante | estratÃ©gica"
               value={tags}
               onChange={(e) => setTags(e.target.value)}
               required
@@ -457,7 +465,7 @@ export default function AdminMembrosPage() {
 
             <input
               style={inputStyle}
-              placeholder="Stats (separadas por | ) Ex: Influência:10 | Presença:9 - MÁX 100 CARACTERES"
+              placeholder="Stats (separadas por | ) Ex: InfluÃªncia:10 | PresenÃ§a:9 - MÃX 100 CARACTERES"
               value={stats}
               maxLength={100}
               onChange={(e) => setStats(e.target.value)}
@@ -465,7 +473,7 @@ export default function AdminMembrosPage() {
 
             <input
               style={inputStyle}
-              placeholder="Símbolo do card (sigil)"
+              placeholder="SÃ­mbolo do card (sigil)"
               value={sigil}
               onChange={(e) => setSigil(e.target.value)}
             />
@@ -486,7 +494,7 @@ export default function AdminMembrosPage() {
 
             <input
               type="number"
-              placeholder="Ordem de exibição"
+              placeholder="Ordem de exibiÃ§Ã£o"
               value={ordem}
               onChange={(e) => setOrdem(Number(e.target.value))}
               style={inputStyle}
@@ -510,7 +518,7 @@ export default function AdminMembrosPage() {
             <div style={galleryAdminWrapStyle}>
               <h3 style={{ margin: 0 }}>Galeria do membro</h3>
               <p style={{ margin: "4px 0 0", color: "#d8b4fe" }}>
-                Você pode adicionar até 16 fotos. Pode usar upload ou URL.
+                VocÃª pode adicionar atÃ© 16 fotos. Pode usar upload ou URL.
               </p>
 
               <div style={galleryGridStyle}>
@@ -555,7 +563,7 @@ export default function AdminMembrosPage() {
             </div>
             {previewImage && (
               <div style={modalOverlayStyle} onClick={() => setPreviewImage(null)}>
-                <img src={previewImage} style={modalImageStyle} />
+                <img src={previewImage} alt="Preview da galeria" style={modalImageStyle} />
               </div>
             )}
 
@@ -571,13 +579,13 @@ export default function AdminMembrosPage() {
                 {uploading
                   ? "Enviando imagem..."
                   : editingId
-                  ? "Salvar alterações"
+                  ? "Salvar alteraÃ§Ãµes"
                   : "Criar membro"}
               </button>
 
               {editingId && (
                 <button type="button" style={buttonStyle} onClick={limparFormulario}>
-                  Cancelar edição
+                  Cancelar ediÃ§Ã£o
                 </button>
               )}
 
@@ -609,11 +617,11 @@ export default function AdminMembrosPage() {
 
                   <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
                     <button style={smallButtonStyle} onClick={() => moverMembro(membro.id, "up")}>
-                      ↑ Subir
+                      â†‘ Subir
                     </button>
 
                     <button style={smallButtonStyle} onClick={() => moverMembro(membro.id, "down")}>
-                      ↓ Descer
+                      â†“ Descer
                     </button>
 
                     <button style={buttonStyle} onClick={() => editarMembro(membro)}>
@@ -631,17 +639,9 @@ export default function AdminMembrosPage() {
             </div>
           </div>
         </div>
-      </main>
-    </>
+    </AdminShell>
   );
 }
-
-const pageStyle: React.CSSProperties = {
-  minHeight: "100vh",
-  background: "linear-gradient(180deg, #090012 0%, #140021 100%)",
-  padding: "110px 24px 40px",
-  color: "white",
-};
 
 const cardStyle: React.CSSProperties = {
   width: "100%",
@@ -781,3 +781,6 @@ const modalImageStyle: React.CSSProperties = {
   borderRadius: 20,
   boxShadow: "0 0 40px rgba(168,85,247,.4)",
 };
+
+
+

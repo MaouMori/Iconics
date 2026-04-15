@@ -1,11 +1,12 @@
 "use client";
 
-import TopBar from "@/components/Topbar";
 import Spinner from "@/components/Spinner";
 import Toast from "@/components/Toast";
+import AdminShell from "@/components/AdminShell";
 import { supabase } from "@/lib/supabase";
 import { uploadPublicImage } from "@/lib/uploadImage";
 import { useEffect, useState } from "react";
+import "../admin-dashboard.css";
 
 type Partner = {
   id: number;
@@ -177,34 +178,36 @@ export default function AdminParceriasPage() {
     await carregarParcerias();
   }
 
-  if (loading) return <main style={pageStyle}><Spinner /></main>;
+  if (loading) {
+    return (
+      <main className="admin-page-loader">
+        <Spinner />
+      </main>
+    );
+  }
 
   if (!permitido) {
     return (
-      <>
-        <TopBar />
-        <main style={pageStyle}>
-          <div style={panelStyle}><h1>Acesso negado</h1></div>
-        </main>
-      </>
+      <AdminShell
+        active="parcerias"
+        title="Gerenciar Parcerias"
+        description="Cadastre, edite e organize as parcerias exibidas no site."
+      >
+        <section className="admin-denied">
+          <h2>Acesso negado</h2>
+          <p>Somente vice-lider ou lider podem gerenciar parcerias.</p>
+        </section>
+      </AdminShell>
     );
   }
 
   return (
-    <>
-      <TopBar />
-      <main style={pageStyle}>
-        <div style={panelStyle}>
-          <div style={headerRow}>
-            <div>
-              <p style={eyebrow}>Administração</p>
-              <h1 style={titleStyle}>Gerenciar Parcerias</h1>
-            </div>
-            <button style={primaryBtn} onClick={() => (window.location.href = "/admin")}>
-              Voltar
-            </button>
-          </div>
-
+    <AdminShell
+      active="parcerias"
+      title="Gerenciar Parcerias"
+      description="Cadastre, edite e organize as parcerias exibidas no site."
+    >
+      <div style={panelStyle}>
           {mensagem && <Toast mensagem={mensagem} onClose={() => setMensagem("")} />}
 
           <div style={twoCol}>
@@ -282,18 +285,10 @@ export default function AdminParceriasPage() {
               </div>
             </div>
           </div>
-        </div>
-      </main>
-    </>
+      </div>
+    </AdminShell>
   );
 }
-
-const pageStyle: React.CSSProperties = {
-  minHeight: "100vh",
-  background: "linear-gradient(180deg, #090012 0%, #140021 100%)",
-  padding: "110px 24px 40px",
-  color: "white",
-};
 
 const panelStyle: React.CSSProperties = {
   maxWidth: 1400,
@@ -305,29 +300,6 @@ const panelStyle: React.CSSProperties = {
   padding: 28,
 };
 
-const headerRow: React.CSSProperties = {
-  display: "flex",
-  justifyContent: "space-between",
-  alignItems: "flex-start",
-  gap: 20,
-  flexWrap: "wrap",
-  marginBottom: 24,
-};
-
-const eyebrow: React.CSSProperties = {
-  margin: 0,
-  color: "#c99cff",
-  textTransform: "uppercase",
-  letterSpacing: "0.14em",
-  fontSize: "0.78rem",
-  fontWeight: 700,
-};
-
-const titleStyle: React.CSSProperties = {
-  margin: "8px 0 0",
-  fontFamily: 'Georgia,"Times New Roman",serif',
-  fontSize: "clamp(2rem, 4vw, 3rem)",
-};
 
 const subTitle: React.CSSProperties = {
   margin: "0 0 16px",

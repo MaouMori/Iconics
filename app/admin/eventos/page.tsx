@@ -1,11 +1,12 @@
 "use client";
 
-import TopBar from "@/components/Topbar";
 import Spinner from "@/components/Spinner";
 import Toast from "@/components/Toast";
+import AdminShell from "@/components/AdminShell";
 import { supabase } from "@/lib/supabase";
 import { uploadPublicImage } from "@/lib/uploadImage";
 import { useEffect, useState } from "react";
+import "../admin-dashboard.css";
 
 type EventItem = {
   id: number;
@@ -151,47 +152,35 @@ export default function AdminEventosPage() {
   }
 
   if (loading) {
-    return <main style={pageStyle}><Spinner /></main>;
+    return (
+      <main className="admin-page-loader">
+        <Spinner />
+      </main>
+    );
   }
 
   if (!permitido) {
     return (
-      <>
-        <TopBar />
-        <main style={pageStyle}>
-          <div style={panelStyle}>
-            <h1 style={titleStyle}>Acesso negado</h1>
-            <p style={mutedText}>
-              Somente vice-líder ou líder podem gerenciar eventos.
-            </p>
-          </div>
-        </main>
-      </>
+      <AdminShell
+        active="eventos"
+        title="Gerenciar Eventos"
+        description="Crie e organize os eventos que aparecem no calendario do site."
+      >
+        <section className="admin-denied">
+          <h2>Acesso negado</h2>
+          <p>Somente vice-lider ou lider podem gerenciar eventos.</p>
+        </section>
+      </AdminShell>
     );
   }
 
   return (
-    <>
-      <TopBar />
-      <main style={pageStyle}>
-        <div style={panelStyle}>
-          <div style={headerRow}>
-            <div>
-              <p style={eyebrowStyle}>Administração da Fraternidade</p>
-              <h1 style={titleStyle}>Gerenciar Eventos</h1>
-              <p style={mutedText}>
-                Crie e organize os eventos que aparecem no calendário do site.
-              </p>
-            </div>
-
-            <button
-              style={primaryButton}
-              onClick={() => (window.location.href = "/admin")}
-            >
-              Voltar
-            </button>
-          </div>
-
+    <AdminShell
+      active="eventos"
+      title="Gerenciar Eventos"
+      description="Crie e organize os eventos que aparecem no calendario do site."
+    >
+      <div style={panelStyle}>
           {mensagem && <Toast mensagem={mensagem} onClose={() => setMensagem("")} />}
 
           <div style={twoColumnLayout}>
@@ -329,18 +318,10 @@ export default function AdminEventosPage() {
               </div>
             </div>
           </div>
-        </div>
-      </main>
-    </>
+      </div>
+    </AdminShell>
   );
 }
-
-const pageStyle: React.CSSProperties = {
-  minHeight: "100vh",
-  background: "linear-gradient(180deg, #090012 0%, #140021 100%)",
-  padding: "110px 24px 40px",
-  color: "white",
-};
 
 const panelStyle: React.CSSProperties = {
   width: "100%",
@@ -352,30 +333,6 @@ const panelStyle: React.CSSProperties = {
   background: "linear-gradient(180deg, rgba(18,7,30,.92), rgba(10,3,20,.92))",
   boxShadow: "0 24px 80px rgba(0,0,0,.35)",
   padding: "28px",
-};
-
-const headerRow: React.CSSProperties = {
-  display: "flex",
-  justifyContent: "space-between",
-  gap: "20px",
-  alignItems: "flex-start",
-  flexWrap: "wrap",
-  marginBottom: "24px",
-};
-
-const eyebrowStyle: React.CSSProperties = {
-  margin: 0,
-  color: "#c99cff",
-  textTransform: "uppercase",
-  letterSpacing: "0.14em",
-  fontSize: "0.78rem",
-  fontWeight: 700,
-};
-
-const titleStyle: React.CSSProperties = {
-  margin: "8px 0 8px",
-  fontFamily: 'Georgia,"Times New Roman",serif',
-  fontSize: "clamp(2rem, 4vw, 3rem)",
 };
 
 const mutedText: React.CSSProperties = {
