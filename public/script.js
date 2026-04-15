@@ -4,35 +4,67 @@ let currentCarouselPage = 0;
 let currentRecruitmentForm = null;
 let currentRecruitmentFields = [];
 
-const memberName = document.getElementById("memberName");
-const memberRole = document.getElementById("memberRole");
-const memberMeta = document.getElementById("memberMeta");
-const memberTags = document.getElementById("memberTags");
-const memberStats = document.getElementById("memberStats");
-const memberGlow = document.getElementById("memberGlow");
-const memberAccent = document.getElementById("memberAccent");
-const memberSigil = document.getElementById("memberSigil");
-const memberSilhouette = document.getElementById("memberSilhouette");
-const memberImage = document.getElementById("memberImage");
-const memberCloak = document.getElementById("memberCloak");
-const memberWeapon = document.getElementById("memberWeapon");
+let memberName = null;
+let memberRole = null;
+let memberMeta = null;
+let memberTags = null;
+let memberStats = null;
+let memberGlow = null;
+let memberAccent = null;
+let memberSigil = null;
+let memberSilhouette = null;
+let memberImage = null;
+let memberCloak = null;
+let memberWeapon = null;
 
-const membersTrack = document.getElementById("membersTrack");
-const prevMembersBtn = document.getElementById("prevMembers");
-const nextMembersBtn = document.getElementById("nextMembers");
+let membersTrack = null;
+let prevMembersBtn = null;
+let nextMembersBtn = null;
 
-const memberMainPanel = document.getElementById("memberMainPanel");
-const cinemaTransition = document.getElementById("cinemaTransition");
+let memberMainPanel = null;
+let cinemaTransition = null;
 
-const loreModal = document.getElementById("loreModal");
-const formModal = document.getElementById("formModal");
-const toast = document.getElementById("toast");
-const recruitForm = document.getElementById("recruitForm");
-const dynamicFormTitle = document.getElementById("dynamicFormTitle");
-const dynamicFormDescription = document.getElementById("dynamicFormDescription");
-const dynamicFormMessage = document.getElementById("dynamicFormMessage");
+let loreModal = null;
+let formModal = null;
+let toast = null;
+let recruitForm = null;
+let dynamicFormTitle = null;
+let dynamicFormDescription = null;
+let dynamicFormMessage = null;
 
-const detailsButton = document.querySelector(".discord-btn");
+let detailsButton = null;
+
+function cacheDomRefs() {
+  memberName = document.getElementById("memberName");
+  memberRole = document.getElementById("memberRole");
+  memberMeta = document.getElementById("memberMeta");
+  memberTags = document.getElementById("memberTags");
+  memberStats = document.getElementById("memberStats");
+  memberGlow = document.getElementById("memberGlow");
+  memberAccent = document.getElementById("memberAccent");
+  memberSigil = document.getElementById("memberSigil");
+  memberSilhouette = document.getElementById("memberSilhouette");
+  memberImage = document.getElementById("memberImage");
+  memberCloak = document.getElementById("memberCloak");
+  memberWeapon = document.getElementById("memberWeapon");
+
+  membersTrack = document.getElementById("membersTrack");
+  prevMembersBtn = document.getElementById("prevMembers");
+  nextMembersBtn = document.getElementById("nextMembers");
+
+  memberMainPanel = document.getElementById("memberMainPanel");
+  cinemaTransition = document.getElementById("cinemaTransition");
+
+  loreModal = document.getElementById("loreModal");
+  formModal = document.getElementById("formModal");
+  toast = document.getElementById("toast");
+  recruitForm = document.getElementById("recruitForm");
+  dynamicFormTitle = document.getElementById("dynamicFormTitle");
+  dynamicFormDescription = document.getElementById("dynamicFormDescription");
+  dynamicFormMessage = document.getElementById("dynamicFormMessage");
+
+  detailsButton = document.querySelector(".discord-btn");
+}
 
 function getAccentStyles(accent) {
   const normalized = String(accent || "").toLowerCase();
@@ -701,6 +733,12 @@ function renderMemberDetailsModal(member) {
 }
 
 async function loadMembers() {
+  cacheDomRefs();
+
+  if (!membersTrack || !memberName) {
+    return;
+  }
+
   try {
     const response = await fetch("/api/public-members", {
       cache: "no-store"
@@ -769,93 +807,119 @@ async function loadMembers() {
   }
 }
 
-if (detailsButton) {
-  detailsButton.addEventListener("click", () => {
-    if (!members.length) {
-      showToast("Nenhum membro carregado.");
-      return;
-    }
+let bgSlides = [];
+let bgIndex = 0;
+let bgIntervalId = null;
+let currentHomeRoot = null;
+let membersReloadTimer = null;
+let globalHandlersBound = false;
 
-    renderMemberDetailsModal(members[currentMember]);
-  });
-}
+function bindHomeElementEvents() {
+  if (detailsButton) {
+    detailsButton.onclick = () => {
+      if (!members.length) {
+        showToast("Nenhum membro carregado.");
+        return;
+      }
 
-if (prevMembersBtn) {
-  prevMembersBtn.addEventListener("click", () => {
-    cinematicFlash();
-    setMember(currentMember - 1);
-  });
-}
-
-if (nextMembersBtn) {
-  nextMembersBtn.addEventListener("click", () => {
-    cinematicFlash();
-    setMember(currentMember + 1);
-  });
-}
-
-const goMembersBtn = document.getElementById("goMembers");
-if (goMembersBtn) {
-  goMembersBtn.addEventListener("click", () => {
-    cinematicFlash();
-    document.getElementById("members")?.scrollIntoView({ behavior: "smooth" });
-  });
-}
-
-const openLoreModalBtn = document.getElementById("openLoreModal");
-if (openLoreModalBtn && loreModal) {
-  openLoreModalBtn.addEventListener("click", () => {
-    openModal(loreModal);
-  });
-}
-
-const openFormModalBtn = document.getElementById("openFormModal");
-if (openFormModalBtn && formModal) {
-  openFormModalBtn.addEventListener("click", async () => {
-    openModal(formModal);
-    await loadDynamicRecruitmentForm();
-  });
-}
-
-document.querySelectorAll("[data-close]").forEach((button) => {
-  button.addEventListener("click", () => {
-    const targetId = button.getAttribute("data-close");
-    const target = targetId ? document.getElementById(targetId) : null;
-    if (target) closeModal(target);
-  });
-});
-
-[loreModal, formModal].forEach((modal) => {
-  if (!modal) return;
-
-  modal.addEventListener("click", (event) => {
-    if (event.target === modal) closeModal(modal);
-  });
-});
-
-document.addEventListener("keydown", (event) => {
-  if (event.key === "Escape") {
-    closeModal(loreModal);
-    closeModal(formModal);
+      renderMemberDetailsModal(members[currentMember]);
+    };
   }
-});
 
-if (recruitForm) {
-  recruitForm.addEventListener("submit", submitDynamicRecruitmentForm);
+  if (prevMembersBtn) {
+    prevMembersBtn.onclick = () => {
+      cinematicFlash();
+      setMember(currentMember - 1);
+    };
+  }
+
+  if (nextMembersBtn) {
+    nextMembersBtn.onclick = () => {
+      cinematicFlash();
+      setMember(currentMember + 1);
+    };
+  }
+
+  const goMembersBtn = document.getElementById("goMembers");
+  if (goMembersBtn) {
+    goMembersBtn.onclick = () => {
+      cinematicFlash();
+      document.getElementById("members")?.scrollIntoView({ behavior: "smooth" });
+    };
+  }
+
+  const openLoreModalBtn = document.getElementById("openLoreModal");
+  if (openLoreModalBtn && loreModal) {
+    openLoreModalBtn.onclick = () => {
+      openModal(loreModal);
+    };
+  }
+
+  const openFormModalBtn = document.getElementById("openFormModal");
+  if (openFormModalBtn && formModal) {
+    openFormModalBtn.onclick = async () => {
+      openModal(formModal);
+      await loadDynamicRecruitmentForm();
+    };
+  }
+
+  document.querySelectorAll("[data-close]").forEach((button) => {
+    button.onclick = () => {
+      const targetId = button.getAttribute("data-close");
+      const target = targetId ? document.getElementById(targetId) : null;
+      if (target) closeModal(target);
+    };
+  });
+
+  [loreModal, formModal].forEach((modal) => {
+    if (!modal) return;
+
+    modal.onclick = (event) => {
+      if (event.target === modal) closeModal(modal);
+    };
+  });
+
+  if (recruitForm) {
+    recruitForm.onsubmit = submitDynamicRecruitmentForm;
+  }
 }
 
-window.addEventListener("resize", updateCarousel);
+function bindGlobalHandlersOnce() {
+  if (globalHandlersBound) return;
+  globalHandlersBound = true;
 
-const mouseGlow = document.getElementById("mouseGlow");
-if (mouseGlow) {
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      closeModal(loreModal);
+      closeModal(formModal);
+    }
+  });
+
+  window.addEventListener("resize", () => {
+    cacheDomRefs();
+    updateCarousel();
+  });
+
   window.addEventListener("mousemove", (event) => {
+    const mouseGlow = document.getElementById("mouseGlow");
+    if (!mouseGlow) return;
     mouseGlow.style.left = `${event.clientX}px`;
     mouseGlow.style.top = `${event.clientY}px`;
   });
+
+  window.addEventListener("pageshow", () => {
+    queueHomeRefresh();
+  });
+
+  window.addEventListener("popstate", () => {
+    queueHomeRefresh();
+  });
 }
 
-const particlesRoot = document.getElementById("particles");
-if (particlesRoot) {
+function mountParticlesIfNeeded() {
+  const particlesRoot = document.getElementById("particles");
+  if (!particlesRoot || particlesRoot.childElementCount > 0) return;
+
   for (let i = 0; i < 26; i++) {
     const particle = document.createElement("span");
     const size = 2 + (i % 4);
@@ -868,8 +932,53 @@ if (particlesRoot) {
   }
 }
 
-const bgSlides = document.querySelectorAll(".bg-slide");
-let bgIndex = 0;
+function setupBackgroundCycle() {
+  bgSlides = Array.from(document.querySelectorAll(".bg-slide"));
+  bgIndex = 0;
+
+  if (bgIntervalId) {
+    clearInterval(bgIntervalId);
+    bgIntervalId = null;
+  }
+
+  if (!bgSlides.length) return;
+
+  cycleMembersBackground();
+  bgIntervalId = setInterval(cycleMembersBackground, 4500);
+}
+
+function queueHomeRefresh() {
+  if (membersReloadTimer) {
+    clearTimeout(membersReloadTimer);
+  }
+
+  membersReloadTimer = setTimeout(() => {
+    bootHomeSections();
+  }, 80);
+}
+
+function bootHomeSections() {
+  cacheDomRefs();
+
+  if (!memberName || !membersTrack) {
+    return;
+  }
+
+  const changedHomeRoot = currentHomeRoot !== membersTrack;
+  currentHomeRoot = membersTrack;
+
+  bindHomeElementEvents();
+  bindGlobalHandlersOnce();
+  mountParticlesIfNeeded();
+  setupBackgroundCycle();
+
+  if (changedHomeRoot || !members.length) {
+    loadMembers();
+  } else {
+    setMember(currentMember);
+    updateCarousel();
+  }
+}
 
 function cycleMembersBackground() {
   if (!bgSlides.length) return;
@@ -879,7 +988,13 @@ function cycleMembersBackground() {
   bgIndex = (bgIndex + 1) % bgSlides.length;
 }
 
-cycleMembersBackground();
-setInterval(cycleMembersBackground, 4500);
+cacheDomRefs();
+bootHomeSections();
 
-loadMembers();
+setInterval(() => {
+  const liveTrack = document.getElementById("membersTrack");
+
+  if (liveTrack && liveTrack !== currentHomeRoot) {
+    queueHomeRefresh();
+  }
+}, 800);
