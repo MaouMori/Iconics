@@ -588,7 +588,10 @@
 .chat-side {
   display: flex;
   flex-direction: column;
-  min-height: 300px;
+  height: clamp(360px, 52vh, 620px);
+  min-height: 360px;
+  max-height: 620px;
+  overflow: hidden;
 }
 
 .chat-placeholder p {
@@ -647,7 +650,8 @@
 
 .chat-scroll {
   flex: 1;
-  max-height: 250px;
+  min-height: 0;
+  max-height: none;
   overflow: auto;
   display: flex;
   flex-direction: column;
@@ -838,7 +842,10 @@
   padding: 10px;
   display: flex;
   flex-direction: column;
-  min-height: 72vh;
+  height: clamp(460px, 72vh, 820px);
+  min-height: 520px;
+  max-height: 820px;
+  overflow: hidden;
 }
 
 .messages-chat-head {
@@ -871,6 +878,7 @@
 
 .messages-stream {
   flex: 1;
+  min-height: 0;
   overflow: auto;
   display: flex;
   flex-direction: column;
@@ -1068,10 +1076,40 @@
   }
 
   .messages-chat {
-    min-height: 56vh;
+    height: clamp(420px, 62vh, 700px);
+    min-height: 420px;
+    max-height: 700px;
   }
 
   .profile-view-layout {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 900px) {
+  .chat-side {
+    height: clamp(340px, 50vh, 520px);
+    min-height: 340px;
+    max-height: 520px;
+  }
+
+  .messages-chat {
+    height: clamp(390px, 58vh, 620px);
+    min-height: 390px;
+    max-height: 620px;
+  }
+}
+
+@media (max-width: 680px) {
+  .chat-side {
+    height: clamp(320px, 46vh, 460px);
+    min-height: 320px;
+    max-height: 460px;
+  }
+
+  .messages-chat {
+    height: clamp(360px, 52vh, 540px);
+    min-height: 360px;
+    max-height: 540px;
   }
 }
