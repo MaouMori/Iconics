@@ -9,7 +9,7 @@ type ViewState = {
 };
 
 const MIN_ZOOM = 1;
-const MAX_ZOOM = 3.2;
+const MAX_ZOOM = 8;
 
 const MANSION = {
   x: 0.685,
@@ -25,7 +25,7 @@ function clamp(value: number, min: number, max: number) {
 }
 
 export default function CityMap() {
-  const [view, setView] = useState<ViewState>({ zoom: 1.2, x: 0, y: 0 });
+  const [view, setView] = useState<ViewState>({ zoom: 2.35, x: 18, y: -40 });
   const [dragging, setDragging] = useState(false);
   const [lastPos, setLastPos] = useState<{ x: number; y: number } | null>(null);
   const [imageIndex, setImageIndex] = useState(0);
@@ -68,7 +68,7 @@ export default function CityMap() {
         <div className="map-actions">
           <button type="button" onClick={() => setView((v) => ({ ...v, zoom: clamp(v.zoom + 0.2, MIN_ZOOM, MAX_ZOOM) }))}>+</button>
           <button type="button" onClick={() => setView((v) => ({ ...v, zoom: clamp(v.zoom - 0.2, MIN_ZOOM, MAX_ZOOM) }))}>-</button>
-          <button type="button" onClick={() => setView({ zoom: 1.2, x: 0, y: 0 })}>Reset</button>
+          <button type="button" onClick={() => setView({ zoom: 2.35, x: 18, y: -40 })}>Reset</button>
         </div>
       </div>
 
@@ -131,7 +131,7 @@ export default function CityMap() {
         </div>
       </div>
 
-      <p className="map-hint">Arraste para navegar no mapa e use o scroll para zoom. Ponto calibrado pela estrela roxa do seu print.</p>
+      <p className="map-hint">Arraste para navegar no mapa e use o scroll para zoom. Agora o zoom vai bem alem do tamanho original da imagem.</p>
     </section>
   );
 }
