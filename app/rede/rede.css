@@ -1,11 +1,32 @@
 .rede-page {
   min-height: 100vh;
-  padding: 108px 18px 24px;
+  padding: 106px 20px 24px;
+  color: #f7ecff;
   background:
-    radial-gradient(circle at 20% 10%, rgba(149, 76, 233, 0.35), transparent 35%),
-    radial-gradient(circle at 80% 20%, rgba(95, 52, 198, 0.32), transparent 28%),
-    #090312;
-  color: #f5eeff;
+    radial-gradient(circle at 20% 8%, rgba(171, 101, 255, 0.42), transparent 32%),
+    radial-gradient(circle at 82% 22%, rgba(105, 64, 210, 0.38), transparent 28%),
+    linear-gradient(180deg, #090313 0%, #0b0418 48%, #07020f 100%);
+}
+
+.rede-hero {
+  max-width: 1500px;
+  margin: 0 auto 14px;
+  padding: 16px 18px;
+  border-radius: 20px;
+  border: 1px solid rgba(214, 183, 255, 0.22);
+  background: linear-gradient(180deg, rgba(19, 8, 39, 0.95), rgba(11, 5, 25, 0.95));
+  box-shadow: 0 16px 38px rgba(0, 0, 0, 0.3), inset 0 0 80px rgba(146, 80, 220, 0.12);
+}
+
+.rede-hero h1 {
+  margin: 0;
+  font-size: clamp(1.5rem, 3.2vw, 2.3rem);
+  font-weight: 900;
+}
+
+.rede-hero p {
+  margin: 8px 0 0;
+  color: #c9b3e6;
 }
 
 .rede-shell {
@@ -14,6 +35,7 @@
   display: grid;
   grid-template-columns: 320px minmax(0, 1fr) 360px;
   gap: 18px;
+  align-items: start;
 }
 
 .rede-left,
@@ -25,19 +47,37 @@
 }
 
 .rede-card {
-  border: 1px solid rgba(206, 163, 255, 0.22);
+  border: 1px solid rgba(214, 183, 255, 0.22);
   border-radius: 20px;
-  background: linear-gradient(180deg, rgba(18, 8, 36, 0.95), rgba(10, 5, 24, 0.95));
-  box-shadow: 0 18px 38px rgba(0, 0, 0, 0.32), 0 0 28px rgba(119, 59, 191, 0.12);
+  background:
+    linear-gradient(180deg, rgba(19, 8, 39, 0.95), rgba(11, 5, 25, 0.95)),
+    radial-gradient(circle at 10% 10%, rgba(175, 110, 255, 0.2), transparent 42%);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.34), 0 0 28px rgba(125, 71, 198, 0.2);
   padding: 16px;
+  position: relative;
+}
+
+.rede-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.06),
+    transparent 24%,
+    transparent 72%,
+    rgba(174, 113, 255, 0.08)
+  );
 }
 
 .rede-kicker {
   margin: 0 0 12px;
-  color: #d7b8ff;
-  font-size: 12px;
+  color: #dcc3ff;
+  font-size: 11px;
   text-transform: uppercase;
-  letter-spacing: 0.24em;
+  letter-spacing: 0.28em;
 }
 
 .profile-head {
@@ -49,12 +89,13 @@
 
 .profile-head h2 {
   margin: 0;
-  font-size: 28px;
+  font-size: clamp(1.2rem, 2vw, 1.8rem);
+  font-weight: 900;
 }
 
 .profile-head p {
-  margin: 4px 0 0;
-  color: #bda2da;
+  margin: 5px 0 0;
+  color: #ba9ddf;
 }
 
 .profile-avatar {
@@ -63,6 +104,18 @@
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid rgba(193, 132, 252, 0.5);
+  box-shadow: 0 0 20px rgba(162, 92, 243, 0.35);
+}
+
+.muted-chip {
+  margin-top: 8px;
+  display: inline-flex;
+  border-radius: 999px;
+  border: 1px solid rgba(251, 113, 133, 0.45);
+  background: rgba(127, 29, 29, 0.35);
+  padding: 6px 10px;
+  font-size: 11px;
+  color: #fecdd3;
 }
 
 .form-stack {
@@ -87,26 +140,89 @@
   outline: none;
 }
 
+.form-stack input:focus,
+.form-stack textarea:focus,
+.composer-card textarea:focus,
+.composer-card input:focus,
+.comment-box input:focus,
+.chat-input input:focus {
+  border-color: rgba(222, 193, 255, 0.5);
+  box-shadow: 0 0 0 3px rgba(143, 76, 224, 0.22);
+}
+
 .btn-primary,
 .comment-box button,
 .chat-input button,
 .post-actions button {
   border: 1px solid rgba(203, 161, 255, 0.35);
   border-radius: 12px;
-  background: linear-gradient(180deg, rgba(163, 90, 240, 0.42), rgba(117, 55, 209, 0.32));
+  background: linear-gradient(180deg, rgba(163, 90, 240, 0.52), rgba(117, 55, 209, 0.34));
   color: #fff;
   padding: 10px 14px;
   font-weight: 700;
   cursor: pointer;
 }
 
+.btn-primary:hover,
+.comment-box button:hover,
+.chat-input button:hover,
+.post-actions button:hover {
+  transform: translateY(-1px);
+}
+
 .btn-ghost {
-  border: 1px solid rgba(203, 161, 255, 0.2);
+  border: 1px solid rgba(203, 161, 255, 0.24);
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.03);
   color: #e5d8f9;
   padding: 7px 10px;
   cursor: pointer;
+}
+
+.danger-btn {
+  border: 1px solid rgba(252, 165, 165, 0.45);
+  border-radius: 10px;
+  background: rgba(153, 27, 27, 0.35);
+  color: #fee2e2;
+  padding: 8px 10px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.danger-mini {
+  border: 1px solid rgba(252, 165, 165, 0.4);
+  border-radius: 8px;
+  background: rgba(127, 29, 29, 0.35);
+  color: #fee2e2;
+  padding: 4px 8px;
+  cursor: pointer;
+  font-size: 11px;
+}
+
+.file-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px dashed rgba(204, 170, 255, 0.42);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  color: #e4d2ff;
+  padding: 10px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.file-btn input {
+  display: none;
+}
+
+.preview-image {
+  width: 100%;
+  max-height: 220px;
+  border-radius: 12px;
+  object-fit: cover;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .member-list {
@@ -131,7 +247,8 @@
 }
 
 .member-item.active {
-  background: rgba(165, 89, 242, 0.2);
+  background: rgba(165, 89, 242, 0.25);
+  border-color: rgba(215, 181, 255, 0.48);
 }
 
 .member-item img,
@@ -196,6 +313,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
+  flex-wrap: wrap;
 }
 
 .post-actions span {
@@ -215,6 +333,10 @@
   background: rgba(255, 255, 255, 0.03);
   padding: 8px 10px;
   font-size: 13px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
 }
 
 .comment-box {
@@ -227,6 +349,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 8px;
 }
 
 .notif-count {
@@ -279,7 +402,7 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-  margin-bottom: 10px;
+  margin: 10px 0;
 }
 
 .chat-bubble {
@@ -288,6 +411,18 @@
   padding: 9px 11px;
   font-size: 14px;
   border: 1px solid rgba(203, 161, 255, 0.18);
+}
+
+.chat-bubble p {
+  margin: 0;
+}
+
+.chat-image {
+  margin-top: 8px;
+  width: 100%;
+  max-width: 220px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
 }
 
 .chat-bubble.me {
@@ -304,6 +439,33 @@
   display: grid;
   grid-template-columns: 1fr auto;
   gap: 8px;
+}
+
+.chat-actions {
+  margin-top: 8px;
+}
+
+.chat-preview {
+  margin-top: 8px;
+  display: grid;
+  gap: 8px;
+}
+
+.chat-preview img {
+  width: 100%;
+  max-width: 240px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.chat-preview button {
+  width: max-content;
+  border: 1px solid rgba(252, 165, 165, 0.38);
+  border-radius: 8px;
+  background: rgba(127, 29, 29, 0.35);
+  color: #fee2e2;
+  padding: 6px 10px;
+  cursor: pointer;
 }
 
 .status-toast {

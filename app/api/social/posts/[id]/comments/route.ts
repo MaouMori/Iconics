@@ -9,6 +9,13 @@ export async function POST(
   const auth = await getAuthedProfile(req);
   if ("error" in auth) return auth.error;
   const { profile } = auth;
+  const mutedUntil = profile.social_muted_until ? String(profile.social_muted_until) : "";
+  if (mutedUntil && new Date(mutedUntil).getTime() > Date.now()) {
+    return NextResponse.json(
+      { error: "Sua conta está temporariamente silenciada para novos comentários." },
+      { status: 403 }
+    );
+  }
 
   const { id } = await context.params;
   const postId = Number(id);

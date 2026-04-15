@@ -27,7 +27,7 @@ export async function getAuthedProfile(req: NextRequest) {
   const { userId, token } = auth;
   const { data: profile, error: profileError } = await supabaseAdmin
     .from("profiles")
-    .select("id, nome, email, cargo, avatar_url, username, bio")
+    .select("id, nome, email, cargo, avatar_url, username, bio, social_muted_until")
     .eq("id", userId)
     .maybeSingle();
 

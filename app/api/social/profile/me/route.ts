@@ -60,7 +60,7 @@ export async function PATCH(req: NextRequest) {
     .from("profiles")
     .update(patch)
     .eq("id", profile.id)
-    .select("id, nome, email, cargo, avatar_url, username, bio")
+    .select("id, nome, email, cargo, avatar_url, username, bio, social_muted_until")
     .single();
 
   if (updateError) {

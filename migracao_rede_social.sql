@@ -1,6 +1,7 @@
 alter table public.profiles
   add column if not exists username text,
-  add column if not exists bio text;
+  add column if not exists bio text,
+  add column if not exists social_muted_until timestamptz;
 
 create unique index if not exists idx_profiles_username_unique
   on public.profiles (lower(username))
@@ -62,3 +63,7 @@ create table if not exists public.site_notifications (
 
 create index if not exists idx_site_notifications_profile
   on public.site_notifications (profile_id, is_read, created_at desc);
+
+insert into storage.buckets (id, name, public)
+values ('social-media', 'social-media', true)
+on conflict (id) do nothing;

@@ -54,6 +54,13 @@ export async function POST(req: NextRequest) {
   const auth = await getAuthedProfile(req);
   if ("error" in auth) return auth.error;
   const { profile } = auth;
+  const mutedUntil = profile.social_muted_until ? String(profile.social_muted_until) : "";
+  if (mutedUntil && new Date(mutedUntil).getTime() > Date.now()) {
+    return NextResponse.json(
+      { error: "Sua conta está temporariamente silenciada para enviar mensagens." },
+      { status: 403 }
+    );
+  }
 
   const body = await req.json().catch(() => null);
   const recipientId = String(body?.recipientId || "").trim();

@@ -14,6 +14,7 @@ type Profile = {
   avatar_url: string | null;
   username: string | null;
   bio: string | null;
+  social_muted_until?: string | null;
 };
 
 type FeedComment = {
@@ -73,6 +74,8 @@ type Notification = {
   created_at: string;
 };
 
+const MOD_ROLES = new Set(["admin", "lider", "vice_lider", "staff"]);
+
 export default function RedePage() {
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useState("");
@@ -88,14 +91,46 @@ export default function RedePage() {
   const [newPostText, setNewPostText] = useState("");
   const [newPostImage, setNewPostImage] = useState("");
   const [newMessageText, setNewMessageText] = useState("");
+  const [newMessageImage, setNewMessageImage] = useState("");
   const [commentDraft, setCommentDraft] = useState<Record<number, string>>({});
   const [savingProfile, setSavingProfile] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [status, setStatus] = useState("");
 
   const [editNome, setEditNome] = useState("");
   const [editUsername, setEditUsername] = useState("");
   const [editBio, setEditBio] = useState("");
   const [editAvatar, setEditAvatar] = useState("");
+  const [nowIso, setNowIso] = useState(() => new Date().toISOString());
+
+  const canModerate = MOD_ROLES.has(String(me?.cargo || "").toLowerCase());
+  const mutedUntil = me?.social_muted_until ? String(me.social_muted_until) : "";
+  const isMuted = Boolean(mutedUntil && mutedUntil > nowIso);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setNowIso(new Date().toISOString());
+    }, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  async function uploadFile(file: File, folder: "posts" | "chat" | "avatars") {
+    if (!token) throw new Error("Nao autenticado.");
+    setUploading(true);
+    const form = new FormData();
+    form.append("file", file);
+    form.append("folder", folder);
+
+    const response = await fetch("/api/social/upload", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+      body: form,
+    });
+    const payload = await response.json();
+    setUploading(false);
+    if (!response.ok) throw new Error(payload.error || "Falha no upload.");
+    return String(payload.url || "");
+  }
 
   useEffect(() => {
     let mounted = true;
@@ -155,8 +190,12 @@ export default function RedePage() {
     });
     if (!response.ok) return;
     const payload = await response.json();
-    setMembers(payload.members || []);
+    const fetchedMembers = (payload.members || []) as MemberLite[];
+    setMembers(fetchedMembers);
     setMessages(payload.messages || []);
+    if (!withId && fetchedMembers.length > 0 && !selectedMemberId) {
+      setSelectedMemberId(fetchedMembers[0].id);
+    }
   }
 
   async function loadNotifications(currentToken: string) {
@@ -173,7 +212,6 @@ export default function RedePage() {
   useEffect(() => {
     if (!token) return;
     let mounted = true;
-
     async function loadAll() {
       await Promise.all([
         loadProfile(token),
@@ -184,7 +222,6 @@ export default function RedePage() {
       if (mounted) setLoading(false);
     }
     loadAll();
-
     return () => {
       mounted = false;
     };
@@ -237,7 +274,7 @@ export default function RedePage() {
     }
     setNewPostText("");
     setNewPostImage("");
-    setStatus("Publicação enviada.");
+    setStatus("Publicacao enviada.");
     loadFeed(token);
   }
 
@@ -271,7 +308,7 @@ export default function RedePage() {
   }
 
   async function sendMessage() {
-    if (!token || !selectedMemberId || !newMessageText.trim()) return;
+    if (!token || !selectedMemberId || (!newMessageText.trim() && !newMessageImage)) return;
     const response = await fetch("/api/social/messages", {
       method: "POST",
       headers: {
@@ -280,7 +317,8 @@ export default function RedePage() {
       },
       body: JSON.stringify({
         recipientId: selectedMemberId,
-        content: newMessageText,
+        content: newMessageText || "[imagem]",
+        imageUrl: newMessageImage || null,
       }),
     });
     const payload = await response.json();
@@ -289,6 +327,7 @@ export default function RedePage() {
       return;
     }
     setNewMessageText("");
+    setNewMessageImage("");
     loadMessages(token, selectedMemberId);
   }
 
@@ -331,6 +370,56 @@ export default function RedePage() {
     loadNotifications(token);
   }
 
+  async function removePost(postId: number) {
+    if (!token || !canModerate) return;
+    const response = await fetch(`/api/social/moderation/posts/${postId}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!response.ok) {
+      const payload = await response.json().catch(() => null);
+      setStatus(payload?.error || "Falha ao remover post.");
+      return;
+    }
+    loadFeed(token);
+  }
+
+  async function removeComment(commentId: number) {
+    if (!token || !canModerate) return;
+    const response = await fetch(`/api/social/moderation/comments/${commentId}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!response.ok) {
+      const payload = await response.json().catch(() => null);
+      setStatus(payload?.error || "Falha ao remover comentario.");
+      return;
+    }
+    loadFeed(token);
+  }
+
+  async function muteMember(profileId: string) {
+    if (!token || !canModerate) return;
+    const response = await fetch("/api/social/moderation/mute", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        profileId,
+        minutes: 60,
+        reason: "Silenciado por 60 minutos pela moderacao.",
+      }),
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      setStatus(payload?.error || "Falha ao silenciar membro.");
+      return;
+    }
+    setStatus("Membro silenciado por 60 minutos.");
+  }
+
   const selectedMember = useMemo(
     () => members.find((item) => item.id === selectedMemberId) || null,
     [members, selectedMemberId]
@@ -351,10 +440,15 @@ export default function RedePage() {
     <>
       <TopBar />
       <main className="rede-page">
+        <div className="rede-hero">
+          <h1>A rede esta observando voce...</h1>
+          <p>Feed, chat, perfil editavel, notificacoes ao vivo e moderacao integrada.</p>
+        </div>
+
         <div className="rede-shell">
           <aside className="rede-left">
             <section className="rede-card profile-card">
-              <p className="rede-kicker">Perfil</p>
+              <p className="rede-kicker">Meu perfil</p>
               <div className="profile-head">
                 <img
                   src={editAvatar || me?.avatar_url || "/images/logo.png"}
@@ -364,6 +458,11 @@ export default function RedePage() {
                 <div>
                   <h2>{me?.nome || "Membro"}</h2>
                   <p>@{me?.username || "semusername"}</p>
+                  {isMuted ? (
+                    <span className="muted-chip">
+                      Silenciado ate {new Date(mutedUntil).toLocaleTimeString("pt-BR")}
+                    </span>
+                  ) : null}
                 </div>
               </div>
 
@@ -379,13 +478,30 @@ export default function RedePage() {
                   onChange={(e) => setEditAvatar(e.target.value)}
                   placeholder="URL da foto"
                 />
+                <label className="file-btn">
+                  Upload avatar
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      try {
+                        const url = await uploadFile(file, "avatars");
+                        setEditAvatar(url);
+                      } catch (error) {
+                        setStatus(error instanceof Error ? error.message : "Falha no upload.");
+                      }
+                    }}
+                  />
+                </label>
                 <textarea
                   value={editBio}
                   onChange={(e) => setEditBio(e.target.value)}
                   placeholder="Bio"
                   rows={3}
                 />
-                <button className="btn-primary" onClick={saveProfile} disabled={savingProfile}>
+                <button className="btn-primary" onClick={saveProfile} disabled={savingProfile || uploading}>
                   {savingProfile ? "Salvando..." : "Salvar meu perfil"}
                 </button>
               </div>
@@ -413,9 +529,9 @@ export default function RedePage() {
 
           <section className="rede-center">
             <section className="rede-card composer-card">
-              <p className="rede-kicker">Criar publicação</p>
+              <p className="rede-kicker">Criar publicacao</p>
               <textarea
-                placeholder="O que você está pensando?"
+                placeholder="O que voce esta pensando?"
                 value={newPostText}
                 onChange={(e) => setNewPostText(e.target.value)}
                 rows={3}
@@ -425,7 +541,25 @@ export default function RedePage() {
                 value={newPostImage}
                 onChange={(e) => setNewPostImage(e.target.value)}
               />
-              <button className="btn-primary" onClick={createPost}>
+              <label className="file-btn">
+                Upload imagem do post
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    try {
+                      const url = await uploadFile(file, "posts");
+                      setNewPostImage(url);
+                    } catch (error) {
+                      setStatus(error instanceof Error ? error.message : "Falha no upload.");
+                    }
+                  }}
+                />
+              </label>
+              {newPostImage ? <img src={newPostImage} alt="" className="preview-image" /> : null}
+              <button className="btn-primary" onClick={createPost} disabled={uploading || isMuted}>
                 Publicar
               </button>
             </section>
@@ -447,24 +581,38 @@ export default function RedePage() {
                   <button onClick={() => toggleLike(post.id)}>
                     {post.liked_by_me ? "Descurtir" : "Curtir"} ({post.like_count})
                   </button>
-                  <span>{post.comment_count} comentários</span>
+                  <span>{post.comment_count} comentarios</span>
+                  {canModerate ? (
+                    <button className="danger-btn" onClick={() => removePost(post.id)}>
+                      Remover post
+                    </button>
+                  ) : null}
                 </div>
 
                 <div className="comment-list">
                   {post.recent_comments.map((comment) => (
                     <div key={comment.id} className="comment-item">
-                      <strong>{comment.author.nome || "Membro"}:</strong> {comment.content}
+                      <div>
+                        <strong>{comment.author.nome || "Membro"}:</strong> {comment.content}
+                      </div>
+                      {canModerate ? (
+                        <button className="danger-mini" onClick={() => removeComment(comment.id)}>
+                          Remover
+                        </button>
+                      ) : null}
                     </div>
                   ))}
                 </div>
 
                 <div className="comment-box">
                   <input
-                    placeholder="Escreva um comentário"
+                    placeholder="Escreva um comentario"
                     value={commentDraft[post.id] || ""}
                     onChange={(e) => setCommentDraft((prev) => ({ ...prev, [post.id]: e.target.value }))}
                   />
-                  <button onClick={() => addComment(post.id)}>Comentar</button>
+                  <button onClick={() => addComment(post.id)} disabled={isMuted}>
+                    Comentar
+                  </button>
                 </div>
               </article>
             ))}
@@ -473,14 +621,14 @@ export default function RedePage() {
           <aside className="rede-right">
             <section className="rede-card">
               <div className="row-between">
-                <p className="rede-kicker">Notificações</p>
+                <p className="rede-kicker">Notificacoes</p>
                 <button className="btn-ghost" onClick={markNotificationsRead}>
                   Marcar lidas
                 </button>
               </div>
               <p className="notif-count">
-                Não lidas: {unreadCount}
-                {adminPendingCount > 0 ? ` | Pendências vínculo: ${adminPendingCount}` : ""}
+                Nao lidas: {unreadCount}
+                {adminPendingCount > 0 ? ` | Pendencias vinculo: ${adminPendingCount}` : ""}
               </p>
               <div className="notif-list">
                 {notifications.map((item) => (
@@ -494,15 +642,21 @@ export default function RedePage() {
 
             <section className="rede-card chat-card">
               <p className="rede-kicker">
-                {selectedMember ? `Conversa com ${selectedMember.nome}` : "Selecione alguém para conversar"}
+                {selectedMember ? `Conversa com ${selectedMember.nome}` : "Selecione alguem para conversar"}
               </p>
+              {canModerate && selectedMember ? (
+                <button className="danger-btn" onClick={() => muteMember(selectedMember.id)}>
+                  Silenciar 60m
+                </button>
+              ) : null}
               <div className="chat-messages">
                 {messages.map((msg) => (
                   <div
                     key={msg.id}
                     className={`chat-bubble ${msg.sender_profile_id === me?.id ? "me" : "other"}`}
                   >
-                    {msg.content}
+                    <p>{msg.content}</p>
+                    {msg.image_url ? <img src={msg.image_url} alt="" className="chat-image" /> : null}
                   </div>
                 ))}
               </div>
@@ -512,7 +666,34 @@ export default function RedePage() {
                   value={newMessageText}
                   onChange={(e) => setNewMessageText(e.target.value)}
                 />
-                <button onClick={sendMessage}>Enviar</button>
+                <button onClick={sendMessage} disabled={isMuted}>
+                  Enviar
+                </button>
+              </div>
+              <div className="chat-actions">
+                <label className="file-btn">
+                  Upload imagem do chat
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      try {
+                        const url = await uploadFile(file, "chat");
+                        setNewMessageImage(url);
+                      } catch (error) {
+                        setStatus(error instanceof Error ? error.message : "Falha no upload.");
+                      }
+                    }}
+                  />
+                </label>
+                {newMessageImage ? (
+                  <div className="chat-preview">
+                    <img src={newMessageImage} alt="" />
+                    <button onClick={() => setNewMessageImage("")}>Remover imagem</button>
+                  </div>
+                ) : null}
               </div>
             </section>
           </aside>
