@@ -65,7 +65,7 @@ export default function AdminVinculosPage() {
           setItems(payload.requests || []);
           setError("");
         } else {
-          setError(payload.error || "Erro ao carregar pendencias.");
+          setError(payload.error || "Erro ao carregar pendências.");
         }
       }
 
@@ -83,7 +83,7 @@ export default function AdminVinculosPage() {
 
     const payload = await response.json();
     if (!response.ok) {
-      setError(payload.error || "Erro ao carregar pendencias.");
+      setError(payload.error || "Erro ao carregar pendências.");
       return;
     }
 
@@ -110,12 +110,12 @@ export default function AdminVinculosPage() {
 
     const payload = await response.json();
     if (!response.ok) {
-      setError(payload.error || "Erro ao processar solicitacao.");
+      setError(payload.error || "Erro ao processar solicitação.");
       setProcessingId(null);
       return;
     }
 
-    setMessage(action === "approve" ? "Solicitacao aprovada." : "Solicitacao rejeitada.");
+    setMessage(action === "approve" ? "Solicitação aprovada." : "Solicitação rejeitada.");
     await loadPending();
     setProcessingId(null);
   }
@@ -125,7 +125,7 @@ export default function AdminVinculosPage() {
       <>
         <TopBar />
         <main style={pageStyle}>
-          <Spinner texto="Carregando aprovacoes..." />
+          <Spinner texto="Carregando aprovações..." />
         </main>
       </>
     );
@@ -138,7 +138,7 @@ export default function AdminVinculosPage() {
         <main style={pageStyle}>
           <section style={panelStyle}>
             <h1 style={titleStyle}>Acesso negado</h1>
-            <p style={muted}>Somente lideranca/staff pode aprovar vinculos.</p>
+            <p style={muted}>Somente liderança/staff pode aprovar vínculos.</p>
           </section>
         </main>
       </>
@@ -152,10 +152,10 @@ export default function AdminVinculosPage() {
         <section style={panelStyle}>
           <div style={headerStyle}>
             <div>
-              <p style={kicker}>Aprovacao de Vinculos</p>
-              <h1 style={titleStyle}>Solicitacoes Pendentes</h1>
+              <p style={kicker}>Aprovação de Vínculos</p>
+              <h1 style={titleStyle}>Solicitações Pendentes</h1>
               <p style={muted}>
-                Aprove ou rejeite vinculacoes de card. Aprovado libera edicao apenas do card vinculado.
+                Aprove ou rejeite vinculações de card. Aprovado libera edição apenas do card vinculado.
               </p>
             </div>
             <button style={secondaryBtn} onClick={() => (window.location.href = "/admin")}>
@@ -166,7 +166,7 @@ export default function AdminVinculosPage() {
           {message && <Toast mensagem={message} onClose={() => setMessage("")} />}
           {error && <Toast mensagem={error} onClose={() => setError("")} />}
 
-          {items.length === 0 && <p style={muted}>Nenhuma solicitacao pendente.</p>}
+          {items.length === 0 && <p style={muted}>Nenhuma solicitação pendente.</p>}
 
           <div style={{ display: "grid", gap: 10 }}>
             {items.map((item) => (

@@ -1107,3 +1107,52 @@
     grid-template-columns: 1fr;
   }
 }
+
+@media (max-width: 900px) {
+  .painel-shell {
+    padding: 92px 12px 20px;
+  }
+
+  .glass-card {
+    border-radius: 18px;
+  }
+
+  .painel-header,
+  .profile-panel,
+  .focus-panel,
+  .calendar-panel,
+  .info-panel,
+  .full-events-panel,
+  .avatar-panel {
+    padding: 16px;
+  }
+
+  .painel-title {
+    font-size: clamp(1.5rem, 9vw, 2.4rem);
+  }
+
+  .painel-kicker {
+    letter-spacing: 0.24em;
+  }
+
+  .profile-name {
+    font-size: clamp(1.7rem, 9vw, 2.6rem);
+  }
+
+  .event-cover-locked {
+    height: 170px;
+  }
+
+  .event-highlight-locked {
+    min-height: unset;
+  }
+
+  .calendar-grid {
+    gap: 6px;
+  }
+
+  .calendar-cell {
+    min-height: 42px;
+    font-size: 12px;
+  }
+}

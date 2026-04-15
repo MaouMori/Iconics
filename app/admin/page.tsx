@@ -154,7 +154,7 @@ export default function AdminPage() {
                   style={smallButtonStyle}
                   onClick={() => (window.location.href = "/admin/vinculos")}
                 >
-                  Vinculos
+                  Vínculos
                 </button>
               </div>
             </div>

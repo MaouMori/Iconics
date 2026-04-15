@@ -237,7 +237,7 @@ export default function CityMap({ onView3D }: CityMapProps) {
             />
             {!imageLoaded && (
               <div className="map-missing-image">
-                Mapa real nao encontrado. Coloque um arquivo em <code>/public/images/mapa-cidade-fivem.png</code>
+                Mapa real não encontrado. Coloque um arquivo em <code>/public/images/mapa-cidade-fivem.png</code>
               </div>
             )}
 
@@ -263,7 +263,7 @@ export default function CityMap({ onView3D }: CityMapProps) {
                 className="mansion-label mansion-popup"
                 style={{ left: `${mansionPos.x * 100}%`, top: `${mansionPos.y * 100}%` }}
               >
-                <strong>Mansao Iconics</strong>
+                <strong>Mansão Iconics</strong>
                 <span>Vinewood Hills</span>
                 <button
                   type="button"

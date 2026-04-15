@@ -13,6 +13,7 @@ type Partner = {
 
 export default function PartnersBar() {
   const [partners, setPartners] = useState<Partner[]>([]);
+  const [isMobile, setIsMobile] = useState(false);
   const pathname = usePathname();
   const isMansaoPage = pathname === "/mansao";
 
@@ -32,7 +33,14 @@ export default function PartnersBar() {
     load();
   }, []);
 
-  if (partners.length === 0) return null;
+  useEffect(() => {
+    const syncMobile = () => setIsMobile(window.innerWidth <= 980);
+    syncMobile();
+    window.addEventListener("resize", syncMobile);
+    return () => window.removeEventListener("resize", syncMobile);
+  }, []);
+
+  if (partners.length === 0 || isMobile) return null;
 
   return (
     <div
@@ -72,7 +80,7 @@ export default function PartnersBar() {
       </div>
 
       <Link href="/parcerias" style={verTodosStyle}>
-        Ver todos →
+        Ver todos {"->"}
       </Link>
     </div>
   );
@@ -165,3 +173,4 @@ const verTodosStyle: React.CSSProperties = {
   transform: "rotate(180deg)",
   padding: "8px 0",
 };
+

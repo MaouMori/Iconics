@@ -9,13 +9,13 @@ export async function POST(req: NextRequest) {
     : "";
 
   if (!token) {
-    return NextResponse.json({ error: "Nao autenticado." }, { status: 401 });
+    return NextResponse.json({ error: "Não autenticado." }, { status: 401 });
   }
 
   const { data: userData, error: userError } = await supabaseAdmin.auth.getUser(token);
   const approverId = userData.user?.id;
   if (userError || !approverId) {
-    return NextResponse.json({ error: "Sessao invalida." }, { status: 401 });
+    return NextResponse.json({ error: "Sessão inválida." }, { status: 401 });
   }
 
   const { data: profile, error: profileError } = await supabaseAdmin
@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
 
   if (!canApproveLink(profile?.cargo)) {
     return NextResponse.json(
-      { error: "Apenas lider, vice_lider, admin ou staff podem aprovar." },
+      { error: "Apenas líder, vice_lider, admin ou staff podem aprovar." },
       { status: 403 }
     );
   }
@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
   const reason = String(body?.reason || "").trim() || null;
 
   if (!Number.isInteger(requestId) || requestId <= 0) {
-    return NextResponse.json({ error: "requestId invalido." }, { status: 400 });
+    return NextResponse.json({ error: "requestId inválido." }, { status: 400 });
   }
 
   if (action !== "approve" && action !== "reject") {
@@ -55,11 +55,11 @@ export async function POST(req: NextRequest) {
     .maybeSingle();
 
   if (requestError || !linkRequest) {
-    return NextResponse.json({ error: "Solicitacao nao encontrada." }, { status: 404 });
+    return NextResponse.json({ error: "Solicitação não encontrada." }, { status: 404 });
   }
 
   if (linkRequest.status !== "pending") {
-    return NextResponse.json({ error: "Solicitacao ja foi processada." }, { status: 409 });
+    return NextResponse.json({ error: "Solicitação já foi processada." }, { status: 409 });
   }
 
   if (action === "reject") {

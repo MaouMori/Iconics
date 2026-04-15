@@ -7,6 +7,7 @@ import { supabase } from "@/lib/supabase";
 export default function Navbar() {
   const [isLogged, setIsLogged] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     async function checkUser() {
@@ -29,6 +30,17 @@ export default function Navbar() {
     };
   }, []);
 
+  useEffect(() => {
+    const onResize = () => {
+      if (window.innerWidth > 960) {
+        setMenuOpen(false);
+      }
+    };
+
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
   async function handleLogout() {
     await supabase.auth.signOut();
     window.location.href = "/";
@@ -37,6 +49,17 @@ export default function Navbar() {
   return (
     <header className="header">
       <nav className="navbar">
+        <button
+          type="button"
+          className="nav-toggle"
+          aria-label="Abrir menu"
+          aria-expanded={menuOpen}
+          onClick={() => setMenuOpen((prev) => !prev)}
+        >
+          {menuOpen ? "✕" : "☰"}
+        </button>
+
+        <div className={`nav-menu ${menuOpen ? "open" : ""}`}>
         <Link href="/" className="nav-link active">Home</Link>
 
         <div className="logo-wrap" aria-label="Logo ICONICS">
@@ -46,7 +69,7 @@ export default function Navbar() {
           </div>
         </div>
 
-        <a href="#formulario" className="nav-link">Formulario</a>
+        <a href="#formulario" className="nav-link">Formulário</a>
         <Link href="/lore" className="nav-link">Lore</Link>
         <Link href="/mansao" className="nav-link">Mansão</Link>
         <Link href="/parcerias" className="nav-link">Parcerias</Link>
@@ -72,6 +95,7 @@ export default function Navbar() {
             </button>
           </>
         )}
+        </div>
       </nav>
     </header>
   );

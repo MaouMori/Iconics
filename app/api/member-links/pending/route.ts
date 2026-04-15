@@ -20,13 +20,13 @@ export async function GET(req: NextRequest) {
     : "";
 
   if (!token) {
-    return NextResponse.json({ error: "Nao autenticado." }, { status: 401 });
+    return NextResponse.json({ error: "Não autenticado." }, { status: 401 });
   }
 
   const { data: userData, error: userError } = await supabaseAdmin.auth.getUser(token);
   const userId = userData.user?.id;
   if (userError || !userId) {
-    return NextResponse.json({ error: "Sessao invalida." }, { status: 401 });
+    return NextResponse.json({ error: "Sessão inválida." }, { status: 401 });
   }
 
   const { data: profile, error: profileError } = await supabaseAdmin
@@ -40,7 +40,7 @@ export async function GET(req: NextRequest) {
   }
 
   if (!canApproveLink(profile?.cargo)) {
-    return NextResponse.json({ error: "Sem permissao para visualizar pendencias." }, { status: 403 });
+    return NextResponse.json({ error: "Sem permissão para visualizar pendências." }, { status: 403 });
   }
 
   const { data: requests, error: requestError } = await supabaseAdmin

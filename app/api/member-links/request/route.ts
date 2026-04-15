@@ -9,13 +9,13 @@ export async function POST(req: NextRequest) {
     : "";
 
   if (!token) {
-    return NextResponse.json({ error: "Nao autenticado." }, { status: 401 });
+    return NextResponse.json({ error: "Não autenticado." }, { status: 401 });
   }
 
   const { data: userData, error: userError } = await supabaseAdmin.auth.getUser(token);
   const userId = userData.user?.id;
   if (userError || !userId) {
-    return NextResponse.json({ error: "Sessao invalida." }, { status: 401 });
+    return NextResponse.json({ error: "Sessão inválida." }, { status: 401 });
   }
 
   const body = await req.json().catch(() => null);
@@ -23,11 +23,11 @@ export async function POST(req: NextRequest) {
   const accessCode = normalizeAccessCode(body?.accessCode);
 
   if (!Number.isInteger(memberId) || memberId <= 0) {
-    return NextResponse.json({ error: "ID de membro invalido." }, { status: 400 });
+    return NextResponse.json({ error: "ID de membro inválido." }, { status: 400 });
   }
 
   if (!accessCode) {
-    return NextResponse.json({ error: "Codigo de acesso obrigatorio." }, { status: 400 });
+    return NextResponse.json({ error: "Código de acesso obrigatório." }, { status: 400 });
   }
 
   const { data: member, error: memberError } = await supabaseAdmin
@@ -37,12 +37,12 @@ export async function POST(req: NextRequest) {
     .maybeSingle();
 
   if (memberError || !member) {
-    return NextResponse.json({ error: "Membro nao encontrado." }, { status: 404 });
+    return NextResponse.json({ error: "Membro não encontrado." }, { status: 404 });
   }
 
   const codeHash = hashAccessCode(memberId, accessCode);
   if (!member.access_code_hash || member.access_code_hash !== codeHash) {
-    return NextResponse.json({ error: "Codigo de acesso invalido." }, { status: 403 });
+    return NextResponse.json({ error: "Código de acesso inválido." }, { status: 403 });
   }
 
   const { data: pendingExisting } = await supabaseAdmin
@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       ok: true,
       requestId: pendingExisting.id,
-      message: "Solicitacao pendente ja existente.",
+      message: "Solicitação pendente já existente.",
     });
   }
 
@@ -87,6 +87,6 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({
     ok: true,
     requestId: inserted.id,
-    message: "Solicitacao enviada. Aguarde aprovacao da lideranca/staff.",
+    message: "Solicitação enviada. Aguarde aprovação da liderança/staff.",
   });
 }

@@ -30,7 +30,7 @@ export default function MansaoPage() {
       <main className="maps-app">
         <aside className="maps-sidebar">
           <p className="maps-kicker">Fraternidade FiveM</p>
-          <h1>Mansao Iconics</h1>
+          <h1>Mansão Iconics</h1>
           <p>
             Explore o mapa da cidade com estilo de navegação livre. Clique no marcador da mansão para abrir
             detalhes e visualizar a propriedade no modo 3D.
@@ -53,7 +53,7 @@ export default function MansaoPage() {
               setViewerOpen(true);
             }}
           >
-            Abrir visualizacao 3D
+            Abrir visualização 3D
           </button>
         </aside>
 
@@ -72,8 +72,8 @@ export default function MansaoPage() {
           <div className="maps-modal" onClick={(event) => event.stopPropagation()}>
             <div className="maps-modal-top">
               <div>
-                <p className="maps-kicker">Visao Orbital</p>
-                <h2>{viewerMode === "3d" ? "Mansao em 3D" : "Foto da Mansao"}</h2>
+                <p className="maps-kicker">Visão Orbital</p>
+                <h2>{viewerMode === "3d" ? "Mansão em 3D" : "Foto da Mansão"}</h2>
               </div>
               <div className="maps-modal-actions">
                 <button

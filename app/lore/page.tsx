@@ -27,18 +27,18 @@ export default function LorePage() {
             <img src="/images/logo.png" alt="Logo Iconics" />
           </div>
 
-          <h1>ICONICS â€” Conventus Nycis</h1>
+          <h1>ICONICS ? Conventus Nycis</h1>
           <h2>Os Arquivos da Fraternidade</h2>
 
           <p>
             Na Universidade de Orleans, onde festas iluminam os corredores,
-            cÃ¢meras registram cada momento e novas tendÃªncias nascem a cada
+            c?meras registram cada momento e novas tend?ncias nascem a cada
             semestre, existe uma fraternidade que domina tanto os holofotes
             quanto as sombras.
           </p>
 
           <div className="hero-actions">
-            <Link href="/" className="hero-btn">Voltar Ã  pÃ¡gina inicial</Link>
+            <Link href="/" className="hero-btn">Voltar Ã  p?gina inicial</Link>
           </div>
         </div>
       </header>
@@ -47,12 +47,12 @@ export default function LorePage() {
         <aside className="sidebar-card">
           <div className="ornament ornament-top"></div>
 
-          <h3>SumÃ¡rio</h3>
+          <h3>Sum?rio</h3>
 
           <nav className="sidebar-nav">
             {[
-              { id: "origem", label: "Origem e FormaÃ§Ã£o" },
-              { id: "simbolos", label: "SÃ­mbolos e EstÃ©tica" },
+              { id: "origem", label: "Origem e Forma??o" },
+              { id: "simbolos", label: "S?mbolos e Est?tica" },
               { id: "valores", label: "Valores e Filosofia" },
               { id: "curiosidades", label: "Curiosidades e Segredos" },
             ].map((item) => (
@@ -67,7 +67,7 @@ export default function LorePage() {
             ))}
           </nav>
 
-          <div className="mini-title">Arquivo visual da mansÃ£o</div>
+          <div className="mini-title">Arquivo visual da mans?o</div>
 
           <div className="image-slot portrait paper-slot">
             <img
@@ -79,7 +79,7 @@ export default function LorePage() {
 
           <div className="divider"></div>
 
-          <div className="mini-title">Registro simbÃ³lico</div>
+          <div className="mini-title">Registro simb?lico</div>
 
           <div className="image-slot landscape">
             <img
@@ -96,36 +96,36 @@ export default function LorePage() {
           {/* ORIGEM */}
           <article className="section-card" id="origem">
             <div className="section-heading">
-              <h2>Origem e FormaÃ§Ã£o</h2>
+              <h2>Origem e Forma??o</h2>
             </div>
 
             <div className="two-col">
               <div className="text-col">
                 <p>
                   A ICONICS nasceu dentro da Universidade de Orleans quando
-                  alguns estudantes perceberam que a nova geraÃ§Ã£o jÃ¡ nÃ£o
-                  conquistava poder apenas por cargos, tÃ­tulos ou tradiÃ§Ãµes.
-                  O verdadeiro domÃ­nio havia mudado de forma: agora ele vivia
-                  na capacidade de moldar narrativas, criar tendÃªncias e
-                  influenciar multidÃµes com uma Ãºnica ideia.
+                  alguns estudantes perceberam que a nova gera??o j? n?o
+                  conquistava poder apenas por cargos, t?tulos ou tradi??es.
+                  O verdadeiro dom?nio havia mudado de forma: agora ele vivia
+                  na capacidade de moldar narrativas, criar tend?ncias e
+                  influenciar multid?es com uma ?nica ideia.
                 </p>
 
                 <p>
-                  Desde o inÃ­cio, a fraternidade passou a atrair pessoas que
-                  nÃ£o apenas participavam da cultura do campus, mas a definiam.
-                  FotÃ³grafos, estilistas, streamers, artistas digitais,
-                  mÃºsicos, performers e comunicadores encontraram na ICONICS
-                  um espaÃ§o onde estÃ©tica, presenÃ§a e ambiÃ§Ã£o se transformavam
-                  em forÃ§a coletiva.
+                  Desde o in?cio, a fraternidade passou a atrair pessoas que
+                  n?o apenas participavam da cultura do campus, mas a definiam.
+                  Fot?grafos, estilistas, streamers, artistas digitais,
+                  m?sicos, performers e comunicadores encontraram na ICONICS
+                  um espa?o onde est?tica, presen?a e ambi??o se transformavam
+                  em for?a coletiva.
                 </p>
 
                 <p>
                   Para o restante da universidade, elas sempre pareceram ser
                   apenas o que mostravam ao mundo: influenciadoras, artistas,
-                  criadoras de tendÃªncias e presenÃ§as inesquecÃ­veis. Mas por
-                  trÃ¡s da imagem impecÃ¡vel, a ICONICS cresceu como algo maior â€”
+                  criadoras de tend?ncias e presen?as inesquec?veis. Mas por
+                  tr?s da imagem impec?vel, a ICONICS cresceu como algo maior ?
                   uma irmandade em que carisma, criatividade e poder caminham
-                  lado a lado com algo mais antigo e mais difÃ­cil de explicar.
+                  lado a lado com algo mais antigo e mais dif?cil de explicar.
                 </p>
               </div>
 
@@ -142,39 +142,39 @@ export default function LorePage() {
           {/* SIMBOLOS */}
           <article className="section-card" id="simbolos">
             <div className="section-heading">
-              <h2>SÃ­mbolos e EstÃ©tica</h2>
+              <h2>S?mbolos e Est?tica</h2>
             </div>
 
             <div className="two-col reverse">
               <div className="image-slot square">
                 <img
                   src="/images/simbolo.png"
-                  alt="SÃ­mbolos da ICONICS"
+                  alt="S?mbolos da ICONICS"
                   className="slot-image"
                 />
               </div>
 
               <div className="text-col">
                 <p>
-                  A identidade da ICONICS Ã© construÃ­da sobre sÃ­mbolos que falam
-                  tanto de influÃªncia quanto de mistÃ©rio. O roxo Ã© sua cor:
-                  intenso, noturno, elegante e impossÃ­vel de ignorar. A cÃ¢mera
-                  Ã© seu emblema principal, representando imagem, narrativa,
-                  visibilidade e controle sobre aquilo que o mundo vÃª.
+                  A identidade da ICONICS ? constru?da sobre s?mbolos que falam
+                  tanto de influ?ncia quanto de mist?rio. O roxo ? sua cor:
+                  intenso, noturno, elegante e imposs?vel de ignorar. A c?mera
+                  ? seu emblema principal, representando imagem, narrativa,
+                  visibilidade e controle sobre aquilo que o mundo v?.
                 </p>
 
                 <p>
-                  Sua mansÃ£o, conhecida por muitos como um verdadeiro estÃºdio
-                  criativo, vive cercada por luzes, gravaÃ§Ãµes, sessÃµes de foto
-                  e festas lendÃ¡rias. Mas entre a decoraÃ§Ã£o sofisticada e o
-                  glamour cuidadosamente montado, hÃ¡ detalhes que poucos notam:
-                  sÃ­mbolos discretos espalhados pelos ambientes, objetos
-                  antigos, velas esquecidas e traÃ§os de uma heranÃ§a que parece
-                  existir alÃ©m da estÃ©tica.
+                  Sua mans?o, conhecida por muitos como um verdadeiro est?dio
+                  criativo, vive cercada por luzes, grava??es, sess?es de foto
+                  e festas lend?rias. Mas entre a decora??o sofisticada e o
+                  glamour cuidadosamente montado, h? detalhes que poucos notam:
+                  s?mbolos discretos espalhados pelos ambientes, objetos
+                  antigos, velas esquecidas e tra?os de uma heran?a que parece
+                  existir al?m da est?tica.
                 </p>
 
                 <blockquote>
-                  â€œInfluÃªncia, Criatividade e Poder.â€
+                  â€œInflu?ncia, Criatividade e Poder.?
                 </blockquote>
               </div>
             </div>
@@ -189,29 +189,29 @@ export default function LorePage() {
             <div className="two-col">
               <div className="text-col">
                 <p>
-                  A filosofia da ICONICS se apoia em trÃªs pilares fundamentais:
-                  influÃªncia, criatividade e poder. InfluÃªncia, porque suas
-                  integrantes compreendem que presenÃ§a Ã© uma forma de domÃ­nio.
+                  A filosofia da ICONICS se apoia em tr?s pilares fundamentais:
+                  influ?ncia, criatividade e poder. Influ?ncia, porque suas
+                  integrantes compreendem que presen?a ? uma forma de dom?nio.
                   Criatividade, porque tudo que nasce dentro da fraternidade
-                  precisa ter assinatura, estÃ©tica e impacto. E poder, porque
-                  a verdadeira lideranÃ§a nÃ£o precisa ser anunciada quando jÃ¡
-                  Ã© sentida por todos ao redor.
+                  precisa ter assinatura, est?tica e impacto. E poder, porque
+                  a verdadeira lideran?a n?o precisa ser anunciada quando j?
+                  ? sentida por todos ao redor.
                 </p>
 
                 <p>
-                  Dentro da fraternidade, hÃ¡ quem acredite que isso tudo seja
-                  apenas resultado de estratÃ©gia, talento e carisma. Mas outras
+                  Dentro da fraternidade, h? quem acredite que isso tudo seja
+                  apenas resultado de estrat?gia, talento e carisma. Mas outras
                   integrantes aprendem cedo que existe algo mais profundo em
-                  jogo. A sensaÃ§Ã£o de que algumas presenÃ§as alteram a atmosfera
-                  de um ambiente. A impressÃ£o de que certas ideias se espalham
-                  rÃ¡pido demais para serem apenas coincidÃªncia. A certeza de que
-                  fascÃ­nio tambÃ©m pode ser uma forÃ§a.
+                  jogo. A sensa??o de que algumas presen?as alteram a atmosfera
+                  de um ambiente. A impress?o de que certas ideias se espalham
+                  r?pido demais para serem apenas coincid?ncia. A certeza de que
+                  fasc?nio tamb?m pode ser uma for?a.
                 </p>
 
                 <p>
-                  Na ICONICS, estÃ©tica nÃ£o Ã© sÃ³ aparÃªncia. Performance nÃ£o Ã© sÃ³
-                  entretenimento. TendÃªncia nÃ£o Ã© sÃ³ moda. Tudo pode se tornar
-                  linguagem, influÃªncia e marca. E, para algumas, isso Ã© apenas
+                  Na ICONICS, est?tica n?o ? s? apar?ncia. Performance n?o ? s?
+                  entretenimento. Tend?ncia n?o ? s? moda. Tudo pode se tornar
+                  linguagem, influ?ncia e marca. E, para algumas, isso ? apenas
                   a primeira camada de algo muito maior.
                 </p>
               </div>
@@ -234,18 +234,18 @@ export default function LorePage() {
 
             <div className="curiosity-grid">
               <div className="curiosity-note">
-                <h4>PresenÃ§a</h4>
+                <h4>Presen?a</h4>
                 <p>
                   Dizem que quando uma integrante da ICONICS entra em uma sala,
                   os olhares se voltam naturalmente. Alguns chamam isso de
-                  carisma. Outros preferem nÃ£o tentar explicar.
+                  carisma. Outros preferem n?o tentar explicar.
                 </p>
               </div>
 
               <div className="curiosity-note">
-                <h4>MansÃ£o</h4>
+                <h4>Mans?o</h4>
                 <p>
-                  A sede da fraternidade Ã© famosa por suas festas, gravaÃ§Ãµes e
+                  A sede da fraternidade ? famosa por suas festas, grava??es e
                   encontros criativos. Ainda assim, muitos juram que a atmosfera
                   muda completamente quando a noite cai.
                 </p>
@@ -255,8 +255,8 @@ export default function LorePage() {
                 <h4>Sussurro</h4>
                 <p>
                   Entre os membros mais antigos, uma frase sempre retorna como
-                  aviso, lembranÃ§a ou maldiÃ§Ã£o. Um nome envolto em sombras,
-                  raramente dito em voz alta: â€œMaldita seja Nyx.â€
+                  aviso, lembran?a ou maldi??o. Um nome envolto em sombras,
+                  raramente dito em voz alta: â€œMaldita seja Nyx.?
                 </p>
               </div>
             </div>

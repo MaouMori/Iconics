@@ -9,14 +9,14 @@ async function getAuthedProfileId(req: NextRequest) {
     : "";
 
   if (!token) {
-    return { error: NextResponse.json({ error: "Nao autenticado." }, { status: 401 }) };
+    return { error: NextResponse.json({ error: "Não autenticado." }, { status: 401 }) };
   }
 
   const { data: userData, error: userError } = await supabaseAdmin.auth.getUser(token);
   const userId = userData.user?.id;
 
   if (userError || !userId) {
-    return { error: NextResponse.json({ error: "Sessao invalida." }, { status: 401 }) };
+    return { error: NextResponse.json({ error: "Sessão inválida." }, { status: 401 }) };
   }
 
   return { userId };
@@ -97,7 +97,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({
       linked: false,
       pendingRequests: pendingRequests || [],
-      warning: "Link ativo encontrado, mas card nao foi localizado.",
+      warning: "Link ativo encontrado, mas card não foi localizado.",
     });
   }
 
@@ -117,7 +117,7 @@ export async function PATCH(req: NextRequest) {
   const body = await req.json().catch(() => null);
 
   if (!body || typeof body !== "object") {
-    return NextResponse.json({ error: "Payload invalido." }, { status: 400 });
+    return NextResponse.json({ error: "Payload inválido." }, { status: 400 });
   }
 
   const { data: activeLink, error: linkError } = await supabaseAdmin
@@ -128,16 +128,16 @@ export async function PATCH(req: NextRequest) {
     .maybeSingle();
 
   if (linkError || !activeLink?.member_card_id) {
-    return NextResponse.json({ error: "Nenhum vinculo ativo encontrado." }, { status: 403 });
+    return NextResponse.json({ error: "Nenhum vínculo ativo encontrado." }, { status: 403 });
   }
 
   if (!activeLink.can_edit) {
-    return NextResponse.json({ error: "Seu vinculo nao possui permissao de edicao." }, { status: 403 });
+    return NextResponse.json({ error: "Seu vínculo não possui permissão de edição." }, { status: 403 });
   }
 
   const updatePayload = sanitizeUpdatePayload(body as Record<string, unknown>);
   if (Object.keys(updatePayload).length === 0) {
-    return NextResponse.json({ error: "Nenhum campo valido para atualizar." }, { status: 400 });
+    return NextResponse.json({ error: "Nenhum campo válido para atualizar." }, { status: 400 });
   }
 
   const { data: updated, error: updateError } = await supabaseAdmin
