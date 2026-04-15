@@ -212,10 +212,10 @@ export default function Mansion3DViewer({
       depth: number,
       y: number,
       parent: THREE.Object3D,
-      center: [number, number, number]
+      center: [number, number]
     ) => {
       const rail = new THREE.Group();
-      rail.position.set(center[0], y, center[2]);
+      rail.position.set(center[0], y, center[1]);
 
       const postMat = new THREE.MeshStandardMaterial({
         color: "#8f969c",
