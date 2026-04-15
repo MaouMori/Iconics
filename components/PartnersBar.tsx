@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 
 type Partner = {
   id: number;
@@ -12,6 +13,8 @@ type Partner = {
 
 export default function PartnersBar() {
   const [partners, setPartners] = useState<Partner[]>([]);
+  const pathname = usePathname();
+  const isMansaoPage = pathname === "/mansao";
 
   useEffect(() => {
     async function load() {
@@ -32,7 +35,13 @@ export default function PartnersBar() {
   if (partners.length === 0) return null;
 
   return (
-    <div style={sidebarStyle}>
+    <div
+      style={{
+        ...sidebarStyle,
+        left: isMansaoPage ? undefined : 12,
+        right: isMansaoPage ? 12 : undefined,
+      }}
+    >
       <div style={headerStyle}>
         <span style={labelStyle}>Parceiros</span>
       </div>

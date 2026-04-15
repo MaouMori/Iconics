@@ -17,6 +17,7 @@
   padding-left: 18px;
   padding-right: 18px;
   padding-bottom: 18px;
+  overflow: hidden;
 }
 
 .maps-sidebar {
@@ -27,7 +28,7 @@
   display: flex;
   flex-direction: column;
   gap: 14px;
-  overflow: auto;
+  overflow: hidden;
 }
 
 .maps-kicker {

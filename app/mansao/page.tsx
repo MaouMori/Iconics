@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import { useState } from "react";
+import { useEffect } from "react";
 import TopBar from "@/components/Topbar";
 import CityMap from "@/components/mansao/CityMap";
 import Mansion3DViewer from "@/components/mansao/Mansion3DViewer";
@@ -8,6 +9,19 @@ import "./mansao.css";
 
 export default function MansaoPage() {
   const [viewerOpen, setViewerOpen] = useState(false);
+
+  useEffect(() => {
+    const previousHtmlOverflow = document.documentElement.style.overflow;
+    const previousBodyOverflow = document.body.style.overflow;
+
+    document.documentElement.style.overflow = "hidden";
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.documentElement.style.overflow = previousHtmlOverflow;
+      document.body.style.overflow = previousBodyOverflow;
+    };
+  }, []);
 
   return (
     <>
