@@ -176,6 +176,12 @@
   font-size: 1.2rem;
 }
 
+.admin-meta.admin-meta-text {
+  font-size: 1.05rem;
+  max-width: 920px;
+  line-height: 1.7;
+}
+
 .admin-meta span {
   margin-left: 8px;
   padding: 5px 10px;
@@ -321,6 +327,10 @@
   place-items: center;
   background: linear-gradient(180deg, #090015 0%, #120026 100%);
   color: #fff;
+}
+
+.admin-content-shell {
+  margin-top: 22px;
 }
 
 .admin-denied {
