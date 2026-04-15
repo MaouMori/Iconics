@@ -236,7 +236,7 @@
 
 .mansion-label {
   position: absolute;
-  transform: translate(24px, -72px);
+  transform: translate(-230px, -72px); /* antes estava positivo */
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -247,6 +247,7 @@
   color: #f0deff;
   min-width: 176px;
 }
+
 
 .mansion-label strong {
   font-size: 1.05rem;
