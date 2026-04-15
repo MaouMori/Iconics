@@ -44,6 +44,13 @@ type PublicMemberListItem = {
   cargo?: string | null;
 };
 
+type DiscordLinkStatus = {
+  linked: boolean;
+  discordUserId: number | null;
+  code: string | null;
+  expiresAt: string | null;
+};
+
 type EditableForm = {
   nome: string;
   idade: string;
@@ -91,6 +98,13 @@ export default function PainelVinculoPage() {
   const [form, setForm] = useState<EditableForm>(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
   const [unlinking, setUnlinking] = useState(false);
+  const [linkingDiscord, setLinkingDiscord] = useState(false);
+  const [discordLink, setDiscordLink] = useState<DiscordLinkStatus>({
+    linked: false,
+    discordUserId: null,
+    code: null,
+    expiresAt: null,
+  });
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [galleryFiles, setGalleryFiles] = useState<(File | null)[]>(Array(16).fill(null));
 
@@ -121,6 +135,7 @@ export default function PainelVinculoPage() {
       if (payload.linked && payload.card) {
         setForm(formFromCard(payload.card));
       }
+      await loadDiscordLinkStatus(accessToken);
       setLoading(false);
     }
 
@@ -154,6 +169,57 @@ export default function PainelVinculoPage() {
 
     loadCards();
   }, []);
+
+  async function loadDiscordLinkStatus(accessToken = token) {
+    if (!accessToken) return;
+    try {
+      const response = await fetch("/api/discord-link/code", {
+        headers: { Authorization: `Bearer ${accessToken}` },
+        cache: "no-store",
+      });
+      const payload = (await response.json()) as DiscordLinkStatus & { error?: string };
+      if (!response.ok) return;
+      setDiscordLink({
+        linked: Boolean(payload.linked),
+        discordUserId: payload.discordUserId || null,
+        code: payload.code || null,
+        expiresAt: payload.expiresAt || null,
+      });
+    } catch {
+      // ignora erro e mantém a tela funcional
+    }
+  }
+
+  async function gerarCodigoVinculoDiscord() {
+    if (!token) return;
+    setLinkingDiscord(true);
+    setError("");
+    setMessage("");
+
+    try {
+      const response = await fetch("/api/discord-link/code", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const payload = await response.json();
+      if (!response.ok) {
+        setError(payload.error || "Erro ao gerar codigo.");
+        return;
+      }
+
+      setDiscordLink({
+        linked: false,
+        discordUserId: null,
+        code: payload.code || null,
+        expiresAt: payload.expiresAt || null,
+      });
+      setMessage("Codigo gerado. Use no Discord: !vincularsite <codigo>");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Erro inesperado ao gerar codigo.");
+    } finally {
+      setLinkingDiscord(false);
+    }
+  }
 
   function formFromCard(card: MemberCardRow): EditableForm {
     const cleanGallery = Array.isArray(card.galeria)
@@ -354,6 +420,32 @@ export default function PainelVinculoPage() {
 
           {message && <Toast mensagem={message} onClose={() => setMessage("")} />}
           {error && <Toast mensagem={error} onClose={() => setError("")} />}
+
+          <div style={requestBox}>
+            <h3 style={cardTitle}>Vincular conta Discord com conta do site</h3>
+            {discordLink.linked ? (
+              <p style={line}>
+                Conta Discord vinculada (ID: {discordLink.discordUserId}).
+              </p>
+            ) : (
+              <>
+                <p style={muted}>
+                  Gere um codigo temporario e execute no Discord: <strong>!vincularsite CODIGO</strong>.
+                </p>
+                <button style={secondaryBtn} onClick={gerarCodigoVinculoDiscord} disabled={linkingDiscord}>
+                  {linkingDiscord ? "Gerando..." : "Gerar codigo de vinculo Discord"}
+                </button>
+                {discordLink.code && (
+                  <p style={{ ...line, marginTop: 8 }}>
+                    Codigo: <strong>{discordLink.code}</strong>
+                    {discordLink.expiresAt
+                      ? ` (expira em ${new Date(discordLink.expiresAt).toLocaleString("pt-BR")})`
+                      : ""}
+                  </p>
+                )}
+              </>
+            )}
+          </div>
 
           {!data.linked && (
             <div style={requestBox}>

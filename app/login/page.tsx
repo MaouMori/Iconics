@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import Link from "next/link";
 import TopBar from "@/components/Topbar";
 import Toast from "@/components/Toast";
 import "./login.css";
@@ -196,7 +197,9 @@ export default function LoginPage() {
                 </button>
 
                 {!isRegister && (
-                  <span className="forgot-text">Esqueceu a senha?</span>
+                  <Link href="/login/esqueci-senha" className="forgot-text">
+                    Esqueci minha senha
+                  </Link>
                 )}
               </div>
 

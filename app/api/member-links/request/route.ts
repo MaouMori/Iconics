@@ -63,7 +63,7 @@ export async function POST(req: NextRequest) {
 
   const { data: profile } = await supabaseAdmin
     .from("profiles")
-    .select("nome")
+    .select("nome, discord_user_id")
     .eq("id", userId)
     .maybeSingle();
 
@@ -73,6 +73,7 @@ export async function POST(req: NextRequest) {
       member_card_id: memberId,
       access_code_hash: codeHash,
       requested_by_profile_id: userId,
+      requested_by_discord_id: profile?.discord_user_id || null,
       requested_by_name: profile?.nome || null,
       request_source: "site",
       status: "pending",

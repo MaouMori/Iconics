@@ -11,6 +11,7 @@ type AdminKey =
   | "usuarios"
   | "parcerias"
   | "vinculos"
+  | "logs"
   | "candidaturas"
   | "formulario";
 
@@ -30,6 +31,7 @@ const NAV_ITEMS: Array<{ key: AdminKey; label: string; href: string }> = [
   { key: "usuarios", label: "Usuarios", href: "/admin/usuarios" },
   { key: "parcerias", label: "Parcerias", href: "/admin/parcerias" },
   { key: "vinculos", label: "Vinculos", href: "/admin/vinculos" },
+  { key: "logs", label: "Logs", href: "/admin/logs" },
 ];
 
 export default function AdminShell({
