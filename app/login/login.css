@@ -349,6 +349,29 @@
   cursor: not-allowed;
 }
 
+.login-discord {
+  height: 54px;
+  border-radius: 999px;
+  border: 1px solid rgba(147, 197, 253, 0.35);
+  background: linear-gradient(180deg, #5865f2 0%, #4752c4 100%);
+  color: #fff;
+  font-size: 0.98rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: 0.2s ease;
+  box-shadow: 0 0 24px rgba(88, 101, 242, 0.3);
+}
+
+.login-discord:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 0 28px rgba(88, 101, 242, 0.4);
+}
+
+.login-discord:disabled {
+  opacity: 0.75;
+  cursor: not-allowed;
+}
+
 .login-message {
   position: relative;
   z-index: 1;

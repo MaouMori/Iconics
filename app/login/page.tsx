@@ -70,6 +70,30 @@ export default function LoginPage() {
     setLoading(false);
   }
 
+  async function handleDiscordLogin() {
+    setMensagem("");
+    setLoading(true);
+    try {
+      const redirectTo =
+        typeof window !== "undefined"
+          ? `${window.location.origin}/painel`
+          : undefined;
+
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "discord",
+        options: { redirectTo },
+      });
+
+      if (error) {
+        setMensagem(traduzirErro(error.message));
+        setLoading(false);
+      }
+    } catch {
+      setMensagem("Ocorreu um erro inesperado ao iniciar login com Discord.");
+      setLoading(false);
+    }
+  }
+
   function traduzirErro(error: string) {
     const erro = error.toLowerCase();
 
@@ -206,6 +230,17 @@ export default function LoginPage() {
               <button type="submit" disabled={loading} className="login-submit">
                 {loading ? "Carregando..." : isRegister ? "Cadastrar" : "Entrar"}
               </button>
+
+              {!isRegister && (
+                <button
+                  type="button"
+                  disabled={loading}
+                  className="login-discord"
+                  onClick={handleDiscordLogin}
+                >
+                  Entrar com Discord
+                </button>
+              )}
             </form>
 
             {mensagem && <Toast mensagem={mensagem} onClose={() => setMensagem("")} />}

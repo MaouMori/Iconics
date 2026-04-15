@@ -81,20 +81,58 @@ export async function POST(req: NextRequest) {
   }
 
   const now = new Date().toISOString();
+  let requestedByProfileId: string | null = linkRequest.requested_by_profile_id || null;
+  let requestedByDiscordId: number | null = linkRequest.requested_by_discord_id || null;
 
-  if (linkRequest.requested_by_profile_id) {
+  if (!requestedByProfileId && requestedByDiscordId) {
+    const { data: profileByDiscord } = await supabaseAdmin
+      .from("profiles")
+      .select("id")
+      .eq("discord_user_id", requestedByDiscordId)
+      .maybeSingle();
+    requestedByProfileId = profileByDiscord?.id || null;
+  }
+
+  if (requestedByProfileId && !requestedByDiscordId) {
+    const { data: profileById } = await supabaseAdmin
+      .from("profiles")
+      .select("discord_user_id")
+      .eq("id", requestedByProfileId)
+      .maybeSingle();
+    requestedByDiscordId = profileById?.discord_user_id || null;
+  }
+
+  if (!requestedByProfileId && !requestedByDiscordId) {
+    return NextResponse.json(
+      {
+        error:
+          "NÃ£o foi possÃ­vel identificar conta do site ou Discord dessa solicitaÃ§Ã£o. PeÃ§a novo vÃ­nculo apÃ³s usar !vincularsite.",
+      },
+      { status: 400 }
+    );
+  }
+
+  await supabaseAdmin
+    .from("member_card_link_requests")
+    .update({
+      requested_by_profile_id: requestedByProfileId,
+      requested_by_discord_id: requestedByDiscordId,
+    })
+    .eq("id", requestId);
+
+  if (requestedByProfileId) {
     await supabaseAdmin
       .from("member_card_links")
       .update({ status: "revoked", updated_at: now })
-      .eq("profile_id", linkRequest.requested_by_profile_id)
+      .eq("profile_id", requestedByProfileId)
       .eq("status", "active");
   }
 
-  if (linkRequest.requested_by_discord_id) {
+  if (requestedByDiscordId) {
     await supabaseAdmin
       .from("member_card_links")
       .update({ status: "revoked", updated_at: now })
-      .eq("discord_user_id", linkRequest.requested_by_discord_id)
+      .eq("discord_user_id", requestedByDiscordId)
       .eq("status", "active");
   }
 
@@ -108,8 +146,8 @@ export async function POST(req: NextRequest) {
     .from("member_card_links")
     .insert({
       member_card_id: linkRequest.member_card_id,
-      profile_id: linkRequest.requested_by_profile_id || null,
-      discord_user_id: linkRequest.requested_by_discord_id || null,
+      profile_id: requestedByProfileId,
+      discord_user_id: requestedByDiscordId,
       status: "active",
       can_edit: true,
       approved_by_profile_id: approverId,
@@ -120,6 +158,19 @@ export async function POST(req: NextRequest) {
 
   if (insertLinkError) {
     return NextResponse.json({ error: insertLinkError.message }, { status: 500 });
+  }
+
+  if (requestedByProfileId && requestedByDiscordId) {
+    await supabaseAdmin
+      .from("profiles")
+      .update({ discord_user_id: null })
+      .eq("discord_user_id", requestedByDiscordId)
+      .neq("id", requestedByProfileId);
+
+    await supabaseAdmin
+      .from("profiles")
+      .update({ discord_user_id: requestedByDiscordId })
+      .eq("id", requestedByProfileId);
   }
 
   const { error: approveError } = await supabaseAdmin
