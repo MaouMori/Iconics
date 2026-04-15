@@ -41,7 +41,7 @@ export default function HomePage() {
             <div className="hero-top-symbol-wrap">
               <img
                 src="/images/olho.png"
-                alt="Símbolo superior da Iconics"
+                alt="Simbolo superior da Iconics"
                 className="hero-top-symbol"
               />
             </div>
@@ -102,7 +102,7 @@ export default function HomePage() {
           <div className="members-content">
             <div className="section-title">
               <h2>Membros em destaque</h2>
-              <p>Conheça nos membros e venha se torna um deles</p>
+              <p>Conheca nossos membros e venha se tornar um deles</p>
             </div>
 
             <div className="members-wrapper">
@@ -156,13 +156,13 @@ export default function HomePage() {
               </div>
 
               <div className="carousel-shell">
-                <button className="carousel-nav" id="prevMembers">‹</button>
+                <button className="carousel-nav" id="prevMembers">{"<"}</button>
 
                 <div className="carousel-viewport">
                   <div className="carousel-track" id="membersTrack"></div>
                 </div>
 
-                <button className="carousel-nav" id="nextMembers">›</button>
+                <button className="carousel-nav" id="nextMembers">{">"}</button>
               </div>
             </div>
           </div>
@@ -177,12 +177,12 @@ export default function HomePage() {
             <span className="lore-badge">Arquivos da Fraternidade</span>
 
             <h2 className="lore-title">Lore</h2>
-            <h3 className="lore-subtitle">ICONICS — Conventus Nycis</h3>
+            <h3 className="lore-subtitle">ICONICS - Conventus Nycis</h3>
 
             <div className="lore-divider"></div>
 
             <p className="lore-text">
-              Na Universidade de Orleans, onde luzes de festas iluminam o campus e milhares de câmeras
+              Na Universidade de Orleans, onde luzes de festas iluminam o campus e milhares de cameras
               registram cada momento, existe uma fraternidade que domina tanto os holofotes quanto as sombras.
             </p>
 
@@ -199,8 +199,8 @@ export default function HomePage() {
 
               <header className="calendar-header">
                 <p className="calendar-kicker">Arquivos da Fraternidade</p>
-                <h2>Calendário</h2>
-                <p className="calendar-subtitle">Eventos e movimentações da ICONICS</p>
+                <h2>Calendario</h2>
+                <p className="calendar-subtitle">Eventos e movimentacoes da ICONICS</p>
               </header>
 
               <div className="calendar-custom-image emblem-real-image">
@@ -208,9 +208,9 @@ export default function HomePage() {
               </div>
 
               <div className="calendar-month-bar">
-                <button className="calendar-nav-btn" id="prevMonth" aria-label="Mês anterior">‹</button>
+                <button className="calendar-nav-btn" id="prevMonth" aria-label="Mes anterior">{"<"}</button>
                 <h3 id="calendarMonthLabel">Abril 2025</h3>
-                <button className="calendar-nav-btn" id="nextMonth" aria-label="Próximo mês">›</button>
+                <button className="calendar-nav-btn" id="nextMonth" aria-label="Proximo mes">{">"}</button>
               </div>
 
               <div className="calendar-grid-wrapper">
@@ -221,7 +221,7 @@ export default function HomePage() {
                   <span>QUA</span>
                   <span>QUI</span>
                   <span>SEX</span>
-                  <span>SÁB</span>
+                  <span>SAB</span>
                 </div>
 
                 <div className="calendar-grid" id="calendarGrid"></div>
@@ -255,7 +255,7 @@ export default function HomePage() {
               </div>
 
               <div className="calendar-footer-action">
-                <a href="/calendario" className="calendar-main-btn">Ver calendário completo</a>
+                <a href="/calendario" className="calendar-main-btn">Ver calendario completo</a>
               </div>
             </div>
           </div>
@@ -264,23 +264,22 @@ export default function HomePage() {
         <section className="formulario" id="formulario">
           <div className="form-box">
             <h2>Quer entrar para a ICONICS?</h2>
-            <p>Abra o formulário e envie sua candidatura.</p>
+            <p>Abra o formulario e envie sua candidatura.</p>
             <div className="botao"><Link href="/recrutamento" className="portal-btn">
-              Abrir formulário
-            </Link></div>
+              Abrir formulario</Link></div>
           </div>
         </section>
         <section className="login-preview" id="login-preview">
   <div className="login-preview-glow"></div>
 
   <div className="login-preview-card">
-    <span className="login-preview-badge">Área Interna</span>
+    <span className="login-preview-badge">Area Interna</span>
 
-    <h2>Já faz parte da ICONICS?</h2>
+    <h2>Ja faz parte da ICONICS?</h2>
 
     <p>
-      Entre na área interna para acessar seu painel, acompanhar eventos,
-      visualizar sua hierarquia e gerenciar conteúdos da fraternidade.
+      Entre na area interna para acessar seu painel, acompanhar eventos,
+      visualizar sua hierarquia e gerenciar conteudos da fraternidade.
     </p>
 
     <div className="login-preview-actions">
@@ -298,7 +297,7 @@ export default function HomePage() {
         <section className="formulario" id="parcerias-preview" style={{ textAlign: "center", padding: "80px 24px" }}>
           <div className="form-box">
             <h2>Nossos Parceiros</h2>
-            <p>Conheça as empresas e comunidades que caminham ao lado da Iconics.</p>
+            <p>Conheca as empresas e comunidades que caminham ao lado da Iconics.</p>
             <div className="botao"><Link href="/parcerias" className="portal-btn">
               Ver parcerias
             </Link></div>
@@ -318,7 +317,7 @@ export default function HomePage() {
               <a href="#">Contato</a>
             </div>
 
-            <p>© ICONICS — estética, presença e influência.</p>
+            <p>(c) ICONICS - estetica, presenca e influencia.</p>
           </div>
         </footer>
       </main>

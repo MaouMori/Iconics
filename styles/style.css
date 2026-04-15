@@ -12,7 +12,11 @@
 }
 
 *{box-sizing:border-box}
-html{scroll-behavior:smooth}
+html{
+  scroll-behavior:smooth;
+  max-width:100%;
+  overflow-x:hidden;
+}
 
 body{
   margin:0;
@@ -22,6 +26,18 @@ body{
     radial-gradient(circle at top, rgba(168,85,247,.16), transparent 24%),
     linear-gradient(180deg, var(--bg) 0%, var(--bg2) 45%, var(--bg3) 100%);
   overflow-x:hidden;
+  max-width:100%;
+}
+
+img, video, canvas, svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.site {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 a{text-decoration:none;color:inherit}
@@ -2622,5 +2638,15 @@ button,input,textarea{font:inherit}
 
   .members-content {
     gap: 18px;
+  }
+
+  .member-main-panel {
+    grid-template-columns: 1fr;
+    min-height: unset;
+    padding: 18px;
+  }
+
+  .member-art-panel {
+    min-height: 360px;
   }
 }

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import TopBar from "@/components/Topbar";
 import Spinner from "@/components/Spinner";
@@ -126,7 +126,7 @@ export default function PainelVinculoPage() {
 
       const payload = (await response.json()) as LinkResponse & { error?: string };
       if (!response.ok) {
-        setError(payload.error || "Erro ao carregar vÃ­nculo.");
+        setError(payload.error || "Erro ao carregar vinculo.");
         setLoading(false);
         return;
       }
@@ -186,7 +186,7 @@ export default function PainelVinculoPage() {
         expiresAt: payload.expiresAt || null,
       });
     } catch {
-      // ignora erro e mantém a tela funcional
+      // ignora erro e mantem a tela funcional
     }
   }
 
@@ -254,7 +254,7 @@ export default function PainelVinculoPage() {
 
     const payload = (await response.json()) as LinkResponse & { error?: string };
     if (!response.ok) {
-      setError(payload.error || "Erro ao carregar vÃ­nculo.");
+      setError(payload.error || "Erro ao carregar vinculo.");
       return;
     }
 
@@ -274,12 +274,12 @@ export default function PainelVinculoPage() {
 
     const memberId = Number(requestMemberId);
     if (!Number.isInteger(memberId) || memberId <= 0) {
-      setError("Informe um ID de membro vÃ¡lido.");
+      setError("Informe um ID de membro valido.");
       return;
     }
 
     if (!requestCode.trim()) {
-      setError("Informe o cÃ³digo de acesso.");
+      setError("Informe o codigo de acesso.");
       return;
     }
 
@@ -297,11 +297,11 @@ export default function PainelVinculoPage() {
 
     const payload = await response.json();
     if (!response.ok) {
-      setError(payload.error || "Erro ao enviar solicitaÃ§Ã£o.");
+      setError(payload.error || "Erro ao enviar solicitacao.");
       return;
     }
 
-    setMessage(payload.message || "SolicitaÃ§Ã£o enviada.");
+    setMessage(payload.message || "Solicitacao enviada.");
     setRequestCode("");
     setRequestMemberId("");
     await loadMyLink();
@@ -339,7 +339,7 @@ export default function PainelVinculoPage() {
 
       const result = await response.json();
       if (!response.ok) {
-        setError(result.error || "NÃ£o foi possÃ­vel salvar.");
+        setError(result.error || "Nao foi possivel salvar.");
         return;
       }
 
@@ -393,7 +393,7 @@ export default function PainelVinculoPage() {
       <>
         <TopBar />
         <main style={pageStyle}>
-          <Spinner texto="Carregando vÃ­nculo..." />
+          <Spinner texto="Carregando vinculo..." />
         </main>
       </>
     );
@@ -406,11 +406,11 @@ export default function PainelVinculoPage() {
         <section style={panelStyle}>
           <div style={headerRow}>
             <div>
-              <p style={eyebrow}>VÃ­nculo de Membro</p>
+              <p style={eyebrow}>Vinculo de Membro</p>
               <h1 style={title}>Meu Card Vinculado</h1>
               <p style={muted}>
-                Solicite o vÃ­nculo com o cÃ³digo de acesso do card. ApÃ³s aprovaÃ§Ã£o por lÃ­der, vice-lÃ­der
-                ou staff, a ediÃ§Ã£o do card fica liberada para sua conta.
+                Solicite o vinculo com o codigo de acesso do card. Apos aprovacao por lider, vice-lider ou
+                staff, a edicao do card fica liberada para sua conta.
               </p>
             </div>
             <button style={secondaryBtn} onClick={() => (window.location.href = "/painel")}>
@@ -449,7 +449,7 @@ export default function PainelVinculoPage() {
 
           {!data.linked && (
             <div style={requestBox}>
-              <h3 style={cardTitle}>Solicitar vÃ­nculo</h3>
+              <h3 style={cardTitle}>Solicitar vinculo</h3>
               <div style={grid2}>
                 <input
                   style={input}
@@ -464,11 +464,11 @@ export default function PainelVinculoPage() {
                   type="text"
                   value={requestCode}
                   onChange={(e) => setRequestCode(e.target.value)}
-                  placeholder="CÃ³digo de acesso do card"
+                  placeholder="Codigo de acesso do card"
                 />
               </div>
               <button style={primaryBtn} onClick={sendLinkRequest}>
-                Enviar solicitaÃ§Ã£o
+                Enviar solicitacao
               </button>
 
               <div style={cardsListWrap}>
@@ -493,7 +493,7 @@ export default function PainelVinculoPage() {
 
               {pending.length > 0 && (
                 <div style={{ marginTop: 12 }}>
-                  <p style={muted}>SolicitaÃ§Ãµes pendentes:</p>
+                  <p style={muted}>Solicitacoes pendentes:</p>
                   {pending.map((item) => (
                     <p key={item.id} style={line}>
                       Pedido #{item.id} - card #{item.member_card_id} ({new Date(item.requested_at).toLocaleString("pt-BR")})
@@ -506,7 +506,7 @@ export default function PainelVinculoPage() {
 
           {data.linked && (
             <div style={editorWrap}>
-              <h3 style={cardTitle}>EdiÃ§Ã£o do card vinculado</h3>
+              <h3 style={cardTitle}>Edicao do card vinculado</h3>
 
               <div style={grid2}>
                 <input style={input} value={form.nome} onChange={(e) => setForm((p) => ({ ...p, nome: e.target.value }))} placeholder="Nome" />
@@ -516,21 +516,21 @@ export default function PainelVinculoPage() {
               </div>
 
               <textarea style={textarea} value={form.personalidade} onChange={(e) => setForm((p) => ({ ...p, personalidade: e.target.value }))} placeholder="Personalidade" />
-              <textarea style={textarea} value={form.habitos} onChange={(e) => setForm((p) => ({ ...p, habitos: e.target.value }))} placeholder="HÃ¡bitos" />
+              <textarea style={textarea} value={form.habitos} onChange={(e) => setForm((p) => ({ ...p, habitos: e.target.value }))} placeholder="Habitos" />
               <textarea style={textarea} value={form.gostos} onChange={(e) => setForm((p) => ({ ...p, gostos: e.target.value }))} placeholder="Gostos" />
               <textarea style={textarea} value={form.hobbies} onChange={(e) => setForm((p) => ({ ...p, hobbies: e.target.value }))} placeholder="Hobbies" />
 
               <div style={grid2}>
                 <input style={input} value={form.tags} onChange={(e) => setForm((p) => ({ ...p, tags: e.target.value }))} placeholder="Tags (A|B|C)" />
-                <input style={input} value={form.stats} onChange={(e) => setForm((p) => ({ ...p, stats: e.target.value }))} placeholder="Stats (ForÃ§a:10|Velocidade:8)" />
+                <input style={input} value={form.stats} onChange={(e) => setForm((p) => ({ ...p, stats: e.target.value }))} placeholder="Stats (Forca:10|Velocidade:8)" />
                 <input style={input} value={form.sigil} onChange={(e) => setForm((p) => ({ ...p, sigil: e.target.value }))} placeholder="Sigil" />
                 <input style={input} value={form.accent_color} onChange={(e) => setForm((p) => ({ ...p, accent_color: e.target.value }))} placeholder="Cor destaque (#7c3aed)" />
                 <input style={input} value={form.imagem_url} onChange={(e) => setForm((p) => ({ ...p, imagem_url: e.target.value }))} placeholder="Imagem principal (URL)" />
                 <input style={input} type="file" accept="image/*" onChange={(e) => setImageFile(e.target.files?.[0] || null)} />
               </div>
 
-              <h4 style={subtitle}>Galeria (atÃ© 16 fotos)</h4>
-              <p style={muted}>Cada foto tem um ID de 1 a 16. Use esse ID para controle rÃ¡pido.</p>
+              <h4 style={subtitle}>Galeria (ate 16 fotos)</h4>
+              <p style={muted}>Cada foto tem um ID de 1 a 16. Use esse ID para controle rapido.</p>
               <div style={galleryGrid}>
                 {Array.from({ length: 16 }).map((_, index) => (
                   <div key={index} style={galleryItem}>
@@ -587,7 +587,7 @@ export default function PainelVinculoPage() {
               </div>
 
               <button style={primaryBtn} onClick={saveMyCard} disabled={saving}>
-                {saving ? "Salvando..." : "Salvar alteraÃ§Ãµes do meu card"}
+                {saving ? "Salvando..." : "Salvar alteracoes do meu card"}
               </button>
               <button
                 style={{

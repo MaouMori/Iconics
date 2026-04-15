@@ -210,6 +210,7 @@
 
 .calendar-grid {
   gap: 10px;
+  min-height: 200px;
 }
 
 .calendar-day {
@@ -262,6 +263,19 @@
 .day-number {
   position: relative;
   z-index: 2;
+  color: #f4ebff;
+  font-weight: 700;
+  line-height: 1;
+  text-shadow: 0 0 10px rgba(166, 96, 255, 0.25);
+}
+
+.calendar-grid:empty::before {
+  content: "Carregando dias...";
+  display: block;
+  grid-column: 1 / -1;
+  text-align: center;
+  color: #d8cceb;
+  padding: 18px 0;
 }
 
 .event-marker {

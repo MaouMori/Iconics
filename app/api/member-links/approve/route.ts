@@ -9,13 +9,13 @@ export async function POST(req: NextRequest) {
     : "";
 
   if (!token) {
-    return NextResponse.json({ error: "Não autenticado." }, { status: 401 });
+    return NextResponse.json({ error: "Nao autenticado." }, { status: 401 });
   }
 
   const { data: userData, error: userError } = await supabaseAdmin.auth.getUser(token);
   const approverId = userData.user?.id;
   if (userError || !approverId) {
-    return NextResponse.json({ error: "Sessão inválida." }, { status: 401 });
+    return NextResponse.json({ error: "Sessao invalida." }, { status: 401 });
   }
 
   const { data: profile, error: profileError } = await supabaseAdmin
@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
 
   if (!canApproveLink(profile?.cargo)) {
     return NextResponse.json(
-      { error: "Apenas líder, vice_lider, admin ou staff podem aprovar." },
+      { error: "Apenas lider, vice_lider, admin ou staff podem aprovar." },
       { status: 403 }
     );
   }
@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
   const reason = String(body?.reason || "").trim() || null;
 
   if (!Number.isInteger(requestId) || requestId <= 0) {
-    return NextResponse.json({ error: "requestId inválido." }, { status: 400 });
+    return NextResponse.json({ error: "requestId invalido." }, { status: 400 });
   }
 
   if (action !== "approve" && action !== "reject") {
@@ -55,11 +55,11 @@ export async function POST(req: NextRequest) {
     .maybeSingle();
 
   if (requestError || !linkRequest) {
-    return NextResponse.json({ error: "Solicitação não encontrada." }, { status: 404 });
+    return NextResponse.json({ error: "Solicitacao nao encontrada." }, { status: 404 });
   }
 
   if (linkRequest.status !== "pending") {
-    return NextResponse.json({ error: "Solicitação já foi processada." }, { status: 409 });
+    return NextResponse.json({ error: "Solicitacao ja foi processada." }, { status: 409 });
   }
 
   if (action === "reject") {
@@ -81,8 +81,8 @@ export async function POST(req: NextRequest) {
       await supabaseAdmin.from("site_notifications").insert({
         profile_id: linkRequest.requested_by_profile_id,
         kind: "member_link_rejected",
-        title: "Solicitação de vínculo rejeitada",
-        body: reason || "Sua solicitação de vínculo foi rejeitada pela liderança.",
+        title: "Solicitacao de vinculo rejeitada",
+        body: reason || "Sua solicitacao de vinculo foi rejeitada pela lideranca.",
         payload: { request_id: requestId, member_card_id: linkRequest.member_card_id },
       });
     }
@@ -116,7 +116,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       {
         error:
-          "NÃ£o foi possÃ­vel identificar conta do site ou Discord dessa solicitaÃ§Ã£o. PeÃ§a novo vÃ­nculo apÃ³s usar !vincularsite.",
+          "Nao foi possivel identificar conta do site ou Discord dessa solicitacao. Peca novo vinculo apos usar !vincularsite.",
       },
       { status: 400 }
     );
@@ -201,8 +201,8 @@ export async function POST(req: NextRequest) {
     await supabaseAdmin.from("site_notifications").insert({
       profile_id: requestedByProfileId,
       kind: "member_link_approved",
-      title: "Solicitação de vínculo aprovada",
-      body: `Seu vínculo para o card #${linkRequest.member_card_id} foi aprovado.`,
+      title: "Solicitacao de vinculo aprovada",
+      body: `Seu vinculo para o card #${linkRequest.member_card_id} foi aprovado.`,
       payload: { request_id: requestId, member_card_id: linkRequest.member_card_id },
     });
   }

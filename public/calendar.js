@@ -11,7 +11,7 @@
     }
 
     const monthNames = [
-      "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+      "Janeiro", "Fevereiro", "Marco", "Abril", "Maio", "Junho",
       "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
     ];
 
@@ -136,17 +136,17 @@
             `
             : `
               <div class="event-image-box image-placeholder-event">
-                <span>Área para imagem do evento</span>
+                <span>Area para imagem do evento</span>
               </div>
             `;
 
         card.innerHTML = `
           <div class="event-card-layout">
             <div class="event-info">
-              <div class="event-date">${formatDisplayDate(event.date)} • ${event.time || "Sem horário"}</div>
+              <div class="event-date">${formatDisplayDate(event.date)} - ${event.time || "Sem horario"}</div>
               <div class="event-title">${event.title}</div>
               <div class="event-location">${event.location || "Sem local"}</div>
-              <div class="event-description">${event.description || "Sem descrição"}</div>
+              <div class="event-description">${event.description || "Sem descricao"}</div>
             </div>
 
             <div class="event-visual">

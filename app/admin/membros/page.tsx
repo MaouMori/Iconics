@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Spinner from "@/components/Spinner";
 import Toast from "@/components/Toast";
@@ -48,7 +48,7 @@ export default function AdminMembrosPage() {
   const [hobbies, setHobbies] = useState("");
   const [tags, setTags] = useState("");
   const [stats, setStats] = useState("");
-  const [sigil, setSigil] = useState("âœ¦");
+  const [sigil, setSigil] = useState("*");
   const [imagemUrl, setImagemUrl] = useState("");
   const [accentColor, setAccentColor] = useState("#7c3aed");
   const [ordem, setOrdem] = useState(0);
@@ -107,7 +107,7 @@ export default function AdminMembrosPage() {
     setHobbies(membro.hobbies || "");
     setTags(membro.tags || "");
     setStats(membro.stats || "");
-    setSigil(membro.sigil || "âœ¦");
+    setSigil(membro.sigil || "*");
     setImagemUrl(membro.imagem_url || "");
     setAccentColor(membro.accent_color || "#7c3aed");
     setOrdem(membro.ordem ?? 0);
@@ -155,7 +155,7 @@ export default function AdminMembrosPage() {
     setHobbies("");
     setTags("");
     setStats("");
-    setSigil("âœ¦");
+    setSigil("*");
     setImagemUrl("");
     setAccentColor("#7c3aed");
     setImagemFile(null);
@@ -167,32 +167,32 @@ export default function AdminMembrosPage() {
     e.preventDefault();
     setMensagem("");
 
-    // ValidaÃ§Ã£o de campos obrigatÃ³rios
+    // Validacao de campos obrigatorios
     if (!nome.trim()) {
-      setMensagem("O nome Ã© obrigatÃ³rio.");
+      setMensagem("O nome e obrigatorio.");
       return;
     }
     if (!idade.trim()) {
-      setMensagem("A idade Ã© obrigatÃ³ria.");
+      setMensagem("A idade e obrigatoria.");
       return;
     }
     if (!meta.trim()) {
-      setMensagem("A meta/subtÃ­tulo Ã© obrigatÃ³ria.");
+      setMensagem("A meta/subtitulo e obrigatoria.");
       return;
     }
     if (!personalidade.trim()) {
-      setMensagem("A personalidade Ã© obrigatÃ³ria.");
+      setMensagem("A personalidade e obrigatoria.");
       return;
     }
     if (!tags.trim()) {
-      setMensagem("As tags sÃ£o obrigatÃ³rias (mÃ­nimo 3).");
+      setMensagem("As tags sao obrigatorias (minimo 3).");
       return;
     }
 
     const { data: userData } = await supabase.auth.getUser();
 
     if (!userData.user) {
-      setMensagem("UsuÃ¡rio nÃ£o autenticado.");
+      setMensagem("Usuario nao autenticado.");
       return;
     }
 
@@ -300,7 +300,7 @@ export default function AdminMembrosPage() {
       limparFormulario();
     }
 
-    setMensagem("Membro excluÃ­do.");
+    setMensagem("Membro excluido.");
     await carregarMembros();
   }
 
@@ -387,12 +387,12 @@ export default function AdminMembrosPage() {
 
           {editingId && (
             <p style={{ color: "#d8b4fe", marginTop: 8 }}>
-              VocÃª estÃ¡ editando um membro existente.
+              Voce esta editando um membro existente.
             </p>
           )}
 
           <p style={{ color: "#a78bfa", marginTop: 12, fontSize: 14 }}>
-            * Campos obrigatÃ³rios para criar um card completo
+            * Campos obrigatorios para criar um card completo
           </p>
 
           <form onSubmit={salvarMembro} style={{ display: "grid", gap: 12, marginTop: 20 }}>
@@ -420,13 +420,13 @@ export default function AdminMembrosPage() {
             >
               <option value="membro">Membro</option>
               <option value="veterano">Veterano</option>
-              <option value="vice_lider">Vice lÃ­der</option>
-              <option value="lider">LÃ­der</option>
+              <option value="vice_lider">Vice lider</option>
+              <option value="lider">Lider</option>
             </select>
 
             <input
               style={inputStyle}
-              placeholder="Meta / subtÃ­tulo * (ex: Dominar, evoluir e ser estrela)"
+              placeholder="Meta / subtitulo * (ex: Dominar, evoluir e ser estrela)"
               value={meta}
               onChange={(e) => setMeta(e.target.value)}
               required
@@ -434,7 +434,7 @@ export default function AdminMembrosPage() {
 
             <textarea
               style={textareaStyle}
-              placeholder="Personalidade * (descriÃ§Ã£o do personagem)"
+              placeholder="Personalidade * (descricao do personagem)"
               value={personalidade}
               onChange={(e) => setPersonalidade(e.target.value)}
               required
@@ -442,7 +442,7 @@ export default function AdminMembrosPage() {
 
             <textarea
               style={textareaStyle}
-              placeholder="HÃ¡bitos"
+              placeholder="Habitos"
               value={habitos}
               onChange={(e) => setHabitos(e.target.value)}
             />
@@ -463,7 +463,7 @@ export default function AdminMembrosPage() {
 
             <input
               style={inputStyle}
-              placeholder="Tags * (separadas por | ) Ex: frio | misterioso | elegante | estratÃ©gica"
+              placeholder="Tags * (separadas por | ) Ex: frio | misterioso | elegante | estrategica"
               value={tags}
               onChange={(e) => setTags(e.target.value)}
               required
@@ -471,7 +471,7 @@ export default function AdminMembrosPage() {
 
             <input
               style={inputStyle}
-              placeholder="Stats (separadas por | ) Ex: InfluÃªncia:10 | PresenÃ§a:9 - MÃX 100 CARACTERES"
+              placeholder="Stats (separadas por | ) Ex: Influencia:10 | Presenca:9 - MAX 100 CARACTERES"
               value={stats}
               maxLength={100}
               onChange={(e) => setStats(e.target.value)}
@@ -479,7 +479,7 @@ export default function AdminMembrosPage() {
 
             <input
               style={inputStyle}
-              placeholder="SÃ­mbolo do card (sigil)"
+              placeholder="Simbolo do card (sigil)"
               value={sigil}
               onChange={(e) => setSigil(e.target.value)}
             />
@@ -500,7 +500,7 @@ export default function AdminMembrosPage() {
 
             <input
               type="number"
-              placeholder="Ordem de exibiÃ§Ã£o"
+              placeholder="Ordem de exibicao"
               value={ordem}
               onChange={(e) => setOrdem(Number(e.target.value))}
               style={inputStyle}
@@ -524,7 +524,7 @@ export default function AdminMembrosPage() {
             <div style={galleryAdminWrapStyle}>
               <h3 style={{ margin: 0 }}>Galeria do membro</h3>
               <p style={{ margin: "4px 0 0", color: "#d8b4fe" }}>
-                VocÃª pode adicionar atÃ© 16 fotos. Pode usar upload ou URL.
+                Voce pode adicionar ate 16 fotos. Pode usar upload ou URL.
               </p>
 
               <div style={galleryGridStyle}>
@@ -585,13 +585,13 @@ export default function AdminMembrosPage() {
                 {uploading
                   ? "Enviando imagem..."
                   : editingId
-                  ? "Salvar alteraÃ§Ãµes"
+                  ? "Salvar alteracoes"
                   : "Criar membro"}
               </button>
 
               {editingId && (
                 <button type="button" style={buttonStyle} onClick={limparFormulario}>
-                  Cancelar ediÃ§Ã£o
+                  Cancelar edicao
                 </button>
               )}
 
@@ -622,13 +622,9 @@ export default function AdminMembrosPage() {
                   </div>
 
                   <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-                    <button style={smallButtonStyle} onClick={() => moverMembro(membro.id, "up")}>
-                      â†‘ Subir
-                    </button>
+                    <button style={smallButtonStyle} onClick={() => moverMembro(membro.id, "up")}>Subir</button>
 
-                    <button style={smallButtonStyle} onClick={() => moverMembro(membro.id, "down")}>
-                      â†“ Descer
-                    </button>
+                    <button style={smallButtonStyle} onClick={() => moverMembro(membro.id, "down")}>Descer</button>
 
                     <button style={buttonStyle} onClick={() => editarMembro(membro)}>
                       Editar
