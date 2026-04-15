@@ -62,6 +62,17 @@ export default function PainelPage() {
       if (profileData) {
         setProfile(profileData);
       } else {
+        const { data: sessionData } = await supabase.auth.getSession();
+        const accessToken = sessionData.session?.access_token;
+        if (accessToken) {
+          await fetch("/api/profiles/ensure", {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          });
+        }
+
         setProfile({
           id: currentUserId,
           nome:

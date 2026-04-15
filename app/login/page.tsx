@@ -19,6 +19,15 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [mostrarSenha, setMostrarSenha] = useState(false);
 
+  async function ensureProfile(token: string) {
+    await fetch("/api/profiles/ensure", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setMensagem("");
@@ -59,6 +68,8 @@ export default function LoginPage() {
           return;
         }
 
+        await ensureProfile(data.session.access_token);
+
         setMensagem("Login realizado com sucesso.");
         router.push("/painel");
         router.refresh();
@@ -76,7 +87,7 @@ export default function LoginPage() {
     try {
       const redirectTo =
         typeof window !== "undefined"
-          ? `${window.location.origin}/painel`
+          ? `${window.location.origin}/auth/callback`
           : undefined;
 
       const { error } = await supabase.auth.signInWithOAuth({
