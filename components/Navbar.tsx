@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import NotificationBell from "@/components/NotificationBell";
 
 export default function Navbar() {
   const [isLogged, setIsLogged] = useState(false);
@@ -82,6 +83,7 @@ export default function Navbar() {
 
         {!loading && isLogged && (
           <>
+            <NotificationBell className="nav-link nav-login nav-bell" compact />
             <Link href="/painel" className="nav-link nav-login">
               Painel
             </Link>

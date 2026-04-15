@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import NotificationBell from "@/components/NotificationBell";
 
 type TopBarProps = {
   showPainel?: boolean;
@@ -133,6 +134,10 @@ export default function TopBar({
           <Link href="/rede" style={linkStyle}>
             Rede{alertCount > 0 ? ` (${alertCount})` : ""}
           </Link>
+        )}
+
+        {!loading && isLogged && (
+          <NotificationBell className="topbar-bell-link" />
         )}
 
         {!loading && isLogged && showLogout && (

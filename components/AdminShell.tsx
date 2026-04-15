@@ -3,6 +3,7 @@
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
+import NotificationBell from "@/components/NotificationBell";
 
 type AdminKey =
   | "dashboard"
@@ -120,6 +121,7 @@ export default function AdminShell({
           <Link href="/painel" className="admin-top-btn">
             Painel
           </Link>
+          <NotificationBell className="admin-top-btn" />
           <button onClick={handleLogout} className="admin-top-btn danger">
             Sair
           </button>

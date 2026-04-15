@@ -2,6 +2,7 @@
 
 import Spinner from "@/components/Spinner";
 import { supabase } from "@/lib/supabase";
+import NotificationBell from "@/components/NotificationBell";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import "./rede.css";
@@ -536,6 +537,7 @@ export default function RedePage() {
             <Link href="/" className="top-btn">Voltar ao site</Link>
             <Link href="/painel" className="top-btn">Painel</Link>
             <Link href="/rede" className="top-btn active">Rede</Link>
+            <NotificationBell className="top-btn" />
             <button className="top-btn danger" onClick={async () => {
               await supabase.auth.signOut();
               window.location.href = "/";
@@ -554,10 +556,10 @@ export default function RedePage() {
                 <span aria-hidden>✎</span>
                 <span>Publicar</span>
               </button>
-              <button onClick={() => document.querySelector<HTMLElement>(".chat-side")?.scrollIntoView({ behavior: "smooth" })}>
+              <Link href="/rede/mensagens">
                 <span aria-hidden>💬</span>
                 <span>Mensagens</span>
-              </button>
+              </Link>
               <button onClick={() => document.querySelector<HTMLElement>(".left-list-panel")?.scrollIntoView({ behavior: "smooth" })}>
                 <span aria-hidden>👥</span>
                 <span>Membros</span>
@@ -596,25 +598,37 @@ export default function RedePage() {
             </section>
 
             <section className="left-list-panel">
-              <p className="section-title">Mensagens</p>
+              <div className="left-list-head">
+                <p className="section-title">Mensagens</p>
+                <Link href="/rede/mensagens" className="mini-link-btn">
+                  Abrir inbox
+                </Link>
+              </div>
               <div className="member-scroll">
                 {members.map((member) => (
-                  <button
-                    key={member.id}
-                    className={`member-tile ${selectedMemberId === member.id ? "active" : ""}`}
-                    onClick={() => {
-                      setSelectedMemberId(member.id);
-                      setNewMessageText("");
-                      setNewMessageImage("");
-                      if (token) loadMessages(token, member.id);
-                    }}
-                  >
-                    <img src={member.avatar_url || "/images/logo.png"} alt="" />
-                    <div>
-                      <strong>{member.nome}</strong>
-                      <span>@{member.username || "membro"}</span>
-                    </div>
-                    <span className="member-tile-actions">
+                  <article key={member.id} className={`member-tile ${selectedMemberId === member.id ? "active" : ""}`}>
+                    <button
+                      className="member-main-hit"
+                      onClick={() => {
+                        setSelectedMemberId(member.id);
+                        setNewMessageText("");
+                        setNewMessageImage("");
+                        if (token) loadMessages(token, member.id);
+                      }}
+                    >
+                      <img src={member.avatar_url || "/images/logo.png"} alt="" />
+                      <div>
+                        <strong>{member.nome}</strong>
+                        <span>@{member.username || "membro"}</span>
+                      </div>
+                    </button>
+                    <div className="member-row-actions">
+                      <Link className="mini-link-btn" href={`/rede/perfil/${member.id}`}>
+                        Perfil
+                      </Link>
+                      <Link className="mini-link-btn" href={`/rede/mensagens?with=${member.id}`}>
+                        Chat
+                      </Link>
                       {member.id !== me?.id ? (
                         <button
                           type="button"
@@ -627,9 +641,20 @@ export default function RedePage() {
                           {follows.followingIds.includes(member.id) ? "Seguindo" : "Seguir"}
                         </button>
                       ) : null}
-                    </span>
-                    {canModerate ? <em onClick={(e) => { e.stopPropagation(); muteMember(member.id); }}>Silenciar</em> : null}
-                  </button>
+                      {canModerate ? (
+                        <button
+                          type="button"
+                          className="mini-link-btn danger"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            muteMember(member.id);
+                          }}
+                        >
+                          Silenciar
+                        </button>
+                      ) : null}
+                    </div>
+                  </article>
                 ))}
               </div>
             </section>
@@ -777,7 +802,7 @@ export default function RedePage() {
                   <div key={member.id} className="trend-item">
                     <img src={member.avatar_url || "/images/logo.png"} alt="" />
                     <div>
-                      <strong>{member.nome}</strong>
+                      <Link href={`/rede/perfil/${member.id}`}><strong>{member.nome}</strong></Link>
                       <p>{member.postCount} postagens</p>
                     </div>
                     <span>#{idx + 1}</span>

@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
     .select("id, nome, username, avatar_url, cargo")
     .neq("id", profile.id)
     .order("nome", { ascending: true })
-    .limit(50);
+    .limit(200);
 
   const members = (membersData || []).map((item) => ({
     id: String(item.id),
@@ -24,8 +24,60 @@ export async function GET(req: NextRequest) {
     cargo: item.cargo || "membro",
   }));
 
+  const { data: conversationRaw } = await supabaseAdmin
+    .from("social_direct_messages")
+    .select("id, sender_profile_id, recipient_profile_id, content, image_url, created_at, read_at")
+    .or(`sender_profile_id.eq.${profile.id},recipient_profile_id.eq.${profile.id}`)
+    .order("created_at", { ascending: false })
+    .limit(500);
+
+  const profileCache = new Map(
+    members.map((m) => [m.id, m] as const)
+  );
+
+  const convoMap = new Map<
+    string,
+    {
+      with: (typeof members)[number];
+      lastMessage: string;
+      lastAt: string;
+      unreadCount: number;
+    }
+  >();
+
+  for (const row of conversationRaw || []) {
+    const otherId =
+      row.sender_profile_id === profile.id
+        ? String(row.recipient_profile_id)
+        : String(row.sender_profile_id);
+    if (!otherId) continue;
+
+    const cached = profileCache.get(otherId);
+    if (!cached) continue;
+
+    const current = convoMap.get(otherId);
+    const isUnreadForMe =
+      row.recipient_profile_id === profile.id && !row.read_at;
+
+    if (!current) {
+      convoMap.set(otherId, {
+        with: cached,
+        lastMessage: row.content || (row.image_url ? "[imagem]" : ""),
+        lastAt: row.created_at,
+        unreadCount: isUnreadForMe ? 1 : 0,
+      });
+      continue;
+    }
+
+    if (isUnreadForMe) current.unreadCount += 1;
+  }
+
+  const conversations = Array.from(convoMap.values()).sort(
+    (a, b) => new Date(b.lastAt).getTime() - new Date(a.lastAt).getTime()
+  );
+
   if (!withProfileId) {
-    return NextResponse.json({ members, messages: [] });
+    return NextResponse.json({ members, conversations, messages: [] });
   }
 
   const { data: messageData } = await supabaseAdmin
@@ -44,8 +96,16 @@ export async function GET(req: NextRequest) {
     .eq("recipient_profile_id", profile.id)
     .is("read_at", null);
 
+  await supabaseAdmin
+    .from("site_notifications")
+    .update({ is_read: true })
+    .eq("profile_id", profile.id)
+    .eq("kind", "message")
+    .eq("is_read", false);
+
   return NextResponse.json({
     members,
+    conversations,
     messages: messageData || [],
   });
 }
