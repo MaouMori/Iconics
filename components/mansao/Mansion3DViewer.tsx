@@ -4,7 +4,11 @@ import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 
-export default function Mansion3DViewer() {
+type Mansion3DViewerProps = {
+  minimal?: boolean;
+};
+
+export default function Mansion3DViewer({ minimal = false }: Mansion3DViewerProps) {
   const mountRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -175,6 +179,15 @@ export default function Mansion3DViewer() {
       mount.removeChild(renderer.domElement);
     };
   }, []);
+
+  if (minimal) {
+    return (
+      <>
+        <div className="viewer-stage viewer-stage-modal" ref={mountRef} />
+        <p className="map-hint">Arraste para orbitar, scroll para zoom e clique direito para mover a câmera.</p>
+      </>
+    );
+  }
 
   return (
     <section className="mansao-panel">

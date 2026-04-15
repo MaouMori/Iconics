@@ -3,6 +3,7 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
 const DEFAULT_LOCATION = { x: 0.685, y: 0.442 };
 const SETTINGS_KEY = "mansion_location";
+const ALLOWED_MARK_ROLES = new Set(["admin", "lider", "vice_lider"]);
 
 function sanitizePoint(raw: unknown) {
   if (!raw || typeof raw !== "object") return null;
@@ -56,8 +57,8 @@ export async function POST(req: NextRequest) {
   }
 
   const cargo = String(profile?.cargo || "").trim().toLowerCase();
-  if (cargo !== "admin") {
-    return NextResponse.json({ error: "Apenas admin pode alterar a localização." }, { status: 403 });
+  if (!ALLOWED_MARK_ROLES.has(cargo)) {
+    return NextResponse.json({ error: "Apenas admin/lider/vice_lider pode alterar a localização." }, { status: 403 });
   }
 
   const body = await req.json().catch(() => null);

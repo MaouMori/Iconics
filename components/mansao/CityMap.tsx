@@ -14,6 +14,10 @@ type Point = {
   y: number;
 };
 
+type CityMapProps = {
+  onView3D?: () => void;
+};
+
 const MIN_ZOOM = 1;
 const MAX_ZOOM = 8;
 
@@ -29,12 +33,14 @@ function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
 }
 
-export default function CityMap() {
-  const [view, setView] = useState<ViewState>({ zoom: 1, x: 0, y: 0 });
+export default function CityMap({ onView3D }: CityMapProps) {
+  const [view, setView] = useState<ViewState>({ zoom: 1.15, x: 0, y: 0 });
   const [dragging, setDragging] = useState(false);
   const [markMode, setMarkMode] = useState(false);
   const [mansionPos, setMansionPos] = useState<Point>(DEFAULT_MANSION);
+  const [markerOpen, setMarkerOpen] = useState(true);
   const [saveState, setSaveState] = useState<"idle" | "saving" | "saved" | "error">("idle");
+  const [saveErrorMessage, setSaveErrorMessage] = useState("");
   const [lastPos, setLastPos] = useState<{ x: number; y: number } | null>(null);
   const [imageIndex, setImageIndex] = useState(0);
   const [imageLoaded, setImageLoaded] = useState(true);
@@ -110,23 +116,16 @@ export default function CityMap() {
     setSaveState("idle");
   };
 
-  const copyCoords = async () => {
-    const text = `x: ${mansionPos.x.toFixed(4)}, y: ${mansionPos.y.toFixed(4)}`;
-    try {
-      await navigator.clipboard.writeText(text);
-    } catch {
-      // ignore clipboard failures
-    }
-  };
-
   const saveLocation = async () => {
     setSaveState("saving");
+    setSaveErrorMessage("");
 
     const { data } = await supabase.auth.getSession();
     const token = data.session?.access_token;
 
     if (!token) {
       setSaveState("error");
+      setSaveErrorMessage("Sessao expirada. Faca login novamente.");
       return;
     }
 
@@ -139,7 +138,15 @@ export default function CityMap() {
       body: JSON.stringify(mansionPos),
     });
 
-    setSaveState(response.ok ? "saved" : "error");
+    if (response.ok) {
+      setSaveState("saved");
+      return;
+    }
+
+    setSaveState("error");
+    const payload = await response.json().catch(() => null);
+    const apiError = payload?.error;
+    setSaveErrorMessage(typeof apiError === "string" && apiError ? apiError : "Falha ao salvar localizacao.");
   };
 
   useEffect(() => {
@@ -185,55 +192,33 @@ export default function CityMap() {
   }, []);
 
   return (
-    <section className="mansao-panel">
-      <div className="mansao-panel-top">
-        <div>
-          <p className="mansao-kicker">Mapa da Cidade</p>
-          <h2>Localizacao da Mansao</h2>
-        </div>
-
-        <div className="map-actions">
-          <button type="button" onClick={() => setView((v) => clampView({ ...v, zoom: clamp(v.zoom + 0.2, MIN_ZOOM, MAX_ZOOM) }))}>+</button>
-          <button type="button" onClick={() => setView((v) => clampView({ ...v, zoom: clamp(v.zoom - 0.2, MIN_ZOOM, MAX_ZOOM) }))}>-</button>
-          {canMark && (
-            <button type="button" onClick={() => setMarkMode((v) => !v)} className={markMode ? "map-action-active" : ""}>Marcar</button>
-          )}
-          {canMark && (
-            <button type="button" onClick={copyCoords}>Copiar</button>
-          )}
-          {canMark && (
-            <button type="button" onClick={saveLocation} disabled={saveState === "saving"}>
-              {saveState === "saving" ? "Salvando..." : "Salvar"}
-            </button>
-          )}
-          <button
-            type="button"
-            onClick={() => {
-              setView({ zoom: 1, x: 0, y: 0 });
-              if (canMark) {
-                setMansionPos(DEFAULT_MANSION);
-                setSaveState("idle");
-              }
-            }}
-          >
-            Reset
+    <div className="maps-map-root">
+      <div className="maps-control-bar">
+        <button type="button" onClick={() => setView((v) => clampView({ ...v, zoom: clamp(v.zoom + 0.2, MIN_ZOOM, MAX_ZOOM) }))}>+</button>
+        <button type="button" onClick={() => setView((v) => clampView({ ...v, zoom: clamp(v.zoom - 0.2, MIN_ZOOM, MAX_ZOOM) }))}>-</button>
+        {canMark && (
+          <button type="button" className={markMode ? "active" : ""} onClick={() => setMarkMode((v) => !v)}>
+            Marcar
           </button>
-        </div>
+        )}
+        {canMark && (
+          <button type="button" onClick={saveLocation} disabled={saveState === "saving"}>
+            {saveState === "saving" ? "Salvando..." : "Salvar"}
+          </button>
+        )}
+        <button type="button" onClick={() => setView({ zoom: 1.15, x: 0, y: 0 })}>Reset</button>
       </div>
 
       <div
         ref={stageRef}
-        className={`map-stage ${dragging ? "dragging" : ""}`}
+        className={`map-stage map-stage-big ${dragging ? "dragging" : ""}`}
         onWheel={onWheel}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
         onPointerLeave={onPointerUp}
       >
-        <div
-          className="map-canvas"
-          style={{ transform: `translate(${view.x}px, ${view.y}px) scale(${view.zoom})` }}
-        >
+        <div className="map-canvas" style={{ transform: `translate(${view.x}px, ${view.y}px) scale(${view.zoom})` }}>
           <div className="map-image-shell" onClick={onMapClick}>
             <img
               className="map-image"
@@ -256,38 +241,49 @@ export default function CityMap() {
               </div>
             )}
 
-            <div
-              className="mansion-pin"
-              style={{
-                left: `${mansionPos.x * 100}%`,
-                top: `${mansionPos.y * 100}%`,
+            <button
+              type="button"
+              className="mansion-pin mansion-pin-house"
+              style={{ left: `${mansionPos.x * 100}%`, top: `${mansionPos.y * 100}%` }}
+              onClick={(event) => {
+                event.stopPropagation();
+                setMarkerOpen(true);
               }}
+              aria-label="Abrir local da mansão"
             >
               <div className="mansion-pin-pulse" />
-              <div className="mansion-pin-core" />
-            </div>
+              <div className="mansion-pin-core mansion-pin-home">
+                <span className="home-roof" />
+                <span className="home-body" />
+              </div>
+            </button>
 
-            <div
-              className="mansion-label"
-              style={{
-                left: `${mansionPos.x * 100}%`,
-                top: `${mansionPos.y * 100}%`,
-              }}
-            >
-              <strong>Mansao Iconics</strong>
-              <span>Vinewood Hills</span>
-            </div>
+            {markerOpen && (
+              <div
+                className="mansion-label mansion-popup"
+                style={{ left: `${mansionPos.x * 100}%`, top: `${mansionPos.y * 100}%` }}
+              >
+                <strong>Mansao Iconics</strong>
+                <span>Vinewood Hills</span>
+                <button
+                  type="button"
+                  className="popup-cta"
+                  onClick={() => {
+                    setMarkerOpen(false);
+                    onView3D?.();
+                  }}
+                >
+                  Ver em 3D
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
 
-      <p className="map-hint">
-        Arraste para navegar e use o scroll para zoom.
-        {canMark ? " Clique em Marcar e depois no mapa para posicionar." : ""}
-      </p>
-      {canMark && <p className="map-hint">Coordenadas atuais: x {mansionPos.x.toFixed(4)} | y {mansionPos.y.toFixed(4)}</p>}
+      {canMark && <p className="map-hint">Coordenadas: x {mansionPos.x.toFixed(4)} | y {mansionPos.y.toFixed(4)}</p>}
       {canMark && saveState === "saved" && <p className="map-hint">Localizacao salva no banco com sucesso.</p>}
-      {canMark && saveState === "error" && <p className="map-hint">Erro ao salvar localizacao. Verifique permissao admin e tabela no Supabase.</p>}
-    </section>
+      {canMark && saveState === "error" && <p className="map-hint">Erro: {saveErrorMessage || "Falha desconhecida."}</p>}
+    </div>
   );
 }
