@@ -15,6 +15,8 @@ export default function TopBar({
 }: TopBarProps) {
   const [isLogged, setIsLogged] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [token, setToken] = useState("");
+  const [alertCount, setAlertCount] = useState(0);
   const [isMobile, setIsMobile] = useState(
     typeof window !== "undefined" ? window.innerWidth <= 680 : false
   );
@@ -23,6 +25,8 @@ export default function TopBar({
     async function checkSession() {
       const { data } = await supabase.auth.getSession();
       setIsLogged(!!data.session);
+      setToken(data.session?.access_token || "");
+      if (!data.session) setAlertCount(0);
       setLoading(false);
     }
 
@@ -32,6 +36,8 @@ export default function TopBar({
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setIsLogged(!!session);
+      setToken(session?.access_token || "");
+      if (!session) setAlertCount(0);
       setLoading(false);
     });
 
@@ -43,6 +49,43 @@ export default function TopBar({
       window.removeEventListener("resize", onResize);
     };
   }, []);
+
+  useEffect(() => {
+    if (!token) return;
+
+    let mounted = true;
+    async function loadSummary() {
+      const response = await fetch("/api/social/notifications?summary=1", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!response.ok || !mounted) return;
+      const payload = await response.json();
+      setAlertCount((payload.unreadCount || 0) + (payload.adminPendingCount || 0));
+    }
+
+    loadSummary();
+    const interval = setInterval(loadSummary, 10000);
+
+    const channel = supabase
+      .channel("topbar-alerts")
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "site_notifications" }, () => {
+        loadSummary();
+      })
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "member_card_link_requests" },
+        () => {
+          loadSummary();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      mounted = false;
+      clearInterval(interval);
+      supabase.removeChannel(channel);
+    };
+  }, [token]);
 
   async function handleLogout() {
     await supabase.auth.signOut();
@@ -83,6 +126,12 @@ export default function TopBar({
         {!loading && isLogged && showPainel && (
           <Link href="/painel" style={linkStyle}>
             Painel
+          </Link>
+        )}
+
+        {!loading && isLogged && (
+          <Link href="/rede" style={linkStyle}>
+            Rede{alertCount > 0 ? ` (${alertCount})` : ""}
           </Link>
         )}
 

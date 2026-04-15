@@ -85,6 +85,26 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: insertError.message }, { status: 500 });
   }
 
+  const { data: approvers } = await supabaseAdmin
+    .from("profiles")
+    .select("id, cargo")
+    .in("cargo", ["lider", "vice_lider", "admin", "staff"]);
+
+  const notifRows =
+    (approvers || [])
+      .map((item) => ({
+        profile_id: item.id,
+        kind: "member_link_request",
+        title: "Nova solicitação de vínculo",
+        body: `${profile?.nome || "Membro"} solicitou vínculo para o card #${memberId}.`,
+        payload: { request_id: inserted.id, member_card_id: memberId, by_profile_id: userId },
+      }))
+      .filter((item) => item.profile_id !== userId) || [];
+
+  if (notifRows.length > 0) {
+    await supabaseAdmin.from("site_notifications").insert(notifRows);
+  }
+
   return NextResponse.json({
     ok: true,
     requestId: inserted.id,

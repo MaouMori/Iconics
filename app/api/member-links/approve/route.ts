@@ -77,6 +77,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: rejectError.message }, { status: 500 });
     }
 
+    if (linkRequest.requested_by_profile_id) {
+      await supabaseAdmin.from("site_notifications").insert({
+        profile_id: linkRequest.requested_by_profile_id,
+        kind: "member_link_rejected",
+        title: "Solicitação de vínculo rejeitada",
+        body: reason || "Sua solicitação de vínculo foi rejeitada pela liderança.",
+        payload: { request_id: requestId, member_card_id: linkRequest.member_card_id },
+      });
+    }
+
     return NextResponse.json({ ok: true, status: "rejected" });
   }
 
@@ -185,6 +195,16 @@ export async function POST(req: NextRequest) {
 
   if (approveError) {
     return NextResponse.json({ error: approveError.message }, { status: 500 });
+  }
+
+  if (requestedByProfileId) {
+    await supabaseAdmin.from("site_notifications").insert({
+      profile_id: requestedByProfileId,
+      kind: "member_link_approved",
+      title: "Solicitação de vínculo aprovada",
+      body: `Seu vínculo para o card #${linkRequest.member_card_id} foi aprovado.`,
+      payload: { request_id: requestId, member_card_id: linkRequest.member_card_id },
+    });
   }
 
   return NextResponse.json({ ok: true, status: "approved" });
