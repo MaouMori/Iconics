@@ -417,6 +417,13 @@ export default function PainelPage() {
                       Calendário
                     </button>
 
+                    <button
+                      className="btn btn-secondary"
+                      onClick={() => (window.location.href = "/painel/vinculo")}
+                    >
+                      Meu card
+                    </button>
+
                     {isAdmin && (
                       <button
                         className="btn btn-secondary"
