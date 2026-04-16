@@ -45,13 +45,18 @@
 }
 
 .rankings-chart-card,
-.rankings-table-card,
 .rankings-admin-card {
   margin-top: 16px;
   border: 1px solid rgba(203, 161, 255, 0.2);
   border-radius: 20px;
   background: rgba(255, 255, 255, 0.03);
   padding: 14px;
+}
+
+.chart-main-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 14px;
 }
 
 .chart-axis {
@@ -71,106 +76,99 @@
 
 .chart-area {
   position: relative;
-  height: clamp(320px, 46vh, 560px);
+  height: clamp(360px, 52vh, 620px);
   margin-top: 8px;
   border-radius: 16px;
-  background:
-    linear-gradient(165deg, rgba(25, 10, 45, 0.9), rgba(15, 5, 28, 0.9));
+  background: linear-gradient(165deg, rgba(25, 10, 45, 0.9), rgba(15, 5, 28, 0.9));
   border: 1px solid rgba(203, 161, 255, 0.2);
   overflow: hidden;
 }
 
-.rocket-node {
+.rocket-only {
   position: absolute;
   transform: translate(-50%, 50%);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  border: 1px solid;
-  border-radius: 999px;
-  background: rgba(9, 4, 18, 0.86);
-  padding: 8px 10px;
-  max-width: min(280px, 62vw);
-}
-
-.rocket-icon {
-  font-size: 1.2rem;
-}
-
-.rocket-label {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: 2px solid;
+  background: rgba(10, 4, 18, 0.92);
+  color: #fff;
+  cursor: pointer;
   display: grid;
-  gap: 2px;
+  place-items: center;
+  font-size: 1.45rem;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
 }
 
-.rocket-label strong {
-  font-size: 0.9rem;
-  line-height: 1.1;
+.rocket-only:hover {
+  transform: translate(-50%, 50%) scale(1.08);
 }
 
-.rocket-label span {
-  color: #ceb5e8;
-  font-size: 0.78rem;
+.rocket-only.selected {
+  transform: translate(-50%, 50%) scale(1.12);
+  box-shadow: 0 0 34px rgba(168, 85, 247, 0.65);
 }
 
-.rankings-table-head h2 {
-  margin: 0 0 8px;
-  font-size: 1.2rem;
-}
-
-.rankings-list {
+.rocket-info-card {
+  border: 1px solid rgba(203, 161, 255, 0.2);
+  border-radius: 16px;
+  background: rgba(8, 3, 18, 0.82);
+  padding: 12px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }
 
-.ranking-row {
-  border: 1px solid rgba(203, 161, 255, 0.18);
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.03);
-  padding: 10px;
+.rocket-info-card h2 {
+  margin: 0;
+  font-size: 1.02rem;
+}
+
+.info-rank {
+  margin: 0;
+  color: #ceb5e8;
+  font-size: 0.9rem;
+}
+
+.info-view,
+.info-edit-grid {
   display: grid;
-  grid-template-columns: 58px minmax(0, 1fr) 100px auto;
-  gap: 8px;
+  gap: 10px;
+}
+
+.info-preview {
+  display: grid;
+  grid-template-columns: auto 1fr;
   align-items: center;
+  gap: 10px;
+  border: 1px solid rgba(203, 161, 255, 0.18);
+  border-radius: 12px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.03);
 }
 
-.ranking-place {
-  font-weight: 800;
-  color: #f0d3ff;
+.big-rocket {
+  font-size: 2rem;
 }
 
-.ranking-name strong {
+.info-preview strong {
   display: block;
+  font-size: 1.1rem;
 }
 
-.ranking-name span {
-  font-size: 1.2rem;
+.info-preview p {
+  margin: 2px 0 0;
+  color: #ceb5e8;
 }
 
-.ranking-points {
-  color: #e2c8ff;
-  font-weight: 700;
-}
-
-.ranking-controls {
-  display: flex;
-  align-items: center;
+.info-edit-grid label {
+  display: grid;
   gap: 6px;
-  flex-wrap: wrap;
+  color: #dac5ef;
+  font-size: 0.84rem;
 }
 
-.ranking-controls button,
-.rankings-admin-card button {
-  border: 1px solid rgba(203, 161, 255, 0.3);
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.05);
-  color: #f5e9ff;
-  padding: 7px 10px;
-  cursor: pointer;
-  font-weight: 700;
-}
-
-.ranking-controls input,
+.info-edit-grid input,
 .admin-grid input {
   border: 1px solid rgba(203, 161, 255, 0.3);
   border-radius: 10px;
@@ -179,14 +177,31 @@
   padding: 8px 10px;
 }
 
-.ranking-controls .save-btn {
-  background: linear-gradient(180deg, rgba(163, 90, 240, 0.56), rgba(117, 55, 209, 0.36));
+.edit-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
-.ranking-controls .delete-btn {
-  border-color: rgba(248, 113, 113, 0.38);
+.save-btn,
+.rankings-admin-card button {
+  border: 1px solid rgba(203, 161, 255, 0.3);
+  border-radius: 10px;
+  background: linear-gradient(180deg, rgba(163, 90, 240, 0.56), rgba(117, 55, 209, 0.36));
+  color: #f5e9ff;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.delete-btn {
+  border: 1px solid rgba(248, 113, 113, 0.38);
+  border-radius: 10px;
   background: rgba(127, 29, 29, 0.35);
   color: #ffe3e3;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-weight: 700;
 }
 
 .rankings-admin-card h3 {
@@ -205,14 +220,9 @@
   color: #ccb2e6;
 }
 
-@media (max-width: 1100px) {
-  .ranking-row {
-    grid-template-columns: 50px minmax(0, 1fr);
-  }
-
-  .ranking-points,
-  .ranking-controls {
-    grid-column: 1 / -1;
+@media (max-width: 1120px) {
+  .chart-main-grid {
+    grid-template-columns: 1fr;
   }
 
   .admin-grid {

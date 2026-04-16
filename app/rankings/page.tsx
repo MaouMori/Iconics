@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import TopBar from "@/components/Topbar";
 import { supabase } from "@/lib/supabase";
 import "./rankings.css";
@@ -14,11 +14,72 @@ type RankingItem = {
   ativo: boolean;
 };
 
+type RocketPoint = {
+  id: number;
+  x: number;
+  y: number;
+};
+
 const EDITOR_ROLES = new Set(["admin", "lider", "vice_lider", "staff"]);
+
+function toNumber(value: unknown, fallback = 0) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+function buildRocketLayout(rankings: RankingItem[], maxPoints: number): RocketPoint[] {
+  const lanes = [18, 30, 42, 54, 66, 78];
+  const minDistance = 9.5; // distancia minima em porcentagem no eixo X da mesma lane
+  const laneXs = new Map<number, number[]>();
+  lanes.forEach((_, laneIndex) => laneXs.set(laneIndex, []));
+
+  return rankings.map((item, index) => {
+    const ratio = Math.max(0, Math.min(1, toNumber(item.pontos, 0) / Math.max(maxPoints, 1)));
+    const baseX = 6 + ratio * 88;
+
+    let chosenLane = 0;
+    let chosenScore = -1;
+
+    for (let laneIndex = 0; laneIndex < lanes.length; laneIndex += 1) {
+      const usedXs = laneXs.get(laneIndex) || [];
+      if (!usedXs.length) {
+        chosenLane = laneIndex;
+        chosenScore = 999;
+        break;
+      }
+      const nearest = Math.min(...usedXs.map((usedX) => Math.abs(usedX - baseX)));
+      if (nearest >= minDistance) {
+        chosenLane = laneIndex;
+        chosenScore = 999;
+        break;
+      }
+      if (nearest > chosenScore) {
+        chosenScore = nearest;
+        chosenLane = laneIndex;
+      }
+    }
+
+    const usedXs = laneXs.get(chosenLane) || [];
+    let x = baseX;
+    if (usedXs.some((usedX) => Math.abs(usedX - x) < minDistance)) {
+      const direction = index % 2 === 0 ? 1 : -1;
+      x = Math.max(4, Math.min(94, x + direction * (minDistance * 0.75)));
+    }
+    usedXs.push(x);
+    laneXs.set(chosenLane, usedXs);
+
+    return {
+      id: item.id,
+      x,
+      y: lanes[chosenLane],
+    };
+  });
+}
 
 export default function RankingsPage() {
   const [loading, setLoading] = useState(true);
   const [rankings, setRankings] = useState<RankingItem[]>([]);
+  const [selectedId, setSelectedId] = useState<number | null>(null);
   const [token, setToken] = useState("");
   const [canEdit, setCanEdit] = useState(false);
   const [status, setStatus] = useState("");
@@ -28,9 +89,28 @@ export default function RankingsPage() {
   const [newColor, setNewColor] = useState("#a855f7");
   const [newRocket, setNewRocket] = useState("🚀");
 
-  const [editing, setEditing] = useState<Record<number, number>>({});
+  const [editName, setEditName] = useState("");
+  const [editPoints, setEditPoints] = useState(0);
+  const [editColor, setEditColor] = useState("#a855f7");
+  const [editRocket, setEditRocket] = useState("🚀");
 
-  async function loadRankings() {
+  function applySelection(item: RankingItem | null) {
+    if (!item) {
+      setSelectedId(null);
+      setEditName("");
+      setEditPoints(0);
+      setEditColor("#a855f7");
+      setEditRocket("🚀");
+      return;
+    }
+    setSelectedId(item.id);
+    setEditName(item.nome || "");
+    setEditPoints(toNumber(item.pontos, 0));
+    setEditColor(item.cor || "#a855f7");
+    setEditRocket(item.foguete_emoji || "🚀");
+  }
+
+  const loadRankings = useCallback(async (preferredId?: number | null) => {
     const response = await fetch("/api/fraternity-rankings", { cache: "no-store" });
     const payload = await response.json().catch(() => null);
     if (!response.ok) {
@@ -39,13 +119,15 @@ export default function RankingsPage() {
     }
     const data = (payload?.rankings || []) as RankingItem[];
     setRankings(data);
-    setEditing(
-      data.reduce<Record<number, number>>((acc, item) => {
-        acc[item.id] = Number(item.pontos || 0);
-        return acc;
-      }, {})
-    );
-  }
+    if (!data.length) {
+      applySelection(null);
+      return;
+    }
+    const currentSelected = preferredId
+      ? data.find((item) => item.id === preferredId) || null
+      : null;
+    applySelection(currentSelected || data[0]);
+  }, []);
 
   useEffect(() => {
     let mounted = true;
@@ -72,12 +154,22 @@ export default function RankingsPage() {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [loadRankings]);
 
   const maxPoints = useMemo(() => {
     if (!rankings.length) return 1;
-    return Math.max(...rankings.map((item) => Number(item.pontos || 0)), 1);
+    return Math.max(...rankings.map((item) => toNumber(item.pontos, 0)), 1);
   }, [rankings]);
+
+  const rocketLayout = useMemo(() => buildRocketLayout(rankings, maxPoints), [rankings, maxPoints]);
+  const selected = useMemo(
+    () => rankings.find((item) => item.id === selectedId) || rankings[0] || null,
+    [rankings, selectedId]
+  );
+  const selectedRank = useMemo(
+    () => (selected ? rankings.findIndex((item) => item.id === selected.id) + 1 : null),
+    [rankings, selected]
+  );
 
   async function createFraternity() {
     if (!canEdit || !token) return;
@@ -93,7 +185,7 @@ export default function RankingsPage() {
       },
       body: JSON.stringify({
         nome: newName.trim(),
-        pontos: Number(newPoints || 0),
+        pontos: toNumber(newPoints, 0),
         cor: newColor,
         foguete_emoji: newRocket || "🚀",
       }),
@@ -106,30 +198,36 @@ export default function RankingsPage() {
     setNewName("");
     setNewPoints(0);
     setStatus("Fraternidade criada.");
-    await loadRankings();
+    await loadRankings(selected?.id || null);
   }
 
-  async function updatePoints(id: number, pontos: number) {
-    if (!canEdit || !token) return;
-    const response = await fetch(`/api/fraternity-rankings/${id}`, {
+  async function saveSelected() {
+    if (!canEdit || !token || !selected) return;
+    const response = await fetch(`/api/fraternity-rankings/${selected.id}`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ pontos }),
+      body: JSON.stringify({
+        nome: editName.trim(),
+        pontos: toNumber(editPoints, 0),
+        cor: editColor,
+        foguete_emoji: editRocket || "🚀",
+      }),
     });
     const payload = await response.json().catch(() => null);
     if (!response.ok) {
-      setStatus(payload?.error || "Falha ao atualizar pontos.");
+      setStatus(payload?.error || "Falha ao salvar fraternidade.");
       return;
     }
-    await loadRankings();
+    setStatus("Fraternidade atualizada.");
+    await loadRankings(selected?.id || null);
   }
 
-  async function removeFraternity(id: number) {
-    if (!canEdit || !token) return;
-    const response = await fetch(`/api/fraternity-rankings/${id}`, {
+  async function removeSelected() {
+    if (!canEdit || !token || !selected) return;
+    const response = await fetch(`/api/fraternity-rankings/${selected.id}`, {
       method: "DELETE",
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -157,114 +255,102 @@ export default function RankingsPage() {
       <main className="rankings-page">
         <section className="rankings-shell">
           <header className="rankings-header">
-            <p className="rankings-kicker">Competição Iconics</p>
+            <p className="rankings-kicker">Competicao Iconics</p>
             <h1>Rankings das Fraternidades</h1>
             <p>
-              Pontuação manual da liderança. O foguete mais avançado no gráfico está na frente.
+              Clique em um foguete para ver detalhes. Aposicoes automaticas evitam sobreposicao.
             </p>
           </header>
 
           <section className="rankings-chart-card">
-            <div className="chart-axis">
-              <span className="axis-start">0 pts</span>
-              <span className="axis-end">{maxPoints} pts</span>
-            </div>
-            <div className="chart-track" />
-            <div className="chart-area">
-              {rankings.map((item, index) => {
-                const ratio = Math.max(0, Math.min(1, Number(item.pontos || 0) / maxPoints));
-                const x = 4 + ratio * 88;
-                const y = 8 + ratio * 70 + (index % 2 === 0 ? 0 : 2);
-                return (
-                  <div
-                    key={item.id}
-                    className="rocket-node"
-                    style={{
-                      left: `${x}%`,
-                      bottom: `${y}%`,
-                      borderColor: item.cor || "#a855f7",
-                      boxShadow: `0 0 24px ${item.cor || "#a855f7"}66`,
-                    }}
-                  >
-                    <span className="rocket-icon">{item.foguete_emoji || "🚀"}</span>
-                    <div className="rocket-label">
-                      <strong>{item.nome}</strong>
-                      <span>{item.pontos} pts</span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </section>
+            <div className="chart-main-grid">
+              <div>
+                <div className="chart-axis">
+                  <span className="axis-start">0 pts</span>
+                  <span className="axis-end">{maxPoints} pts</span>
+                </div>
+                <div className="chart-track" />
 
-          <section className="rankings-table-card">
-            <div className="rankings-table-head">
-              <h2>Classificação atual</h2>
-            </div>
-            <div className="rankings-list">
-              {rankings.map((item, idx) => (
-                <article key={`row-${item.id}`} className="ranking-row">
-                  <div className="ranking-place">#{idx + 1}</div>
-                  <div className="ranking-name">
-                    <strong>{item.nome}</strong>
-                    <span>{item.foguete_emoji || "🚀"}</span>
-                  </div>
-                  <div className="ranking-points">{item.pontos} pts</div>
-                  {canEdit ? (
-                    <div className="ranking-controls">
+                <div className="chart-area">
+                  {rankings.map((item) => {
+                    const position = rocketLayout.find((point) => point.id === item.id);
+                    if (!position) return null;
+                    const isSelected = selected?.id === item.id;
+                    return (
                       <button
+                        key={item.id}
                         type="button"
-                        onClick={() =>
-                          setEditing((prev) => ({
-                            ...prev,
-                            [item.id]: Number(prev[item.id] || 0) - 10,
-                          }))
-                        }
+                        className={`rocket-only ${isSelected ? "selected" : ""}`}
+                        style={{
+                          left: `${position.x}%`,
+                          bottom: `${position.y}%`,
+                          borderColor: item.cor || "#a855f7",
+                          boxShadow: `0 0 24px ${(item.cor || "#a855f7")}55`,
+                        }}
+                        title={`${item.nome} - ${item.pontos} pts`}
+                        onClick={() => applySelection(item)}
                       >
-                        -10
+                        <span>{item.foguete_emoji || "🚀"}</span>
                       </button>
-                      <input
-                        type="number"
-                        value={editing[item.id] ?? item.pontos}
-                        onChange={(e) =>
-                          setEditing((prev) => ({
-                            ...prev,
-                            [item.id]: Number(e.target.value || 0),
-                          }))
-                        }
-                      />
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setEditing((prev) => ({
-                            ...prev,
-                            [item.id]: Number(prev[item.id] || 0) + 10,
-                          }))
-                        }
-                      >
-                        +10
-                      </button>
-                      <button
-                        type="button"
-                        className="save-btn"
-                        onClick={() => updatePoints(item.id, Number(editing[item.id] ?? item.pontos))}
-                      >
-                        Salvar
-                      </button>
-                      <button
-                        type="button"
-                        className="delete-btn"
-                        onClick={() => removeFraternity(item.id)}
-                      >
-                        Remover
-                      </button>
-                    </div>
-                  ) : null}
-                </article>
-              ))}
-              {rankings.length === 0 ? (
-                <p className="rank-empty">Nenhuma fraternidade cadastrada ainda.</p>
-              ) : null}
+                    );
+                  })}
+                  {!rankings.length ? <p className="rank-empty">Nenhuma fraternidade cadastrada.</p> : null}
+                </div>
+              </div>
+
+              <aside className="rocket-info-card">
+                <h2>Fraternidade selecionada</h2>
+                {selected ? (
+                  <>
+                    <p className="info-rank">Posicao atual: #{selectedRank || 1}</p>
+                    {!canEdit ? (
+                      <div className="info-view">
+                        <div className="info-preview">
+                          <span className="big-rocket">{selected.foguete_emoji || "🚀"}</span>
+                          <div>
+                            <strong>{selected.nome}</strong>
+                            <p>{selected.pontos} pts</p>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="info-edit-grid">
+                        <label>
+                          Nome da fraternidade
+                          <input value={editName} onChange={(e) => setEditName(e.target.value)} />
+                        </label>
+                        <label>
+                          Pontos
+                          <input
+                            type="number"
+                            value={editPoints}
+                            onChange={(e) => setEditPoints(toNumber(e.target.value, 0))}
+                          />
+                        </label>
+                        <label>
+                          Emoji do foguete
+                          <input value={editRocket} onChange={(e) => setEditRocket(e.target.value)} />
+                        </label>
+                        <label>
+                          Cor
+                          <input type="color" value={editColor} onChange={(e) => setEditColor(e.target.value)} />
+                        </label>
+
+                        <div className="edit-actions">
+                          <button type="button" className="save-btn" onClick={saveSelected}>
+                            Salvar
+                          </button>
+                          <button type="button" className="delete-btn" onClick={removeSelected}>
+                            Remover
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <p className="rank-empty">Selecione um foguete no grafico.</p>
+                )}
+              </aside>
             </div>
           </section>
 
@@ -281,7 +367,7 @@ export default function RankingsPage() {
                   type="number"
                   placeholder="Pontos"
                   value={newPoints}
-                  onChange={(e) => setNewPoints(Number(e.target.value || 0))}
+                  onChange={(e) => setNewPoints(toNumber(e.target.value, 0))}
                 />
                 <input
                   type="text"
@@ -289,11 +375,7 @@ export default function RankingsPage() {
                   value={newRocket}
                   onChange={(e) => setNewRocket(e.target.value)}
                 />
-                <input
-                  type="color"
-                  value={newColor}
-                  onChange={(e) => setNewColor(e.target.value)}
-                />
+                <input type="color" value={newColor} onChange={(e) => setNewColor(e.target.value)} />
                 <button type="button" onClick={createFraternity}>
                   Criar fraternidade
                 </button>
@@ -307,4 +389,3 @@ export default function RankingsPage() {
     </>
   );
 }
-
