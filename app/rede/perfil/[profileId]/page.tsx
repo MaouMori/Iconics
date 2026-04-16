@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Spinner from "@/components/Spinner";
 import NotificationBell from "@/components/NotificationBell";
@@ -39,7 +39,17 @@ export default function RedeProfilePage() {
   const [payload, setPayload] = useState<ProfilePayload | null>(null);
   const [status, setStatus] = useState("");
 
-  async function loadProfile(currentToken: string) {
+  type FeedFallbackPost = {
+    id: number;
+    content: string;
+    image_url: string | null;
+    created_at: string;
+    like_count: number;
+    comment_count: number;
+  };
+
+  const loadProfile = useCallback(async (currentToken: string) => {
+    if (!profileId) return;
     const response = await fetch(`/api/social/profile/${profileId}`, {
       headers: { Authorization: `Bearer ${currentToken}` },
       cache: "no-store",
@@ -49,12 +59,42 @@ export default function RedeProfilePage() {
       setStatus(data.error || "Erro ao carregar perfil.");
       return;
     }
-    setPayload(data);
-  }
+    const normalizedPosts = Array.isArray(data?.recentPosts) ? data.recentPosts : [];
+
+    if (normalizedPosts.length === 0) {
+      const fallback = await fetch(`/api/social/feed?limit=40&profileId=${profileId}`, {
+        headers: { Authorization: `Bearer ${currentToken}` },
+        cache: "no-store",
+      }).then((r) => r.json()).catch(() => null);
+
+      const fallbackPosts = Array.isArray(fallback?.posts)
+        ? fallback.posts.map((post: FeedFallbackPost) => ({
+            id: Number(post.id),
+            content: String(post.content || ""),
+            image_url: post.image_url ? String(post.image_url) : null,
+            created_at: String(post.created_at || ""),
+            like_count: Number(post.like_count || 0),
+            comment_count: Number(post.comment_count || 0),
+          }))
+        : [];
+
+      setPayload({
+        ...data,
+        recentPosts: fallbackPosts,
+      });
+      return;
+    }
+
+    setPayload({
+      ...data,
+      recentPosts: normalizedPosts,
+    });
+  }, [profileId]);
 
   useEffect(() => {
     let mounted = true;
     async function boot() {
+      if (!profileId) return;
       const { data: sessionData } = await supabase.auth.getSession();
       const accessToken = sessionData.session?.access_token || "";
       if (!accessToken) {
@@ -70,7 +110,7 @@ export default function RedeProfilePage() {
     return () => {
       mounted = false;
     };
-  }, [profileId]);
+  }, [profileId, loadProfile]);
 
   async function toggleFollow() {
     if (!payload || !token) return;

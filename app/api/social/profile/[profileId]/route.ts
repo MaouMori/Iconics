@@ -56,11 +56,20 @@ export async function GET(req: NextRequest, context: Context) {
     .order("created_at", { ascending: false })
     .limit(20);
 
+  const normalizedPosts = (recentPosts || []).map((post) => ({
+    id: Number(post.id),
+    content: String(post.content || ""),
+    image_url: post.image_url ? String(post.image_url) : null,
+    created_at: String(post.created_at || ""),
+    like_count: Number(post.like_count || 0),
+    comment_count: Number(post.comment_count || 0),
+  }));
+
   return NextResponse.json({
     profile: targetProfile,
     followersCount: followersCount || 0,
     followingCount: followingCount || 0,
     following: Boolean(myFollow?.id),
-    recentPosts: recentPosts || [],
+    recentPosts: normalizedPosts,
   });
 }

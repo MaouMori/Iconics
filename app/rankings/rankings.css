@@ -3,9 +3,14 @@
   padding: 110px 18px 36px;
   color: #f2e8ff;
   background:
+    linear-gradient(rgba(8, 2, 18, 0.72), rgba(8, 2, 18, 0.82)),
+    url("/images/rankings-space-bg.jpg"),
     radial-gradient(circle at 15% 12%, rgba(162, 86, 255, 0.26), transparent 28%),
     radial-gradient(circle at 82% 80%, rgba(100, 64, 207, 0.22), transparent 30%),
     linear-gradient(180deg, #090217 0%, #0a0320 45%, #070214 100%);
+  background-size: cover, cover, auto, auto, auto;
+  background-position: center, center, center, center, center;
+  background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, no-repeat;
 }
 
 .rankings-loader {

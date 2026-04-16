@@ -526,6 +526,10 @@ export default function RedePage() {
                 <span aria-hidden>✎</span>
                 <span>Publicar</span>
               </button>
+              <Link href="/rede/mensagens">
+                <span aria-hidden>💬</span>
+                <span>Mensagens</span>
+              </Link>
               <button onClick={() => document.querySelector<HTMLElement>(".left-list-panel")?.scrollIntoView({ behavior: "smooth" })}>
                 <span aria-hidden>👥</span>
                 <span>Pesquisar</span>

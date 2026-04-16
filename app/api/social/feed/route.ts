@@ -24,15 +24,22 @@ export async function GET(req: NextRequest) {
   const { userId } = auth;
 
   const limitParam = Number(req.nextUrl.searchParams.get("limit") || "20");
+  const profileIdFilter = String(req.nextUrl.searchParams.get("profileId") || "").trim();
   const limit = Number.isFinite(limitParam)
     ? Math.max(5, Math.min(40, Math.trunc(limitParam)))
     : 20;
 
-  const { data: postsData, error: postsError } = await supabaseAdmin
+  let postsQuery = supabaseAdmin
     .from("social_posts")
     .select("id, profile_id, content, image_url, created_at")
     .order("created_at", { ascending: false })
     .limit(limit);
+
+  if (profileIdFilter) {
+    postsQuery = postsQuery.eq("profile_id", profileIdFilter);
+  }
+
+  const { data: postsData, error: postsError } = await postsQuery;
 
   if (postsError) {
     return NextResponse.json({ error: postsError.message }, { status: 500 });
