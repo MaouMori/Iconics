@@ -273,7 +273,7 @@ export default function CityMap({ onView3D }: CityMapProps) {
                     onView3D?.();
                   }}
                 >
-                  Ver em 3D
+                  Ver foto
                 </button>
               </div>
             )}
