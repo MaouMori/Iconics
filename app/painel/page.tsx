@@ -445,6 +445,13 @@ export default function PainelPage() {
                       Meu card
                     </button>
 
+                    <button
+                      className="btn btn-secondary"
+                      onClick={() => (window.location.href = "/rankings")}
+                    >
+                      Rankings
+                    </button>
+
                     {isAdmin && (
                       <button
                         className="btn btn-secondary"

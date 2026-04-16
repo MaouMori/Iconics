@@ -490,6 +490,10 @@
 
 .event-content {
   padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 260px;
 }
 
 .event-chips {
@@ -523,21 +527,30 @@
 
 .event-title {
   margin: 0;
-  font-size: 32px;
+  font-size: clamp(1.45rem, 2.2vw, 2rem);
   font-weight: 900;
+  line-height: 1.2;
 }
 
 .event-desc {
-  margin-top: 14px;
+  margin-top: 2px;
   color: #d4d4d8;
   line-height: 1.8;
-  font-size: 16px;
+  font-size: 15px;
+  max-height: 130px;
+  overflow: auto;
+  padding-right: 4px;
 }
 
 .event-foot {
-  margin-top: 16px;
+  margin-top: 4px;
   color: #a1a1aa;
   font-size: 14px;
+}
+
+.event-content .btn {
+  margin-top: auto;
+  width: fit-content;
 }
 
 .sidebar-title {
@@ -995,11 +1008,12 @@
 .event-highlight-locked {
   display: flex;
   flex-direction: column;
-  min-height: 420px;
+  min-height: 560px;
+  height: 100%;
 }
 
 .event-cover-locked {
-  height: 220px;
+  height: clamp(220px, 30vh, 320px);
   border-radius: 22px 22px 0 0;
   overflow: hidden;
 }

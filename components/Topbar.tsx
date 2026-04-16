@@ -136,6 +136,10 @@ export default function TopBar({
           </Link>
         )}
 
+        <Link href="/rankings" style={linkStyle}>
+          Rankings
+        </Link>
+
         {!loading && isLogged && (
           <NotificationBell className="topbar-bell-link" />
         )}

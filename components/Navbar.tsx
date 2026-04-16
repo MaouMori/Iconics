@@ -74,6 +74,7 @@ export default function Navbar() {
         <Link href="/lore" className="nav-link">Lore</Link>
         <Link href="/mansao" className="nav-link">Mansão</Link>
         <Link href="/parcerias" className="nav-link">Parcerias</Link>
+        <Link href="/rankings" className="nav-link">Rankings</Link>
 
         {!loading && !isLogged && (
           <Link href="/login" className="nav-link nav-login">

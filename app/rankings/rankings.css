@@ -1,0 +1,222 @@
+.rankings-page {
+  min-height: 100vh;
+  padding: 110px 18px 36px;
+  color: #f2e8ff;
+  background:
+    radial-gradient(circle at 15% 12%, rgba(162, 86, 255, 0.26), transparent 28%),
+    radial-gradient(circle at 82% 80%, rgba(100, 64, 207, 0.22), transparent 30%),
+    linear-gradient(180deg, #090217 0%, #0a0320 45%, #070214 100%);
+}
+
+.rankings-loader {
+  display: grid;
+  place-items: center;
+}
+
+.rankings-shell {
+  max-width: 1320px;
+  margin: 0 auto;
+  border: 1px solid rgba(196, 151, 255, 0.2);
+  border-radius: 28px;
+  padding: 20px;
+  background:
+    linear-gradient(180deg, rgba(16, 8, 33, 0.94), rgba(10, 4, 24, 0.94)),
+    radial-gradient(circle at center, rgba(154, 92, 236, 0.1), transparent 60%);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.38);
+}
+
+.rankings-header h1 {
+  margin: 8px 0 10px;
+  font-size: clamp(1.9rem, 3.6vw, 3.4rem);
+}
+
+.rankings-kicker {
+  margin: 0;
+  color: #d8b4fe;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.rankings-header p {
+  margin: 0;
+  color: #d6bfe9;
+}
+
+.rankings-chart-card,
+.rankings-table-card,
+.rankings-admin-card {
+  margin-top: 16px;
+  border: 1px solid rgba(203, 161, 255, 0.2);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 14px;
+}
+
+.chart-axis {
+  display: flex;
+  justify-content: space-between;
+  color: #cfb7e8;
+  font-size: 0.84rem;
+  margin-bottom: 8px;
+}
+
+.chart-track {
+  height: 3px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #3f205b 0%, #a855f7 50%, #f59e0b 100%);
+  margin: 0 10px;
+}
+
+.chart-area {
+  position: relative;
+  height: clamp(320px, 46vh, 560px);
+  margin-top: 8px;
+  border-radius: 16px;
+  background:
+    linear-gradient(165deg, rgba(25, 10, 45, 0.9), rgba(15, 5, 28, 0.9));
+  border: 1px solid rgba(203, 161, 255, 0.2);
+  overflow: hidden;
+}
+
+.rocket-node {
+  position: absolute;
+  transform: translate(-50%, 50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid;
+  border-radius: 999px;
+  background: rgba(9, 4, 18, 0.86);
+  padding: 8px 10px;
+  max-width: min(280px, 62vw);
+}
+
+.rocket-icon {
+  font-size: 1.2rem;
+}
+
+.rocket-label {
+  display: grid;
+  gap: 2px;
+}
+
+.rocket-label strong {
+  font-size: 0.9rem;
+  line-height: 1.1;
+}
+
+.rocket-label span {
+  color: #ceb5e8;
+  font-size: 0.78rem;
+}
+
+.rankings-table-head h2 {
+  margin: 0 0 8px;
+  font-size: 1.2rem;
+}
+
+.rankings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ranking-row {
+  border: 1px solid rgba(203, 161, 255, 0.18);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 10px;
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr) 100px auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.ranking-place {
+  font-weight: 800;
+  color: #f0d3ff;
+}
+
+.ranking-name strong {
+  display: block;
+}
+
+.ranking-name span {
+  font-size: 1.2rem;
+}
+
+.ranking-points {
+  color: #e2c8ff;
+  font-weight: 700;
+}
+
+.ranking-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.ranking-controls button,
+.rankings-admin-card button {
+  border: 1px solid rgba(203, 161, 255, 0.3);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #f5e9ff;
+  padding: 7px 10px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.ranking-controls input,
+.admin-grid input {
+  border: 1px solid rgba(203, 161, 255, 0.3);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  color: #fff;
+  padding: 8px 10px;
+}
+
+.ranking-controls .save-btn {
+  background: linear-gradient(180deg, rgba(163, 90, 240, 0.56), rgba(117, 55, 209, 0.36));
+}
+
+.ranking-controls .delete-btn {
+  border-color: rgba(248, 113, 113, 0.38);
+  background: rgba(127, 29, 29, 0.35);
+  color: #ffe3e3;
+}
+
+.rankings-admin-card h3 {
+  margin: 0 0 10px;
+}
+
+.admin-grid {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) 120px 140px 70px auto;
+  gap: 8px;
+}
+
+.rank-empty,
+.rank-status {
+  margin: 10px 0 0;
+  color: #ccb2e6;
+}
+
+@media (max-width: 1100px) {
+  .ranking-row {
+    grid-template-columns: 50px minmax(0, 1fr);
+  }
+
+  .ranking-points,
+  .ranking-controls {
+    grid-column: 1 / -1;
+  }
+
+  .admin-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
