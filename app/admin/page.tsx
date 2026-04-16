@@ -3,6 +3,7 @@
 import Spinner from "@/components/Spinner";
 import AdminShell from "@/components/AdminShell";
 import { supabase } from "@/lib/supabase";
+import { getRoleLabel, hasAdminAccess } from "@/lib/roles";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import "./admin-dashboard.css";
@@ -40,12 +41,7 @@ export default function AdminPage() {
 
       const cargoNormalizado = String(profile?.cargo || "").trim().toLowerCase();
 
-      if (
-        cargoNormalizado !== "lider" &&
-        cargoNormalizado !== "vice_lider" &&
-        cargoNormalizado !== "admin" &&
-        cargoNormalizado !== "staff"
-      ) {
+      if (!hasAdminAccess(cargoNormalizado)) {
         setLoading(false);
         return;
       }
@@ -69,11 +65,7 @@ export default function AdminPage() {
   }, []);
 
   const cargoLabel = useMemo(() => {
-    if (cargo === "lider") return "Lider";
-    if (cargo === "vice_lider") return "Vice-lider";
-    if (cargo === "admin") return "Admin";
-    if (cargo === "staff") return "Staff";
-    return cargo || "Membro";
+    return getRoleLabel(cargo);
   }, [cargo]);
 
   if (loading) {
@@ -95,7 +87,7 @@ export default function AdminPage() {
       <AdminShell active="dashboard" title="Painel Iconics">
         <section className="admin-denied">
           <h1>Acesso negado</h1>
-          <p>Somente lideranca/admin/staff podem acessar este painel.</p>
+          <p>Somente lideranca pode acessar este painel.</p>
         </section>
       </AdminShell>
     );

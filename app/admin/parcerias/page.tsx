@@ -4,6 +4,7 @@ import Spinner from "@/components/Spinner";
 import Toast from "@/components/Toast";
 import AdminShell from "@/components/AdminShell";
 import { supabase } from "@/lib/supabase";
+import { hasAdminAccess, normalizeRole } from "@/lib/roles";
 import { uploadPublicImage } from "@/lib/uploadImage";
 import { useEffect, useState } from "react";
 import "../admin-dashboard.css";
@@ -55,8 +56,8 @@ export default function AdminParceriasPage() {
         .eq("id", userData.user.id)
         .single();
 
-      const cargo = String(profile?.cargo || "").trim().toLowerCase();
-      if (cargo === "lider" || cargo === "vice_lider") {
+      const cargo = normalizeRole(profile?.cargo);
+      if (hasAdminAccess(cargo)) {
         setPermitido(true);
         await carregarParcerias();
       }
@@ -201,7 +202,7 @@ export default function AdminParceriasPage() {
       >
         <section className="admin-denied">
           <h2>Acesso negado</h2>
-          <p>Somente vice-lider ou lider podem gerenciar parcerias.</p>
+          <p>Somente lideranca pode gerenciar parcerias.</p>
         </section>
       </AdminShell>
     );

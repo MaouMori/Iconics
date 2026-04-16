@@ -7,7 +7,7 @@ import Toast from "@/components/Toast";
 import { supabase } from "@/lib/supabase";
 
 export default function EsqueciSenhaPage() {
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState("");
 
@@ -17,8 +17,21 @@ export default function EsqueciSenhaPage() {
     setMsg("");
 
     try {
+      let email = identifier.trim().toLowerCase();
+      if (!email.includes("@")) {
+        const resolveResponse = await fetch(
+          `/api/auth/resolve?identifier=${encodeURIComponent(email)}`
+        );
+        const resolvePayload = await resolveResponse.json().catch(() => ({}));
+        if (!resolveResponse.ok || !resolvePayload?.email) {
+          setMsg(resolvePayload?.error || "Usuario nao encontrado.");
+          return;
+        }
+        email = String(resolvePayload.email).toLowerCase();
+      }
+
       const redirectTo = `${window.location.origin}/login/redefinir-senha`;
-      const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo,
       });
 
@@ -44,11 +57,11 @@ export default function EsqueciSenhaPage() {
 
           <form onSubmit={onSubmit} style={{ display: "grid", gap: 10 }}>
             <input
-              type="email"
+              type="text"
               required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Seu e-mail"
+              value={identifier}
+              onChange={(e) => setIdentifier(e.target.value)}
+              placeholder="Seu e-mail ou usuario"
               style={input}
             />
             <button type="submit" disabled={loading} style={btn}>
@@ -103,4 +116,3 @@ const btn: React.CSSProperties = {
   fontWeight: 700,
 };
 const back: React.CSSProperties = { display: "inline-block", marginTop: 14, color: "#d8b4fe" };
-

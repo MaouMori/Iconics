@@ -18,6 +18,15 @@ function pickDisplayName(user: AuthUserLike): string {
   return String(raw || "Membro").trim().slice(0, 80) || "Membro";
 }
 
+function normalizeUsuario(value: unknown) {
+  return String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, "")
+    .replace(/[^a-z0-9_.-]/g, "")
+    .slice(0, 24);
+}
+
 export async function POST(req: NextRequest) {
   const authorization = req.headers.get("authorization") || "";
   const token = authorization.startsWith("Bearer ")
@@ -36,11 +45,12 @@ export async function POST(req: NextRequest) {
 
   const userId = user.id;
   const userEmail = user.email || null;
+  const usuarioFromMetadata = normalizeUsuario(user.user_metadata?.usuario);
   const nome = pickDisplayName(user);
 
   const { data: existing, error: selectError } = await supabaseAdmin
     .from("profiles")
-    .select("id, nome, email, cargo")
+    .select("id, nome, email, cargo, usuario")
     .eq("id", userId)
     .maybeSingle();
 
@@ -52,6 +62,7 @@ export async function POST(req: NextRequest) {
     const patch: Record<string, string | null> = {};
     if (!existing.nome) patch.nome = nome;
     if (!existing.email && userEmail) patch.email = userEmail;
+    if (!existing.usuario && usuarioFromMetadata) patch.usuario = usuarioFromMetadata;
     if (Object.keys(patch).length > 0) {
       await supabaseAdmin.from("profiles").update(patch).eq("id", userId);
     }
@@ -62,7 +73,8 @@ export async function POST(req: NextRequest) {
     id: userId,
     nome,
     email: userEmail,
-    cargo: "membro",
+    cargo: "calouro",
+    usuario: usuarioFromMetadata || null,
   });
 
   if (insertError) {

@@ -164,7 +164,7 @@ export default function RedeProfilePage() {
             <img src={payload.profile.avatar_url || "/images/logo.png"} alt="" className="profile-view-avatar" />
             <h2>{payload.profile.nome || "Membro"}</h2>
             <p>@{payload.profile.username || "membro"}</p>
-            <p className="profile-view-role">{payload.profile.cargo || "membro"}</p>
+          <p className="profile-view-role">{payload.profile.cargo || "calouro"}</p>
             <p className="profile-view-bio">{payload.profile.bio || "Sem bio cadastrada."}</p>
             <div className="profile-view-stats">
               <div><strong>{payload.followersCount}</strong><span>Seguidores</span></div>

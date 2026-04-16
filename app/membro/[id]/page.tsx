@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/lib/supabase";
@@ -54,7 +54,7 @@ export default function WikiMembroPage() {
         const memberId = Number(rawId);
 
         if (Number.isNaN(memberId) || memberId <= 0) {
-          setErro("Membro inválido.");
+          setErro("Membro invalido.");
           setLoading(false);
           return;
         }
@@ -66,7 +66,7 @@ export default function WikiMembroPage() {
           .single();
 
         if (error || !data) {
-          setErro("Membro não encontrado.");
+          setErro("Membro nao encontrado.");
           setLoading(false);
           return;
         }
@@ -153,9 +153,9 @@ function nextLightbox() {
         <div className="member-wiki-shell">
           <div className="member-wiki-card">
             <h2>Erro</h2>
-            <p>{erro || "Não foi possível carregar o membro."}</p>
+            <p>{erro || "Nao foi possivel carregar o membro."}</p>
             <Link href="/" className="member-wiki-back">
-              ← Voltar ao site
+              † Voltar ao site
             </Link>
           </div>
         </div>
@@ -179,7 +179,7 @@ function nextLightbox() {
           </div>
 
           <Link href="/" className="member-wiki-back">
-            ← Voltar ao site
+            † Voltar ao site
           </Link>
         </header>
 
@@ -190,13 +190,13 @@ function nextLightbox() {
             <p className="member-wiki-role">{formatCargo(member.cargo)}</p>
 
             <div className="member-wiki-meta">
-              <span>{member.idade ? `${member.idade} anos` : "Idade não informada"}</span>
-              <span>•</span>
-              <span>{member.meta || "Presença marcante que define o ambiente"}</span>
+              <span>{member.idade ? `${member.idade} anos` : "Idade nao informada"}</span>
+              <span>€¢</span>
+              <span>{member.meta || "Presenca marcante que define o ambiente"}</span>
             </div>
 
             <p className="member-wiki-description">
-              {member.personalidade || "Uma presença marcante que define o ambiente. Personalidade única e inconfundível."}
+              {member.personalidade || "Uma presenca marcante que define o ambiente. Personalidade unica e inconfundivel."}
             </p>
 
             <div className="member-wiki-tags">
@@ -209,7 +209,7 @@ function nextLightbox() {
               ) : (
                 <>
                   <span className="member-wiki-tag">Misterioso</span>
-                  <span className="member-wiki-tag">Único</span>
+                  <span className="member-wiki-tag">Ãšnico</span>
                   <span className="member-wiki-tag">Iconic</span>
                 </>
               )}
@@ -229,17 +229,17 @@ function nextLightbox() {
         <section className="member-wiki-grid">
           <article className="member-wiki-card">
             <h3>Personalidade</h3>
-            <p>{member.personalidade || "Presença marcante e personalidade única que define cada movimento. Uma aura de mistério e poder."}</p>
+            <p>{member.personalidade || "Presenca marcante e personalidade unica que define cada movimento. Uma aura de misterio e poder."}</p>
           </article>
 
           <article className="member-wiki-card">
-            <h3>Hábitos</h3>
-            <p>{member.habitos || "Hábitos definidos pela busca constante de excelência. Cada ação é calculada para manter a presença dominante."}</p>
+            <h3>Habitos</h3>
+            <p>{member.habitos || "Habitos definidos pela busca constante de excelencia. Cada acao e calculada para manter a presenca dominante."}</p>
           </article>
 
           <article className="member-wiki-card">
             <h3>Gostos</h3>
-            <p>{member.gostos || "Aprecia o que é raro, exclusivo e imponente. Tem gosto refinado para tudo que representa poder e elegância."}</p>
+            <p>{member.gostos || "Aprecia o que e raro, exclusivo e imponente. Tem gosto refinado para tudo que representa poder e elegancia."}</p>
           </article>
 
           <article className="member-wiki-card">
@@ -255,7 +255,7 @@ function nextLightbox() {
             ) : (
               <div className="member-wiki-tag-list">
                 <span className="member-wiki-chip">Dominar ambientes</span>
-                <span className="member-wiki-chip">Estratégia</span>
+                <span className="member-wiki-chip">Estrategia</span>
                 <span className="member-wiki-chip">Arte do poder</span>
               </div>
             )}
@@ -263,16 +263,16 @@ function nextLightbox() {
 
           <article className="member-wiki-card member-wiki-card-wide">
             <h3>Lore Pessoal</h3>
-            <p>{member.meta || "Uma jornada de transformação e ascensão. Cada passo foi dado com propósito, construindo uma presença que não passa despercebida."}</p>
+            <p>{member.meta || "Uma jornada de transformacao e ascensao. Cada passo foi dado com proposito, construindo uma presenca que nao passa despercebida."}</p>
           </article>
 
           <article className="member-wiki-card member-wiki-card-wide">
             <div className="member-wiki-gallery-head">
-              <h3>Galeria de Memórias</h3>
+              <h3>Galeria de Memorias</h3>
 
               <div className="member-wiki-gallery-controls">
-                <button type="button" onClick={prevPhoto}>←</button>
-                <button type="button" onClick={nextPhoto}>→</button>
+                <button type="button" onClick={prevPhoto}>†</button>
+                <button type="button" onClick={nextPhoto}>†’</button>
               </div>
             </div>
 
@@ -307,7 +307,7 @@ function nextLightbox() {
           </article>
 
           <article className="member-wiki-card member-wiki-card-wide">
-            <h3>Estatísticas</h3>
+            <h3>Estatisticas</h3>
             {stats.length ? (
               <div className="member-wiki-stats">
                 {stats.map((stat) => (
@@ -321,15 +321,15 @@ function nextLightbox() {
               <div className="member-wiki-stats">
                 <div className="member-wiki-stat">
                   <span className="member-wiki-stat-value">10</span>
-                  <span className="member-wiki-stat-label">Presença</span>
+                  <span className="member-wiki-stat-label">Presenca</span>
                 </div>
                 <div className="member-wiki-stat">
                   <span className="member-wiki-stat-value">10</span>
-                  <span className="member-wiki-stat-label">Influência</span>
+                  <span className="member-wiki-stat-label">Influencia</span>
                 </div>
                 <div className="member-wiki-stat">
                   <span className="member-wiki-stat-value">10</span>
-                  <span className="member-wiki-stat-label">Estratégia</span>
+                  <span className="member-wiki-stat-label">Estrategia</span>
                 </div>
                 <div className="member-wiki-stat">
                   <span className="member-wiki-stat-value">10</span>
@@ -346,7 +346,7 @@ function nextLightbox() {
       className="member-lightbox-close"
       onClick={closeLightbox}
     >
-      ×
+      Ã—
     </button>
 
     {gallery.length > 1 && (
@@ -359,7 +359,7 @@ function nextLightbox() {
             prevLightbox();
           }}
         >
-          ←
+          †
         </button>
 
         <button
@@ -370,7 +370,7 @@ function nextLightbox() {
             nextLightbox();
           }}
         >
-          →
+          †’
         </button>
       </>
     )}
@@ -420,12 +420,15 @@ function parseStats(value?: string | null): ParsedStat[] {
 
 function formatCargo(cargo?: string | null) {
   const map: Record<string, string> = {
-    lider: "Líder da Iconics",
-    vice_lider: "Vice-líder",
+    lider: "Lider da Iconics",
+    vice_lider: "Vice-lider",
+    conselheiro: "Conselheiro",
+    elite: "Elite",
     veterano: "Veterano",
-    membro: "Membro",
+    calouro: "Calouro",
   };
-  
 
-  return map[String(cargo || "membro").trim().toLowerCase()] || "Membro";
+  return map[String(cargo || "calouro").trim().toLowerCase()] || "Calouro";
 }
+
+

@@ -5,6 +5,7 @@ import { supabase } from "@/lib/supabase";
 import TopBar from "@/components/Topbar";
 import Spinner from "@/components/Spinner";
 import Toast from "@/components/Toast";
+import { hasAdminAccess, normalizeRole } from "@/lib/roles";
 
 type Submission = {
   id: number;
@@ -34,9 +35,8 @@ export default function AdminCandidaturasPage() {
         .eq("id", userData.user.id)
         .single();
 
-      const cargo = String(profile?.cargo || "").trim().toLowerCase();
-
-      if (cargo !== "lider" && cargo !== "vice_lider") {
+      const cargo = normalizeRole(profile?.cargo);
+      if (!hasAdminAccess(cargo)) {
         setLoading(false);
         return;
       }

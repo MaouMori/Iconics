@@ -79,7 +79,7 @@ type FollowState = {
   followingIds: string[];
 };
 
-const MOD_ROLES = new Set(["admin", "lider", "vice_lider", "staff"]);
+const MOD_ROLES = new Set(["admin", "lider", "vice_lider", "conselheiro", "staff"]);
 
 export default function RedePage() {
   const [loading, setLoading] = useState(true);

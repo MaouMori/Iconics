@@ -1,6 +1,5 @@
 import { createHash } from "crypto";
-
-const EDITOR_ROLES = new Set(["admin", "lider", "vice_lider", "staff"]);
+import { hasAdminAccess } from "@/lib/roles";
 
 export function normalizeAccessCode(input: unknown) {
   return String(input || "").trim().toUpperCase();
@@ -15,8 +14,7 @@ export function hashAccessCode(memberId: number, rawCode: unknown) {
 }
 
 export function canApproveLink(cargo: unknown) {
-  const normalized = String(cargo || "").trim().toLowerCase();
-  return EDITOR_ROLES.has(normalized);
+  return hasAdminAccess(cargo);
 }
 
 export const ALLOWED_MEMBER_UPDATE_FIELDS = new Set([

@@ -4,6 +4,7 @@ import Spinner from "@/components/Spinner";
 import Toast from "@/components/Toast";
 import AdminShell from "@/components/AdminShell";
 import { supabase } from "@/lib/supabase";
+import { hasAdminAccess, normalizeRole } from "@/lib/roles";
 import { useEffect, useState } from "react";
 import "../admin-dashboard.css";
 
@@ -50,8 +51,8 @@ export default function AdminVinculosPage() {
         .eq("id", userId)
         .maybeSingle();
 
-      const cargo = String(profile?.cargo || "").trim().toLowerCase();
-      const isAllowed = cargo === "lider" || cargo === "vice_lider" || cargo === "admin" || cargo === "staff";
+      const cargo = normalizeRole(profile?.cargo);
+      const isAllowed = hasAdminAccess(cargo);
       setAllowed(isAllowed);
       setToken(accessToken);
 

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -13,6 +13,8 @@ export default function LoginPage() {
 
   const [isRegister, setIsRegister] = useState(false);
   const [nome, setNome] = useState("");
+  const [usuario, setUsuario] = useState("");
+  const [identificador, setIdentificador] = useState("");
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [mensagem, setMensagem] = useState("");
@@ -28,6 +30,19 @@ export default function LoginPage() {
     });
   }
 
+  async function resolveIdentifierToEmail(value: string) {
+    const raw = value.trim().toLowerCase();
+    if (!raw) return "";
+    if (raw.includes("@")) return raw;
+
+    const response = await fetch(`/api/auth/resolve?identifier=${encodeURIComponent(raw)}`);
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok || !payload?.email) {
+      throw new Error(payload?.error || "Usuario nao encontrado.");
+    }
+    return String(payload.email).toLowerCase();
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setMensagem("");
@@ -39,7 +54,7 @@ export default function LoginPage() {
           email,
           password: senha,
           options: {
-            data: { nome },
+            data: { nome, usuario },
           },
         });
 
@@ -51,8 +66,10 @@ export default function LoginPage() {
 
         setMensagem("Cadastro realizado com sucesso.");
       } else {
+        const loginEmail = await resolveIdentifierToEmail(identificador);
+
         const { data, error } = await supabase.auth.signInWithPassword({
-          email,
+          email: loginEmail,
           password: senha,
         });
 
@@ -63,7 +80,7 @@ export default function LoginPage() {
         }
 
         if (!data.session) {
-          setMensagem("Não foi possível iniciar a sessão. Verifique seu e-mail e sua senha.");
+          setMensagem("Nao foi possivel iniciar a sessao. Verifique seu login e senha.");
           setLoading(false);
           return;
         }
@@ -74,8 +91,12 @@ export default function LoginPage() {
         router.push("/painel");
         router.refresh();
       }
-    } catch {
-      setMensagem("Ocorreu um erro inesperado.");
+    } catch (error) {
+      if (error instanceof Error && error.message) {
+        setMensagem(error.message);
+      } else {
+        setMensagem("Ocorreu um erro inesperado.");
+      }
     }
 
     setLoading(false);
@@ -108,21 +129,10 @@ export default function LoginPage() {
   function traduzirErro(error: string) {
     const erro = error.toLowerCase();
 
-    if (erro.includes("email not confirmed")) {
-      return "Seu e-mail ainda não foi confirmado.";
-    }
-
-    if (erro.includes("invalid login credentials")) {
-      return "E-mail ou senha incorretos.";
-    }
-
-    if (erro.includes("user already registered")) {
-      return "Este e-mail já está cadastrado.";
-    }
-
-    if (erro.includes("password should be at least")) {
-      return "A senha precisa ter pelo menos 6 caracteres.";
-    }
+    if (erro.includes("email not confirmed")) return "Seu e-mail ainda nao foi confirmado.";
+    if (erro.includes("invalid login credentials")) return "Login ou senha incorretos.";
+    if (erro.includes("user already registered")) return "Este e-mail ja esta cadastrado.";
+    if (erro.includes("password should be at least")) return "A senha precisa ter pelo menos 6 caracteres.";
 
     return error;
   }
@@ -148,11 +158,7 @@ export default function LoginPage() {
           <div className="login-brand">
             <div className="login-emblem-orbit">
               <div className="login-emblem-ring">
-                <img
-                  src="/images/logo.png"
-                  alt="Logo ICONICS"
-                  className="login-emblem"
-                />
+                <img src="/images/logo.png" alt="Logo ICONICS" className="login-emblem" />
               </div>
             </div>
 
@@ -175,7 +181,7 @@ export default function LoginPage() {
             <form onSubmit={handleSubmit} className="login-form">
               {isRegister && (
                 <div className="field-wrap">
-                  <span className="field-icon">✦</span>
+                  <span className="field-icon">*</span>
                   <input
                     type="text"
                     placeholder="Nome"
@@ -187,20 +193,47 @@ export default function LoginPage() {
                 </div>
               )}
 
-              <div className="field-wrap">
-                <span className="field-icon">✉</span>
-                <input
-                  type="email"
-                  placeholder="E-mail"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="login-input"
-                />
-              </div>
+              {isRegister && (
+                <div className="field-wrap">
+                  <span className="field-icon">@</span>
+                  <input
+                    type="text"
+                    placeholder="Usuario (login sem @)"
+                    value={usuario}
+                    onChange={(e) => setUsuario(e.target.value)}
+                    className="login-input"
+                  />
+                </div>
+              )}
+
+              {isRegister ? (
+                <div className="field-wrap">
+                  <span className="field-icon">@</span>
+                  <input
+                    type="email"
+                    placeholder="E-mail"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    className="login-input"
+                  />
+                </div>
+              ) : (
+                <div className="field-wrap">
+                  <span className="field-icon">@</span>
+                  <input
+                    type="text"
+                    placeholder="E-mail ou usuario"
+                    value={identificador}
+                    onChange={(e) => setIdentificador(e.target.value)}
+                    required
+                    className="login-input"
+                  />
+                </div>
+              )}
 
               <div className="field-wrap">
-                <span className="field-icon">&#128274;</span>
+                <span className="field-icon">#</span>
                 <input
                   type={mostrarSenha ? "text" : "password"}
                   placeholder="Senha"
@@ -215,7 +248,7 @@ export default function LoginPage() {
                   onClick={() => setMostrarSenha(!mostrarSenha)}
                   aria-label={mostrarSenha ? "Ocultar senha" : "Mostrar senha"}
                 >
-                  {mostrarSenha ? "\u{1F648}" : "\u{1F441}"}
+                  {mostrarSenha ? "🙈" : "👁"}
                 </button>
               </div>
 
@@ -228,7 +261,7 @@ export default function LoginPage() {
                     setMensagem("");
                   }}
                 >
-                  {isRegister ? "Já tenho conta" : "Quero criar conta"}
+                  {isRegister ? "Ja tenho conta" : "Quero criar conta"}
                 </button>
 
                 {!isRegister && (

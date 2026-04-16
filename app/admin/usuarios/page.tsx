@@ -4,6 +4,7 @@ import Spinner from "@/components/Spinner";
 import Toast from "@/components/Toast";
 import AdminShell from "@/components/AdminShell";
 import { supabase } from "@/lib/supabase";
+import { getRoleLabel, hasAdminAccess, normalizeRole } from "@/lib/roles";
 import { useEffect, useState } from "react";
 import "../admin-dashboard.css";
 
@@ -49,7 +50,7 @@ export default function AdminUsuariosPage() {
         .eq("id", userData.user.id)
         .single();
 
-      if (profile?.cargo === "lider") {
+      if (hasAdminAccess(normalizeRole(profile?.cargo))) {
         setPermitido(true);
         await carregarUsuarios();
       }
@@ -100,7 +101,7 @@ export default function AdminUsuariosPage() {
       >
         <section className="admin-denied">
           <h2>Acesso negado</h2>
-          <p>Somente lideres podem alterar cargos.</p>
+          <p>Somente lideranca pode alterar cargos.</p>
         </section>
       </AdminShell>
     );
@@ -132,7 +133,7 @@ export default function AdminUsuariosPage() {
                     <td style={tdStyle}>{user.nome || "Sem nome"}</td>
                     <td style={tdStyle}>{user.email || "Sem e-mail"}</td>
                     <td style={tdStyle}>
-                      <span style={badgeStyle(user.cargo)}>{user.cargo}</span>
+                      <span style={badgeStyle(user.cargo)}>{getRoleLabel(user.cargo)}</span>
                     </td>
                     <td style={tdStyle}>
                       <select
@@ -140,9 +141,11 @@ export default function AdminUsuariosPage() {
                         value={user.cargo}
                         onChange={(e) => alterarCargo(user.id, e.target.value)}
                       >
-                        <option value="membro">membro</option>
+                        <option value="calouro">calouro</option>
+                        <option value="elite">elite</option>
                         <option value="veterano">veterano</option>
                         <option value="vice_lider">vice_lider</option>
+                        <option value="conselheiro">conselheiro</option>
                         <option value="lider">lider</option>
                       </select>
                     </td>
@@ -226,8 +229,10 @@ function badgeStyle(cargo: string): React.CSSProperties {
   const map: Record<string, string> = {
     lider: "#f4c542",
     vice_lider: "#a855f7",
+    conselheiro: "#f59e0b",
+    elite: "#22d3ee",
     veterano: "#38bdf8",
-    membro: "#cbd5e1",
+    calouro: "#cbd5e1",
   };
 
   const color = map[cargo] || "#cbd5e1";

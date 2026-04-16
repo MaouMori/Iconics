@@ -27,7 +27,7 @@ const DEFAULT_MANSION: Point = {
 };
 
 const MAP_IMAGE_CANDIDATES = ["/images/mapa-cidade-fivem.png", "/images/asdsa.png"];
-const ALLOWED_MARK_ROLES = new Set(["admin", "lider", "vice_lider"]);
+const ALLOWED_MARK_ROLES = new Set(["admin", "staff", "lider", "vice_lider", "conselheiro"]);
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));

@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
     nome: item.nome || "Membro",
     username: item.username || null,
     avatar_url: item.avatar_url || null,
-    cargo: item.cargo || "membro",
+      cargo: item.cargo || "calouro",
   }));
 
   const { data: conversationRaw } = await supabaseAdmin

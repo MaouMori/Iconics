@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Spinner from "@/components/Spinner";
 import { supabase } from "@/lib/supabase";
@@ -10,7 +10,9 @@ type Profile = {
   id: string;
   nome: string | null;
   username: string | null;
+  usuario: string | null;
   bio: string | null;
+  email: string | null;
   avatar_url: string | null;
 };
 
@@ -23,7 +25,10 @@ export default function RedeConfigPage() {
   const [profile, setProfile] = useState<Profile | null>(null);
 
   const [nome, setNome] = useState("");
+  const [usuario, setUsuario] = useState("");
   const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [senha, setSenha] = useState("");
   const [bio, setBio] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
 
@@ -60,7 +65,9 @@ export default function RedeConfigPage() {
       const p = payload.profile as Profile;
       setProfile(p);
       setNome(p.nome || "");
+      setUsuario(p.usuario || "");
       setUsername(p.username || "");
+      setEmail(p.email || "");
       setBio(p.bio || "");
       setAvatarUrl(p.avatar_url || "");
       setLoading(false);
@@ -99,7 +106,10 @@ export default function RedeConfigPage() {
       },
       body: JSON.stringify({
         nome,
+        usuario,
         username,
+        email,
+        password: senha,
         bio,
         avatar_url: avatarUrl,
       }),
@@ -111,7 +121,8 @@ export default function RedeConfigPage() {
       return;
     }
     setProfile(payload.profile as Profile);
-    setStatus("Perfil atualizado com sucesso.");
+    setSenha("");
+    setStatus("Conta atualizada com sucesso.");
   }
 
   if (loading) {
@@ -130,7 +141,7 @@ export default function RedeConfigPage() {
             <div className="brand-flame">◉</div>
             <strong>ICONICS</strong>
           </div>
-          <h1>Configuracoes do Perfil</h1>
+          <h1>Configuracoes da Conta</h1>
           <div className="top-actions">
             <Link href="/rede" className="top-btn">Voltar para Rede</Link>
             <Link href="/painel" className="top-btn">Painel</Link>
@@ -171,8 +182,25 @@ export default function RedeConfigPage() {
               <input value={nome} onChange={(e) => setNome(e.target.value)} />
             </div>
             <div>
-              <p className="section-title">@Username</p>
-              <input value={username} onChange={(e) => setUsername(e.target.value)} />
+              <p className="section-title">Usuario (login)</p>
+              <input value={usuario} onChange={(e) => setUsuario(e.target.value)} placeholder="ex: maou" />
+            </div>
+            <div>
+              <p className="section-title">@Username (rede)</p>
+              <input value={username} onChange={(e) => setUsername(e.target.value)} placeholder="ex: specter" />
+            </div>
+            <div>
+              <p className="section-title">E-mail</p>
+              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+            </div>
+            <div>
+              <p className="section-title">Nova senha</p>
+              <input
+                type="password"
+                value={senha}
+                onChange={(e) => setSenha(e.target.value)}
+                placeholder="Deixe em branco para manter"
+              />
             </div>
           </div>
 
@@ -194,4 +222,3 @@ export default function RedeConfigPage() {
     </main>
   );
 }
-

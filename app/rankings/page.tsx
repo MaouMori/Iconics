@@ -20,7 +20,7 @@ type RocketPoint = {
   y: number;
 };
 
-const EDITOR_ROLES = new Set(["admin", "lider", "vice_lider", "staff"]);
+const EDITOR_ROLES = new Set(["admin", "lider", "vice_lider", "conselheiro", "staff"]);
 
 function toNumber(value: unknown, fallback = 0) {
   const parsed = Number(value);

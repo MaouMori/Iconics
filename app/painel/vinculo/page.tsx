@@ -71,7 +71,7 @@ type EditableForm = {
 const EMPTY_FORM: EditableForm = {
   nome: "",
   idade: "",
-  cargo: "membro",
+    cargo: "calouro",
   meta: "",
   personalidade: "",
   habitos: "",
@@ -229,7 +229,7 @@ export default function PainelVinculoPage() {
     return {
       nome: card.nome || "",
       idade: card.idade ? String(card.idade) : "",
-      cargo: card.cargo || "membro",
+        cargo: card.cargo || "calouro",
       meta: card.meta || "",
       personalidade: card.personalidade || "",
       habitos: card.habitos || "",
@@ -409,9 +409,9 @@ export default function PainelVinculoPage() {
               <p style={eyebrow}>Vinculo de Membro</p>
               <h1 style={title}>Meu Card Vinculado</h1>
               <p style={muted}>
-                Solicite o vinculo com o codigo de acesso do card. Apos aprovacao por lider, vice-lider ou
-                staff, a edicao do card fica liberada para sua conta.
-              </p>
+            Solicite o vinculo com o codigo de acesso do card. Apos aprovacao por lider, vice-lider,
+            conselheiro ou staff, a edicao do card fica liberada para sua conta.
+          </p>
             </div>
             <button style={secondaryBtn} onClick={() => (window.location.href = "/painel")}>
               Voltar ao painel

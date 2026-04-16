@@ -4,6 +4,7 @@ import Spinner from "@/components/Spinner";
 import Toast from "@/components/Toast";
 import AdminShell from "@/components/AdminShell";
 import { supabase } from "@/lib/supabase";
+import { hasAdminAccess, normalizeRole } from "@/lib/roles";
 import { useEffect, useState } from "react";
 import { uploadPublicImage } from "@/lib/uploadImage";
 import "../admin-dashboard.css";
@@ -40,7 +41,7 @@ export default function AdminMembrosPage() {
 
   const [nome, setNome] = useState("");
   const [idade, setIdade] = useState("");
-  const [cargo, setCargo] = useState("membro");
+  const [cargo, setCargo] = useState("calouro");
   const [meta, setMeta] = useState("");
   const [personalidade, setPersonalidade] = useState("");
   const [habitos, setHabitos] = useState("");
@@ -70,7 +71,7 @@ export default function AdminMembrosPage() {
         .eq("id", userData.user.id)
         .single();
 
-      if (profile?.cargo === "lider" || profile?.cargo === "vice_lider") {
+      if (hasAdminAccess(normalizeRole(profile?.cargo))) {
         setPermitido(true);
         await carregarMembros();
       }
@@ -99,7 +100,7 @@ export default function AdminMembrosPage() {
     setEditingId(membro.id);
     setNome(membro.nome || "");
     setIdade(membro.idade ? String(membro.idade) : "");
-    setCargo(membro.cargo || "membro");
+    setCargo(membro.cargo || "calouro");
     setMeta(membro.meta || "");
     setPersonalidade(membro.personalidade || "");
     setHabitos(membro.habitos || "");
@@ -147,7 +148,7 @@ export default function AdminMembrosPage() {
     setEditingId(null);
     setNome("");
     setIdade("");
-    setCargo("membro");
+    setCargo("calouro");
     setMeta("");
     setPersonalidade("");
     setHabitos("");
@@ -370,7 +371,7 @@ export default function AdminMembrosPage() {
       >
         <section className="admin-denied">
           <h2>Acesso negado</h2>
-          <p>Somente vice-lider ou lider podem gerenciar membros.</p>
+          <p>Somente lideranca pode gerenciar membros.</p>
         </section>
       </AdminShell>
     );
@@ -418,9 +419,11 @@ export default function AdminMembrosPage() {
               onChange={(e) => setCargo(e.target.value)}
               required
             >
-              <option value="membro">Membro</option>
+              <option value="calouro">Calouro</option>
+              <option value="elite">Elite</option>
               <option value="veterano">Veterano</option>
               <option value="vice_lider">Vice lider</option>
+              <option value="conselheiro">Conselheiro</option>
               <option value="lider">Lider</option>
             </select>
 

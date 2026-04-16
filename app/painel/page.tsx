@@ -1,9 +1,10 @@
-"use client";
+﻿"use client";
 
 import TopBar from "@/components/Topbar";
 import Spinner from "@/components/Spinner";
 import Toast from "@/components/Toast";
 import { supabase } from "@/lib/supabase";
+import { getRoleLabel, hasAdminAccess, normalizeRole } from "@/lib/roles";
 import { useEffect, useMemo, useState } from "react";
 import "./painel.css";
 
@@ -79,7 +80,7 @@ export default function PainelPage() {
             userData.user.user_metadata?.nome ||
             currentUserEmail.split("@")[0] ||
             "Sem nome",
-          cargo: "membro",
+          cargo: "calouro",
           email: currentUserEmail,
           avatar_url: null,
         });
@@ -114,12 +115,12 @@ export default function PainelPage() {
     const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 
     if (file.size > maxSize) {
-      setAvatarMessage("Erro: a imagem deve ter no máximo 2 MB.");
+      setAvatarMessage("Erro: a imagem deve ter no maximo 2 MB.");
       return;
     }
 
     if (!allowedTypes.includes(file.type)) {
-      setAvatarMessage("Erro: formato inválido. Use JPEG, PNG, WebP ou GIF.");
+      setAvatarMessage("Erro: formato invalido. Use JPEG, PNG, WebP ou GIF.");
       return;
     }
 
@@ -170,8 +171,8 @@ export default function PainelPage() {
     );
   }
 
-  const cargoNormalizado = String(profile?.cargo || "membro").trim().toLowerCase();
-  const isAdmin = cargoNormalizado === "lider" || cargoNormalizado === "vice_lider";
+  const cargoNormalizado = normalizeRole(profile?.cargo || "calouro");
+  const isAdmin = hasAdminAccess(cargoNormalizado);
 
   const selectedEvent =
     events.find((e) => e.id === selectedEventId) || events[0] || null;
@@ -185,8 +186,10 @@ export default function PainelPage() {
     const base =
       cargoNormalizado === "lider"
         ? 96
-        : cargoNormalizado === "vice_lider"
-        ? 88
+        : cargoNormalizado === "vice_lider" || cargoNormalizado === "conselheiro"
+        ? 90
+        : cargoNormalizado === "elite"
+        ? 82
         : cargoNormalizado === "veterano"
         ? 76
         : 64;
@@ -298,7 +301,7 @@ export default function PainelPage() {
               <div className="painel-handle">
                 @{(email ? email.split("@")[0] : "iconics_member").toUpperCase()}
               </div>
-              <div className="painel-subhandle">Perfil do membro</div>
+                <div className="painel-subhandle">Perfil da conta</div>
             </div>
           </header>
 
@@ -342,8 +345,10 @@ export default function PainelPage() {
                   <p className="mini-value">
                     {cargoNormalizado === "lider"
                       ? "Supreme"
-                      : cargoNormalizado === "vice_lider"
+                      : cargoNormalizado === "vice_lider" || cargoNormalizado === "conselheiro"
                       ? "Elite"
+                      : cargoNormalizado === "elite"
+                      ? "Ascensao"
                       : cargoNormalizado === "veterano"
                       ? "Destaque"
                       : "Ascendente"}
@@ -351,7 +356,7 @@ export default function PainelPage() {
                 </div>
 
                 <div className="mini-card">
-                  <p className="mini-label">Força do perfil</p>
+                  <p className="mini-label">Forca do perfil</p>
                   <div className="progress-track">
                     <div
                       className="progress-fill"
@@ -388,11 +393,11 @@ export default function PainelPage() {
 
                       <h3 className="event-title">{selectedEvent.titulo}</h3>
                       <p className="event-desc">
-                        {selectedEvent.descricao || "Sem descrição."}
+                        {selectedEvent.descricao || "Sem descricao."}
                       </p>
                       <p className="event-foot">
-                        {selectedEvent.local || "Sem local"} •{" "}
-                        {selectedEvent.horario || "Sem horário"}
+                        {selectedEvent.local || "Sem local"} €¢{" "}
+                        {selectedEvent.horario || "Sem horario"}
                       </p>
 
                       <button
@@ -422,10 +427,10 @@ export default function PainelPage() {
 
                     <div className="profile-meta">
                       <p>
-                        Rank: <span>♛ {getCargoLabel(cargoNormalizado)}</span>
+                        Rank: <span>™› {getRoleLabel(cargoNormalizado)}</span>
                       </p>
                       <p>
-                        E-mail: <strong>{email || "Não identificado"}</strong>
+                        E-mail: <strong>{email || "Nao identificado"}</strong>
                       </p>
                     </div>
                   </div>
@@ -435,7 +440,7 @@ export default function PainelPage() {
                       className="btn btn-primary"
                       onClick={() => (window.location.href = "/calendario")}
                     >
-                      Calendário
+                      Calendario
                     </button>
 
                     <button
@@ -443,6 +448,12 @@ export default function PainelPage() {
                       onClick={() => (window.location.href = "/painel/vinculo")}
                     >
                       Meu card
+                    </button>
+                    <button
+                      className="btn btn-secondary"
+                      onClick={() => (window.location.href = "/rede/config")}
+                    >
+                      Minha conta
                     </button>
 
                     <button
@@ -464,26 +475,28 @@ export default function PainelPage() {
                 </div>
 
                 <p className="profile-bio">
-                  Presença, estética e influência. Onde os outros seguem tendências,
+                  Presenca, estetica e influencia. Onde os outros seguem tendencias,
                   a ICONICS cria impacto.
                 </p>
 
                 <div className="stats-grid">
                   {[
-                    { label: "Cargo", value: getCargoLabel(cargoNormalizado) },
+                    { label: "Cargo", value: getRoleLabel(cargoNormalizado) },
                     { label: "Eventos", value: `${events.length} ativos` },
                     {
                       label: "Status",
                       value:
                         cargoNormalizado === "lider"
                           ? "Supreme"
-                          : cargoNormalizado === "vice_lider"
+                          : cargoNormalizado === "vice_lider" || cargoNormalizado === "conselheiro"
                           ? "Elite"
+                          : cargoNormalizado === "elite"
+                          ? "Ascensao"
                           : cargoNormalizado === "veterano"
                           ? "Destaque"
                           : "Ascendente",
                     },
-                    { label: "Força do perfil", value: `${profileStrength}%` },
+                    { label: "Forca do perfil", value: `${profileStrength}%` },
                   ].map((item) => (
                     <div key={item.label} className="stat-card">
                       <p className="stat-label">{item.label}</p>
@@ -496,7 +509,7 @@ export default function PainelPage() {
               <div className="glass-card full-events-panel">
                 <div className="panel-head">
                   <p className="panel-kicker">Eventos da fraternidade</p>
-                  <span className="panel-muted">{events.length} visíveis</span>
+                  <span className="panel-muted">{events.length} visiveis</span>
                 </div>
 
                 {events.length > 0 ? (
@@ -529,11 +542,11 @@ export default function PainelPage() {
                           <h3 className="event-card-title">{event.titulo}</h3>
 
                           <p className="event-card-desc">
-                            {event.descricao || "Sem descrição."}
+                            {event.descricao || "Sem descricao."}
                           </p>
 
                           <p className="event-card-foot">
-                            {event.local || "Sem local"} • {event.horario || "Sem horário"}
+                            {event.local || "Sem local"} €¢ {event.horario || "Sem horario"}
                           </p>
                         </div>
                       </button>
@@ -549,16 +562,16 @@ export default function PainelPage() {
               <div className="glass-card calendar-panel">
                 <div className="panel-row">
                   <div>
-                    <h3 className="sidebar-title">Meu Calendário</h3>
+                    <h3 className="sidebar-title">Meu Calendario</h3>
                     <p className="calendar-month">{monthLabel}</p>
                   </div>
 
                   <div className="calendar-nav">
                     <button className="calendar-nav-btn" onClick={goPrevMonth}>
-                      ←
+                      †
                     </button>
                     <button className="calendar-nav-btn" onClick={goNextMonth}>
-                      →
+                      †’
                     </button>
                   </div>
                 </div>
@@ -611,7 +624,7 @@ export default function PainelPage() {
                 </div>
 
                 <div className="next-box">
-                  <p className="next-label">Próximos eventos</p>
+                  <p className="next-label">Proximos eventos</p>
 
                   <div className="next-list">
                     {filteredMonthEvents.length > 0 ? (
@@ -639,7 +652,7 @@ export default function PainelPage() {
                         );
                       })
                     ) : (
-                      <p className="next-empty">Sem eventos neste mês.</p>
+                      <p className="next-empty">Sem eventos neste mes.</p>
                     )}
                   </div>
                 </div>
@@ -647,17 +660,17 @@ export default function PainelPage() {
 
               <div className="glass-card info-panel">
                 <div className="panel-head">
-                  <p className="panel-kicker">Informações</p>
-                  <span className="panel-muted">Visualização</span>
+                  <p className="panel-kicker">Informacoes</p>
+                  <span className="panel-muted">Visualizacao</span>
                 </div>
 
                 <div className="info-list">
                   {[
                     ["Nome", profile?.nome || "Sem nome"],
-                    ["Usuário", email ? `@${email.split("@")[0]}` : "@iconics_member"],
-                    ["E-mail", email || "Não identificado"],
-                    ["Cargo", getCargoLabel(cargoNormalizado)],
-                    ["Acesso admin", isAdmin ? "Liberado" : "Não"],
+                    ["Usuario", email ? `@${email.split("@")[0]}` : "@iconics_member"],
+                    ["E-mail", email || "Nao identificado"],
+                    ["Cargo", getRoleLabel(cargoNormalizado)],
+                    ["Acesso admin", isAdmin ? "Liberado" : "Nao"],
                     ["Eventos ativos", String(events.length)],
                   ].map(([label, value]) => (
                     <div key={label} className="info-item">
@@ -681,13 +694,7 @@ function formatEventDate(dateString?: string | null) {
   return date.toLocaleDateString("pt-BR");
 }
 
-function getCargoLabel(cargo: string) {
-  const map: Record<string, string> = {
-    lider: "Líder",
-    vice_lider: "Vice-líder",
-    veterano: "Veterano",
-    membro: "Membro",
-  };
 
-  return map[cargo] || cargo;
-}
+
+
+

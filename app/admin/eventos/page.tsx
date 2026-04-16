@@ -4,6 +4,7 @@ import Spinner from "@/components/Spinner";
 import Toast from "@/components/Toast";
 import AdminShell from "@/components/AdminShell";
 import { supabase } from "@/lib/supabase";
+import { hasAdminAccess, normalizeRole } from "@/lib/roles";
 import { uploadPublicImage } from "@/lib/uploadImage";
 import { useEffect, useState } from "react";
 import "../admin-dashboard.css";
@@ -49,11 +50,8 @@ export default function AdminEventosPage() {
         .eq("id", userData.user.id)
         .single();
 
-      const cargoNormalizado = String(profile?.cargo || "")
-        .trim()
-        .toLowerCase();
-
-      if (cargoNormalizado === "lider" || cargoNormalizado === "vice_lider") {
+      const cargoNormalizado = normalizeRole(profile?.cargo);
+      if (hasAdminAccess(cargoNormalizado)) {
         setPermitido(true);
         await carregarEventos();
       }
@@ -174,7 +172,7 @@ export default function AdminEventosPage() {
       >
         <section className="admin-denied">
           <h2>Acesso negado</h2>
-          <p>Somente vice-lider ou lider podem gerenciar eventos.</p>
+          <p>Somente lideranca pode gerenciar eventos.</p>
         </section>
       </AdminShell>
     );
