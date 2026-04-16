@@ -28,26 +28,26 @@ function toNumber(value: unknown, fallback = 0) {
 }
 
 function buildRocketLayout(rankings: RankingItem[], maxPoints: number): RocketPoint[] {
-  const lanes = [18, 30, 42, 54, 66, 78];
-  const minDistance = 9.5; // distancia minima em porcentagem no eixo X da mesma lane
-  const laneXs = new Map<number, number[]>();
-  lanes.forEach((_, laneIndex) => laneXs.set(laneIndex, []));
+  const lanes = [14, 26, 38, 50, 62, 74, 86];
+  const minDistance = 10.5; // distancia minima em porcentagem no eixo Y da mesma lane
+  const laneYs = new Map<number, number[]>();
+  lanes.forEach((_, laneIndex) => laneYs.set(laneIndex, []));
 
   return rankings.map((item, index) => {
     const ratio = Math.max(0, Math.min(1, toNumber(item.pontos, 0) / Math.max(maxPoints, 1)));
-    const baseX = 6 + ratio * 88;
+    const baseY = 8 + ratio * 84;
 
     let chosenLane = 0;
     let chosenScore = -1;
 
     for (let laneIndex = 0; laneIndex < lanes.length; laneIndex += 1) {
-      const usedXs = laneXs.get(laneIndex) || [];
-      if (!usedXs.length) {
+      const usedYs = laneYs.get(laneIndex) || [];
+      if (!usedYs.length) {
         chosenLane = laneIndex;
         chosenScore = 999;
         break;
       }
-      const nearest = Math.min(...usedXs.map((usedX) => Math.abs(usedX - baseX)));
+      const nearest = Math.min(...usedYs.map((usedY) => Math.abs(usedY - baseY)));
       if (nearest >= minDistance) {
         chosenLane = laneIndex;
         chosenScore = 999;
@@ -59,19 +59,19 @@ function buildRocketLayout(rankings: RankingItem[], maxPoints: number): RocketPo
       }
     }
 
-    const usedXs = laneXs.get(chosenLane) || [];
-    let x = baseX;
-    if (usedXs.some((usedX) => Math.abs(usedX - x) < minDistance)) {
+    const usedYs = laneYs.get(chosenLane) || [];
+    let y = baseY;
+    if (usedYs.some((usedY) => Math.abs(usedY - y) < minDistance)) {
       const direction = index % 2 === 0 ? 1 : -1;
-      x = Math.max(4, Math.min(94, x + direction * (minDistance * 0.75)));
+      y = Math.max(6, Math.min(94, y + direction * (minDistance * 0.75)));
     }
-    usedXs.push(x);
-    laneXs.set(chosenLane, usedXs);
+    usedYs.push(y);
+    laneYs.set(chosenLane, usedYs);
 
     return {
       id: item.id,
-      x,
-      y: lanes[chosenLane],
+      x: lanes[chosenLane],
+      y,
     };
   });
 }
@@ -266,8 +266,8 @@ export default function RankingsPage() {
             <div className="chart-main-grid">
               <div>
                 <div className="chart-axis">
-                  <span className="axis-start">0 pts</span>
                   <span className="axis-end">{maxPoints} pts</span>
+                  <span className="axis-start">0 pts</span>
                 </div>
                 <div className="chart-track" />
 
