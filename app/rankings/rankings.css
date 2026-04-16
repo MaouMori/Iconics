@@ -93,7 +93,12 @@
   height: clamp(360px, 52vh, 620px);
   margin-top: 0;
   border-radius: 16px;
-  background: linear-gradient(165deg, rgba(25, 10, 45, 0.9), rgba(15, 5, 28, 0.9));
+  background:
+    linear-gradient(165deg, rgba(25, 10, 45, 0.72), rgba(15, 5, 28, 0.78)),
+    url("/images/rankings-chart-bg.jpg");
+  background-size: cover, cover;
+  background-position: center, center;
+  background-repeat: no-repeat, no-repeat;
   border: 1px solid rgba(203, 161, 255, 0.2);
   overflow: hidden;
   margin-left: 82px;
