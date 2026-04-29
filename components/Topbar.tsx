@@ -131,6 +131,12 @@ export default function TopBar({
         )}
 
         {!loading && isLogged && (
+          <Link href="/missoes" style={linkStyle}>
+            Missoes
+          </Link>
+        )}
+
+        {!loading && isLogged && (
           <Link href="/rede" style={linkStyle}>
             Rede{alertCount > 0 ? ` (${alertCount})` : ""}
           </Link>

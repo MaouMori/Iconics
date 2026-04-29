@@ -88,6 +88,9 @@ export default function Navbar() {
             <Link href="/painel" className="nav-link nav-login">
               Painel
             </Link>
+            <Link href="/missoes" className="nav-link nav-login">
+              Missoes
+            </Link>
 
             <button
               type="button"
