@@ -121,6 +121,10 @@
   align-items: start;
 }
 
+.missions-layout.two-col {
+  grid-template-columns: 300px minmax(0, 1fr);
+}
+
 .missions-left,
 .missions-right {
   display: flex;
@@ -370,6 +374,191 @@
   cursor: pointer;
 }
 
+.mission-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.mission-form input,
+.mission-form textarea,
+.mission-form select,
+.mission-modal-panel textarea {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid rgba(216, 180, 254, 0.2);
+  border-radius: 8px;
+  background: rgba(5, 4, 15, 0.72);
+  color: #fff;
+  padding: 12px;
+  font: inherit;
+}
+
+.mission-form textarea,
+.mission-modal-panel textarea {
+  min-height: 88px;
+  resize: vertical;
+}
+
+.mission-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.mission-form button,
+.mission-review button,
+.mission-modal-actions button {
+  min-height: 44px;
+  border-radius: 8px;
+  border: 1px solid rgba(217, 70, 239, 0.58);
+  background: rgba(126, 34, 206, 0.24);
+  color: #f5d0fe;
+  cursor: pointer;
+}
+
+.mission-review {
+  grid-template-columns: 1fr;
+}
+
+.mission-review div {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.mission-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(2, 1, 8, 0.78);
+}
+
+.mission-modal-panel {
+  width: min(720px, 100%);
+  border: 1px solid rgba(183, 95, 255, 0.32);
+  border-radius: 8px;
+  background: rgba(8, 6, 18, 0.96);
+  box-shadow: 0 0 42px rgba(132, 44, 255, 0.24);
+  padding: 24px;
+}
+
+.mission-modal-panel h2 {
+  margin: 0 0 8px;
+}
+
+.mission-modal-panel p {
+  color: #ddd6fe;
+}
+
+.mission-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.mission-page-panel,
+.mission-page-grid,
+.mission-card-showcase {
+  padding: 18px;
+}
+
+.mission-page-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.rank-row {
+  display: grid;
+  grid-template-columns: 58px 64px minmax(0, 1fr) 120px 120px;
+  gap: 16px;
+  align-items: center;
+  padding: 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.rank-row img {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.rank-row h2 {
+  margin: 0;
+  color: #fff;
+}
+
+.rank-row p {
+  margin: 4px 0 0;
+  color: #c4b5fd;
+}
+
+.rank-row strong,
+.rank-row span {
+  color: #f5d0fe;
+}
+
+.event-card {
+  grid-template-columns: 260px minmax(0, 1fr);
+}
+
+.member-mission-card {
+  width: min(760px, 100%);
+  margin: 24px auto;
+  min-height: 360px;
+  display: grid;
+  grid-template-columns: 180px minmax(0, 1fr);
+  gap: 28px;
+  align-items: center;
+  border: 1px solid rgba(217, 70, 239, 0.32);
+  border-radius: 8px;
+  padding: 32px;
+  background:
+    linear-gradient(135deg, rgba(5, 4, 15, 0.86), rgba(88, 28, 135, 0.28)),
+    url("/images/footer_magic_mist.png") center / cover;
+}
+
+.member-mission-card img {
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid rgba(245, 208, 254, 0.42);
+}
+
+.member-mission-card p,
+.member-mission-card span {
+  color: #d8b4fe;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+}
+
+.member-mission-card h2 {
+  margin: 10px 0;
+  font-size: 42px;
+  color: #fff;
+}
+
+.member-mission-card footer {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.member-mission-card footer strong {
+  padding: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #f5d0fe;
+  text-align: center;
+}
+
 .mission-actions button:disabled {
   color: #c4b5fd;
   border-color: rgba(196, 181, 253, 0.22);
@@ -547,6 +736,7 @@
 
 @media (max-width: 1380px) {
   .missions-layout,
+  .missions-layout.two-col,
   .missions-hero {
     grid-template-columns: 1fr;
   }
@@ -567,7 +757,12 @@
 
   .missions-tabs,
   .mission-card,
-  .mission-meta {
+  .mission-meta,
+  .mission-page-grid,
+  .rank-row,
+  .event-card,
+  .member-mission-card,
+  .member-mission-card footer {
     grid-template-columns: 1fr;
   }
 

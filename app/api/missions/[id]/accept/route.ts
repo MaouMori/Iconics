@@ -29,7 +29,12 @@ export async function POST(req: NextRequest, context: RouteContext) {
   }
 
   const level = getMissionLevel(profile);
-  const requiredLevel = Number(mission.required_level || 1);
+  const visibleLevel = Number(mission.visible_level || 0);
+  if (level < visibleLevel) {
+    return NextResponse.json({ error: "Esta missao ainda nao esta visivel para seu nivel." }, { status: 403 });
+  }
+
+  const requiredLevel = Number(mission.required_level || 0);
   if (level < requiredLevel) {
     return NextResponse.json(
       { error: `Nivel ${requiredLevel} necessario para aceitar esta missao.` },

@@ -1,3 +1,7 @@
+alter table public.profiles
+  add column if not exists mission_xp integer not null default 0,
+  add column if not exists mission_level integer not null default 0;
+
 create table if not exists public.guild_missions (
   id bigserial primary key,
   slug text not null unique,
@@ -7,6 +11,7 @@ create table if not exists public.guild_missions (
   category text not null default 'social',
   difficulty text not null default 'media',
   required_level integer not null default 1,
+  visible_level integer not null default 0,
   reward_influence integer not null default 50,
   time_limit_hours integer not null default 24,
   image_url text null,
@@ -23,11 +28,17 @@ create table if not exists public.guild_mission_claims (
   profile_id uuid not null references public.profiles(id) on delete cascade,
   status text not null default 'accepted',
   progress integer not null default 0,
+  proof_text text null,
+  proof_links text[] not null default '{}',
+  proof_files jsonb not null default '[]'::jsonb,
+  reviewed_by uuid null references public.profiles(id) on delete set null,
+  review_note text null,
   proof_url text null,
   accepted_at timestamptz not null default now(),
   expires_at timestamptz null,
   submitted_at timestamptz null,
   completed_at timestamptz null,
+  rejected_at timestamptz null,
   updated_at timestamptz not null default now()
 );
 
@@ -41,6 +52,9 @@ create index if not exists idx_guild_mission_claims_profile
 create index if not exists idx_guild_mission_claims_status
   on public.guild_mission_claims(status, accepted_at desc);
 
+create index if not exists idx_profiles_mission_rank
+  on public.profiles(mission_level desc, mission_xp desc);
+
 create table if not exists public.guild_mission_activity (
   id bigserial primary key,
   mission_id bigint null references public.guild_missions(id) on delete set null,
@@ -52,7 +66,7 @@ create table if not exists public.guild_mission_activity (
 );
 
 insert into public.guild_missions
-  (slug, title, summary, details, category, difficulty, required_level, reward_influence, time_limit_hours, image_url, status, unlock_after_completed, tags)
+  (slug, title, summary, details, category, difficulty, required_level, visible_level, reward_influence, time_limit_hours, image_url, status, unlock_after_completed, tags)
 values
   (
     'viralizacao',
@@ -62,6 +76,7 @@ values
     'social',
     'media',
     1,
+    0,
     150,
     24,
     '/images/portal_scene_main.png',
@@ -77,6 +92,7 @@ values
     'misterio',
     'alta',
     4,
+    0,
     200,
     48,
     '/images/olho.png',
@@ -92,6 +108,7 @@ values
     'social',
     'facil',
     2,
+    0,
     100,
     72,
     '/images/mansao.png',
@@ -107,6 +124,7 @@ values
     'secreta',
     'secreta',
     8,
+    6,
     400,
     96,
     '/images/rankings-space-bg.jpg',
