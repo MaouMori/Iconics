@@ -1164,8 +1164,8 @@
 .thread-three { top: 518px; left: 405px; transform: rotate(12deg); }
 
 .quest-paper {
-  width: 170px;
-  min-height: 210px;
+  width: 168px;
+  min-height: 232px;
   justify-self: center;
   position: relative;
   display: flex;
@@ -1173,12 +1173,12 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 28px 16px 22px;
+  padding: 42px 22px 34px;
   border: 0;
   color: #241406;
   text-align: center;
   cursor: pointer;
-  background: url("/images/mission-parchment-small.svg") center / 100% 100% no-repeat;
+  background: url("/images/mission-parchment-small.png") center / 100% 100% no-repeat;
   filter: drop-shadow(0 12px 14px rgba(0, 0, 0, 0.5));
   transition: filter 180ms ease, box-shadow 180ms ease;
 }
@@ -1248,9 +1248,9 @@
 .quest-detail {
   min-height: clamp(560px, calc(100vh - 230px), 690px);
   position: relative;
-  padding: 64px 42px 34px;
+  padding: 92px 58px 66px;
   color: #241406;
-  background: url("/images/mission-parchment-large.svg") center / 100% 100% no-repeat;
+  background: url("/images/mission-parchment-large.png") center / 100% 100% no-repeat;
   filter: drop-shadow(0 24px 30px rgba(0, 0, 0, 0.5));
 }
 
