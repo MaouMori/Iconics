@@ -221,25 +221,43 @@ export default function MissoesPage() {
               <span className="quest-red-thread thread-two" aria-hidden="true" />
               <span className="quest-red-thread thread-three" aria-hidden="true" />
               <div className="quest-scroll-grid">
-                {visibleMissions.length === 0 ? (
+                {visibleMissions.length === 0 && tab !== "available" ? (
                   <div className="quest-empty">Nenhum pergaminho neste mural.</div>
                 ) : (
-                  visibleMissions.map((mission, index) => (
-                    <button
-                      key={mission.id}
-                      type="button"
-                      className={`quest-paper ${selectedMission?.id === mission.id ? "selected" : ""} ${mission.isLocked ? "locked" : ""}`}
-                      onClick={() => setSelectedMission(mission)}
-                      style={{ transform: `rotate(${[-2, 1.5, -1, 2, -1.5, 1][index % 6]}deg) ${selectedMission?.id === mission.id ? "scale(1.08)" : ""}` }}
-                    >
-                      <span className="quest-pin" />
-                      <span className="quest-icon">{mission.status === "secret" || mission.isLocked ? "?" : getQuestIcon(mission.category)}</span>
-                      <strong>{mission.status === "secret" && mission.isLocked ? "???" : mission.title}</strong>
-                      <small>{mission.isLocked ? mission.lockedReason : mission.summary}</small>
-                      <b>+{mission.reward_influence} XP</b>
-                      <em>{mission.difficulty}</em>
-                    </button>
-                  ))
+                  <>
+                    {visibleMissions.map((mission, index) => (
+                      <button
+                        key={mission.id}
+                        type="button"
+                        className={`quest-paper ${selectedMission?.id === mission.id ? "selected" : ""} ${mission.isLocked ? "locked" : ""}`}
+                        onClick={() => setSelectedMission(mission)}
+                        style={{ transform: `rotate(${[-2, 1.5, -1, 2, -1.5, 1][index % 6]}deg) ${selectedMission?.id === mission.id ? "scale(1.05)" : ""}` }}
+                      >
+                        <span className="quest-pin" />
+                        <span className="quest-icon">{mission.status === "secret" || mission.isLocked ? "?" : getQuestIcon(mission.category)}</span>
+                        <strong>{mission.status === "secret" && mission.isLocked ? "???" : mission.title}</strong>
+                        <small>{mission.isLocked ? mission.lockedReason : mission.summary}</small>
+                        <b>+{mission.reward_influence} XP</b>
+                        <em>{mission.difficulty}</em>
+                      </button>
+                    ))}
+                    {tab === "available" ? Array.from({ length: Math.max(0, 9 - visibleMissions.length) }).map((_, index) => (
+                      <button
+                        key={`placeholder-${index}`}
+                        type="button"
+                        className="quest-paper locked quest-placeholder"
+                        disabled
+                        style={{ transform: `rotate(${[1.5, -1, 2, -2, 1, -1.5][index % 6]}deg)` }}
+                      >
+                        <span className="quest-pin" />
+                        <span className="quest-icon">?</span>
+                        <strong>???</strong>
+                        <small>Missao secreta bloqueada para ver.</small>
+                        <b>???</b>
+                        <em>Bloqueada</em>
+                      </button>
+                    )) : null}
+                  </>
                 )}
               </div>
             </div>
@@ -248,7 +266,7 @@ export default function MissoesPage() {
               {detailsMission ? (
                 <>
                   <span className="wax-seal">ICONICS</span>
-                  <div className="quest-eye">◉</div>
+                  <div className="quest-eye">O</div>
                   <h2>{detailsMission.title}</h2>
                   <span className="quest-rarity">Missao {detailsMission.difficulty}</span>
                   <p>{detailsMission.isLocked ? detailsMission.lockedReason : detailsMission.details || detailsMission.summary}</p>
@@ -343,9 +361,9 @@ export default function MissoesPage() {
 
 function getQuestIcon(category: string) {
   const normalized = category.toLowerCase();
-  if (normalized.includes("social")) return "✦";
-  if (normalized.includes("recrut")) return "⚑";
-  if (normalized.includes("evento")) return "◆";
-  if (normalized.includes("misterio") || normalized.includes("enigma")) return "◉";
-  return "✧";
+  if (normalized.includes("social")) return "!";
+  if (normalized.includes("recrut")) return "+";
+  if (normalized.includes("evento")) return "*";
+  if (normalized.includes("misterio") || normalized.includes("enigma")) return "O";
+  return "*";
 }
