@@ -27,6 +27,7 @@ export default function TopBar({
     level?: number;
     xp?: number;
     nextInfluence?: number;
+    canManage?: boolean;
   } | null>(null);
   const [isMobile, setIsMobile] = useState(
     typeof window !== "undefined" ? window.innerWidth <= 680 : false
@@ -127,6 +128,7 @@ export default function TopBar({
         level: missionPayload?.profile?.level || 0,
         xp: missionPayload?.profile?.xp || 0,
         nextInfluence: missionPayload?.profile?.nextInfluence || 1,
+        canManage: missionPayload?.profile?.canManage || false,
       });
     }
 
@@ -157,10 +159,17 @@ export default function TopBar({
     const navItems = [
       { label: "Painel", href: "/painel", icon: "P" },
       { label: "Missoes", href: "/missoes", icon: "M" },
+      { label: "Ranking", href: "/missoes/ranking", icon: "R" },
+      { label: "Eventos", href: "/missoes/eventos", icon: "E" },
+      { label: "Meu card", href: "/missoes/meu-card", icon: "C" },
       { label: "Rede", href: "/rede", icon: "N" },
       { label: "Notificacoes", href: "/rede", icon: "!" },
       { label: "Mensagens", href: "/rede/mensagens", icon: "@" },
       { label: "Configuracoes", href: "/rede/config", icon: "S" },
+    ];
+    const missionAdminItems = [
+      { label: "Criar missao", href: "/missoes/criar", icon: "+" },
+      { label: "Revisao", href: "/missoes/revisao", icon: "V" },
     ];
     const coreItems = [
       { label: "Mansao", href: "/mansao", icon: "I" },
@@ -206,6 +215,15 @@ export default function TopBar({
               </Link>
             );
           })}
+          {profile?.canManage ? missionAdminItems.map((item) => {
+            const active = pathname === item.href || pathname?.startsWith(`${item.href}/`);
+            return (
+              <Link key={item.href} href={item.href} style={active ? sidebarLinkActiveStyle : sidebarLinkStyle}>
+                <span style={sidebarIconStyle}>{item.icon}</span>
+                <span>{item.label}</span>
+              </Link>
+            );
+          }) : null}
         </nav>
 
         <nav style={sidebarCoreStyle} aria-label="Iconics core">

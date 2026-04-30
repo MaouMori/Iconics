@@ -9,19 +9,10 @@ import "./missoes.css";
 type MissionClaim = {
   id: number;
   mission_id: number;
-  profile_id?: string;
   status: string;
   proof_text?: string | null;
-  proof_links?: string[] | null;
   proof_files?: { name?: string; url?: string; type?: string }[] | null;
-  mission_title?: string;
-  mission_reward?: number;
-  profile_name?: string;
-  profile_avatar_url?: string | null;
-  profile_cargo?: string | null;
   accepted_at: string;
-  submitted_at?: string | null;
-  completed_at?: string | null;
 };
 
 type Mission = {
@@ -32,29 +23,17 @@ type Mission = {
   category: string;
   difficulty: string;
   required_level: number;
-  visible_level: number;
   reward_influence: number;
   time_limit_hours: number;
-  image_url?: string | null;
   status: string;
   tags?: string[];
   claim?: MissionClaim | null;
-  isAccepted: boolean;
-  isCompleted: boolean;
-  isSubmitted: boolean;
   isLocked: boolean;
   lockedReason: string;
 };
 
 type MissionProfile = {
-  id: string;
-  nome: string | null;
-  cargo: string | null;
-  avatar_url?: string | null;
   level: number;
-  xp: number;
-  nextInfluence: number;
-  rankLabel: string;
   canManage: boolean;
 };
 
@@ -62,67 +41,29 @@ type Payload = {
   profile: MissionProfile;
   missions: Mission[];
   claims: MissionClaim[];
-  adminClaims: MissionClaim[];
-  activity: {
-    id: number;
-    title: string;
-    description?: string | null;
-    influence_delta: number;
-    mission_title?: string;
-    mission_summary?: string;
-    mission_image_url?: string;
-    mission_status?: string;
-  }[];
-  levels?: { level: number; required_xp: number; label?: string | null }[];
   usingFallback?: boolean;
 };
 
 const tabs = [
   { id: "available", label: "Disponiveis" },
-  { id: "active", label: "Aceitas" },
+  { id: "active", label: "Em andamento" },
   { id: "submitted", label: "Finalizadas" },
-  { id: "review", label: "Para aprovar" },
   { id: "secret", label: "Secretas" },
 ] as const;
 
 type TabId = (typeof tabs)[number]["id"];
-type PanelMode = "missions" | "create" | "review";
-
-const navItems = [
-  ["Missoes", "/missoes"],
-  ["Meu painel", "/missoes/painel"],
-  ["Rankings", "/missoes/ranking"],
-  ["Eventos", "/missoes/eventos"],
-  ["Meu card", "/missoes/meu-card"],
-];
 
 export default function MissoesPage() {
   const [payload, setPayload] = useState<Payload | null>(null);
   const [tab, setTab] = useState<TabId>("available");
-  const [panelMode, setPanelMode] = useState<PanelMode>("missions");
   const [loading, setLoading] = useState(true);
-  const [actionId, setActionId] = useState<number | null>(null);
   const [message, setMessage] = useState("");
+  const [actionId, setActionId] = useState<number | null>(null);
+  const [selectedMission, setSelectedMission] = useState<Mission | null>(null);
   const [proofClaim, setProofClaim] = useState<MissionClaim | null>(null);
-  const [reviewClaimDetails, setReviewClaimDetails] = useState<MissionClaim | null>(null);
   const [proofText, setProofText] = useState("");
   const [proofFiles, setProofFiles] = useState<{ name?: string; url?: string; type?: string }[]>([]);
   const [uploadingProof, setUploadingProof] = useState(false);
-  const [uploadingMissionImage, setUploadingMissionImage] = useState(false);
-  const [editingMission, setEditingMission] = useState<Mission | null>(null);
-  const [createForm, setCreateForm] = useState({
-    title: "",
-    summary: "",
-    details: "",
-    reward_influence: "100",
-    required_level: "0",
-    visible_level: "0",
-    time_limit_hours: "24",
-    difficulty: "media",
-    category: "geral",
-    status: "active",
-    image_url: "",
-  });
 
   async function getToken() {
     const { data } = await supabase.auth.getSession();
@@ -139,7 +80,7 @@ export default function MissoesPage() {
     const response = await fetch("/api/missions", { headers: { Authorization: `Bearer ${token}` } });
     const data = await response.json().catch(() => null);
     if (!response.ok) {
-      setMessage(data?.error || "Nao foi possivel carregar o painel de missoes.");
+      setMessage(data?.error || "Nao foi possivel carregar o mural de missoes.");
       setLoading(false);
       return;
     }
@@ -168,11 +109,11 @@ export default function MissoesPage() {
     return data;
   }
 
-  async function uploadMissionFile(file: File, purpose: "proof" | "mission-image") {
+  async function uploadMissionFile(file: File) {
     const token = await getToken();
     const form = new FormData();
     form.append("file", file);
-    form.append("purpose", purpose);
+    form.append("purpose", "proof");
     const response = await fetch("/api/missions/upload", {
       method: "POST",
       headers: { Authorization: `Bearer ${token}` },
@@ -183,14 +124,13 @@ export default function MissoesPage() {
     return data.file as { name: string; url: string; type: string };
   }
 
-  async function acceptMission(missionId: number) {
-    setActionId(missionId);
+  async function acceptMission(mission: Mission) {
+    setActionId(mission.id);
     setMessage("");
     try {
-      await apiAction(`/api/missions/${missionId}/accept`, { method: "POST" });
-      setMessage("Missao aceita. Ela apareceu na aba Aceitas.");
-      setPanelMode("missions");
-      setTab("active");
+      await apiAction(`/api/missions/${mission.id}/accept`, { method: "POST" });
+      setMessage("Missao aceita. O pergaminho saiu do mural disponivel.");
+      setSelectedMission(null);
       await loadMissions();
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Nao foi possivel aceitar esta missao.");
@@ -205,64 +145,17 @@ export default function MissoesPage() {
     try {
       await apiAction(`/api/missions/claims/${proofClaim.id}/submit`, {
         method: "POST",
-        body: JSON.stringify({
-          proof_text: proofText,
-          proof_links: [],
-          proof_files: proofFiles,
-        }),
+        body: JSON.stringify({ proof_text: proofText, proof_links: [], proof_files: proofFiles }),
       });
       setProofClaim(null);
       setProofText("");
       setProofFiles([]);
+      setSelectedMission(null);
       setTab("submitted");
-      setMessage("Comprovantes enviados. A lideranca vai revisar sua missao.");
+      setMessage("Comprovantes enviados para a revisao da lideranca.");
       await loadMissions();
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Nao foi possivel finalizar a missao.");
-    }
-    setActionId(null);
-  }
-
-  async function createMission() {
-    setMessage("");
-    try {
-      await apiAction("/api/missions", { method: "POST", body: JSON.stringify(createForm) });
-      setCreateForm({ ...createForm, title: "", summary: "", details: "", image_url: "" });
-      setMessage("Missao criada e publicada no painel.");
-      setPanelMode("missions");
-      await loadMissions();
-    } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Nao foi possivel criar a missao.");
-    }
-  }
-
-  async function updateMission() {
-    if (!editingMission) return;
-    setMessage("");
-    try {
-      await apiAction(`/api/missions/${editingMission.id}`, {
-        method: "PATCH",
-        body: JSON.stringify(editingMission),
-      });
-      setEditingMission(null);
-      setMessage("Missao atualizada.");
-      await loadMissions();
-    } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Nao foi possivel editar a missao.");
-    }
-  }
-
-  async function reviewClaim(claimId: number, action: "approve" | "reject") {
-    setActionId(claimId);
-    try {
-      await apiAction(`/api/missions/claims/${claimId}/review`, {
-        method: "POST",
-        body: JSON.stringify({ action }),
-      });
-      setMessage(action === "approve" ? "Missao aprovada e XP entregue." : "Missao recusada.");
-      await loadMissions();
-    } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Nao foi possivel revisar.");
     }
     setActionId(null);
   }
@@ -271,20 +164,6 @@ export default function MissoesPage() {
   const claims = useMemo(() => payload?.claims || [], [payload?.claims]);
   const activeClaims = claims.filter((claim) => claim.status === "accepted");
   const submittedClaims = claims.filter((claim) => claim.status === "submitted" || claim.status === "completed" || claim.status === "rejected");
-  const pendingReviewClaims = (payload?.adminClaims || []).filter((claim) => claim.status === "submitted");
-  const profile = payload?.profile;
-  const xpPercent = profile ? Math.min(100, Math.round((profile.xp / Math.max(profile.nextInfluence, 1)) * 100)) : 0;
-
-  useEffect(() => {
-    if (!profile?.canManage) return;
-    function syncPanelFromHash() {
-      if (window.location.hash === "#criar-missao") setPanelMode("create");
-      if (window.location.hash === "#revisao-lideranca") setPanelMode("review");
-    }
-    syncPanelFromHash();
-    window.addEventListener("hashchange", syncPanelFromHash);
-    return () => window.removeEventListener("hashchange", syncPanelFromHash);
-  }, [profile?.canManage]);
 
   const visibleMissions = useMemo(() => {
     if (tab === "active") {
@@ -304,17 +183,15 @@ export default function MissoesPage() {
     return missions.filter((mission) => mission.status !== "secret" && !claimedMissionIds.has(Number(mission.id)));
   }, [activeClaims, claims, missions, submittedClaims, tab]);
 
-  function openTab(nextTab: TabId) {
-    setPanelMode("missions");
-    setTab(nextTab);
-  }
+  const detailsMission = selectedMission || visibleMissions[0] || null;
+  const selectedClaim = detailsMission?.claim || claims.find((claim) => Number(claim.mission_id) === Number(detailsMission?.id)) || null;
 
   if (loading) {
     return (
       <>
         <TopBar />
         <main className="missions-page missions-loading">
-          <Spinner texto="Carregando painel de missoes..." />
+          <Spinner texto="Carregando mural de missoes..." />
         </main>
       </>
     );
@@ -323,193 +200,99 @@ export default function MissoesPage() {
   return (
     <>
       <TopBar />
-      <main className="missions-page">
-        <section className="missions-shell">
-          <MissionHero />
+      <main className="missions-page medieval-missions-page">
+        <section className="medieval-board-shell">
+          <header className="medieval-sign">
+            <span>A influencia comeca aqui</span>
+            <h1>Painel de Missoes</h1>
+          </header>
+
           {message ? <div className="missions-alert">{message}</div> : null}
           {payload?.usingFallback ? <div className="missions-alert">Aplique a migracao de missoes no Supabase para liberar todas as acoes.</div> : null}
 
-          <div className="missions-layout">
-            <MissionMenu
-              active="/missoes"
-              activePanel={panelMode}
-              canManage={profile?.canManage}
-              onCreate={() => setPanelMode("create")}
-              onReview={() => setPanelMode("review")}
-            />
-
-            <section className="missions-board">
-              {panelMode === "create" && profile?.canManage ? (
-                <div className="mission-panel-scroll">
-                  <section className="mission-manage-panel">
-                    <h2>Criar missao</h2>
-                    <div className="mission-form">
-                      <input placeholder="Titulo" value={createForm.title} onChange={(e) => setCreateForm({ ...createForm, title: e.target.value })} />
-                      <textarea placeholder="Resumo" value={createForm.summary} onChange={(e) => setCreateForm({ ...createForm, summary: e.target.value })} />
-                      <textarea placeholder="Detalhes" value={createForm.details} onChange={(e) => setCreateForm({ ...createForm, details: e.target.value })} />
-                      <label className="mission-file-input">
-                        {uploadingMissionImage ? "Enviando imagem..." : "Enviar imagem da missao"}
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={async (e) => {
-                            const file = e.target.files?.[0];
-                            if (!file) return;
-                            setUploadingMissionImage(true);
-                            try {
-                              const uploaded = await uploadMissionFile(file, "mission-image");
-                              setCreateForm({ ...createForm, image_url: uploaded.url });
-                            } catch (error) {
-                              setMessage(error instanceof Error ? error.message : "Falha no upload da imagem.");
-                            }
-                            setUploadingMissionImage(false);
-                          }}
-                        />
-                      </label>
-                      {createForm.image_url ? <img className="mission-upload-preview" src={createForm.image_url} alt="Preview da missao" /> : null}
-                      <div className="mission-form-grid">
-                        <input placeholder="XP" value={createForm.reward_influence} onChange={(e) => setCreateForm({ ...createForm, reward_influence: e.target.value })} />
-                        <input placeholder="Nivel para aceitar" value={createForm.required_level} onChange={(e) => setCreateForm({ ...createForm, required_level: e.target.value })} />
-                        <input placeholder="Nivel para ver" value={createForm.visible_level} onChange={(e) => setCreateForm({ ...createForm, visible_level: e.target.value })} />
-                        <input placeholder="Horas" value={createForm.time_limit_hours} onChange={(e) => setCreateForm({ ...createForm, time_limit_hours: e.target.value })} />
-                      </div>
-                      <button type="button" onClick={createMission}>Criar missao</button>
-                    </div>
-                  </section>
-                </div>
-              ) : panelMode === "review" && profile?.canManage ? (
-                <div className="mission-panel-scroll">
-                  <section className="mission-manage-panel">
-                    <h2>Revisao da lideranca</h2>
-                    {pendingReviewClaims.length === 0 ? (
-                      <div className="mission-empty">Nenhuma missao aguardando aprovacao.</div>
-                    ) : (
-                      pendingReviewClaims.map((claim) => (
-                        <article key={claim.id} className="review-card">
-                          <div className="review-member">
-                            <img src={claim.profile_avatar_url || "/images/iconics_emblem_main.png"} alt={claim.profile_name || "Membro"} />
-                            <div>
-                              <h2>{claim.mission_title}</h2>
-                              <p>{claim.profile_name} enviou comprovantes para revisao.</p>
-                              <span>{claim.profile_cargo || "membro"} - +{claim.mission_reward || 0} XP</span>
-                            </div>
-                          </div>
-                          <div className="mission-modal-actions">
-                            <button type="button" onClick={() => setReviewClaimDetails(claim)}>Ver detalhes</button>
-                            <button type="button" onClick={() => reviewClaim(claim.id, "approve")} disabled={actionId === claim.id}>Aprovar</button>
-                            <button type="button" onClick={() => reviewClaim(claim.id, "reject")} disabled={actionId === claim.id}>Recusar</button>
-                          </div>
-                        </article>
-                      ))
-                    )}
-                  </section>
-                </div>
-              ) : (
-                <>
-                  <div className="missions-tabs" role="tablist" aria-label="Filtros de missao">
-                    {tabs.filter((item) => item.id !== "review" || profile?.canManage).map((item) => (
-                  <button key={item.id} type="button" className={tab === item.id ? "active" : ""} onClick={() => openTab(item.id)}>
-                    {item.label}
-                    {item.id === "active" && activeClaims.length ? <span>{activeClaims.length}</span> : null}
-                    {item.id === "submitted" && submittedClaims.length ? <span>{submittedClaims.length}</span> : null}
-                    {item.id === "review" && pendingReviewClaims.length ? <span>{pendingReviewClaims.length}</span> : null}
-                  </button>
-                ))}
-                  </div>
-
-                  <div className="missions-list">
-                {tab === "review" && profile?.canManage ? (
-                  pendingReviewClaims.length === 0 ? (
-                    <div className="mission-empty">Nenhuma missao aguardando aprovacao.</div>
-                  ) : (
-                    pendingReviewClaims.map((claim) => (
-                      <article key={claim.id} className="review-card">
-                        <div className="review-member">
-                          <img src={claim.profile_avatar_url || "/images/iconics_emblem_main.png"} alt={claim.profile_name || "Membro"} />
-                          <div>
-                            <h2>{claim.mission_title}</h2>
-                            <p>{claim.profile_name} enviou comprovantes para revisao.</p>
-                            <span>{claim.profile_cargo || "membro"} - +{claim.mission_reward || 0} XP</span>
-                          </div>
-                        </div>
-                        <div className="mission-modal-actions">
-                          <button type="button" onClick={() => setReviewClaimDetails(claim)}>Ver detalhes</button>
-                          <button type="button" onClick={() => reviewClaim(claim.id, "approve")} disabled={actionId === claim.id}>Aprovar</button>
-                          <button type="button" onClick={() => reviewClaim(claim.id, "reject")} disabled={actionId === claim.id}>Recusar</button>
-                        </div>
-                      </article>
-                    ))
-                  )
-                ) : visibleMissions.length === 0 ? (
-                  <div className="mission-empty">Nenhuma missao nesta aba.</div>
+          <section className="medieval-mural-layout">
+            <div className="quest-board">
+              <div className="quest-board-rail left" />
+              <div className="quest-board-rail right" />
+              <div className="quest-scroll-grid">
+                {visibleMissions.length === 0 ? (
+                  <div className="quest-empty">Nenhum pergaminho neste mural.</div>
                 ) : (
-                  visibleMissions.map((mission) => {
-                    const claim = mission.claim;
-                    return (
-                      <article key={mission.id} className={`mission-card ${mission.isLocked ? "locked" : ""}`}>
-                        <div className="mission-image-wrap">
-                          <img src={mission.image_url || "/images/portal_scene_secondary.png"} alt={mission.title} />
-                        </div>
-                        <div className="mission-body">
-                          <div className="mission-heading">
-                            <div>
-                              <h2>Missao: {mission.title}</h2>
-                              <p>{mission.summary}</p>
-                            </div>
-                            <span className={`difficulty ${mission.difficulty}`}>{mission.difficulty}</span>
-                          </div>
-                          <div className="mission-tags">
-                            {(mission.tags || [mission.category]).map((tag) => <span key={tag}>{tag}</span>)}
-                          </div>
-                          <div className="mission-meta">
-                            <div><strong>+{mission.reward_influence}</strong><span>XP</span></div>
-                            <div><strong>{mission.time_limit_hours}h</strong><span>tempo</span></div>
-                            <div><strong>Nivel {mission.required_level}</strong><span>aceitar</span></div>
-                          </div>
-                        </div>
-                        <div className="mission-actions">
-                          {profile?.canManage ? (
-                            <button type="button" onClick={() => setEditingMission(mission)}>Editar</button>
-                          ) : null}
-                          {mission.isLocked ? (
-                            <button type="button" disabled>Bloqueada</button>
-                          ) : claim?.status === "accepted" ? (
-                            <button type="button" onClick={() => setProofClaim(claim)}>Finalizar</button>
-                          ) : claim?.status === "submitted" ? (
-                            <button type="button" disabled>Em revisao</button>
-                          ) : claim?.status === "completed" ? (
-                            <button type="button" disabled>Aprovada</button>
-                          ) : (
-                            <button type="button" onClick={() => acceptMission(mission.id)} disabled={actionId === mission.id || payload?.usingFallback}>
-                              {actionId === mission.id ? "Aceitando..." : "Aceitar"}
-                            </button>
-                          )}
-                          <details>
-                            <summary>Ver detalhes</summary>
-                            <p>{mission.isLocked ? mission.lockedReason : mission.details || "Sem detalhes extras."}</p>
-                          </details>
-                        </div>
-                      </article>
-                    );
-                  })
+                  visibleMissions.map((mission, index) => (
+                    <button
+                      key={mission.id}
+                      type="button"
+                      className={`quest-paper ${selectedMission?.id === mission.id ? "selected" : ""} ${mission.isLocked ? "locked" : ""}`}
+                      onClick={() => setSelectedMission(mission)}
+                      style={{ transform: `rotate(${[-2, 1.5, -1, 2, -1.5, 1][index % 6]}deg) ${selectedMission?.id === mission.id ? "scale(1.08)" : ""}` }}
+                    >
+                      <span className="quest-pin" />
+                      <span className="quest-icon">{mission.status === "secret" || mission.isLocked ? "?" : getQuestIcon(mission.category)}</span>
+                      <strong>{mission.status === "secret" && mission.isLocked ? "???" : mission.title}</strong>
+                      <small>{mission.isLocked ? mission.lockedReason : mission.summary}</small>
+                      <b>+{mission.reward_influence} XP</b>
+                      <em>{mission.difficulty}</em>
+                    </button>
+                  ))
                 )}
-                  </div>
-                </>
-              )}
-            </section>
+              </div>
+            </div>
 
-            <aside className="missions-right">
-              <AgentCard profile={profile} percent={xpPercent} />
-              <ActivityCard activity={payload?.activity || []} />
+            <aside className={`quest-detail ${detailsMission ? "open" : ""}`}>
+              {detailsMission ? (
+                <>
+                  <span className="wax-seal">ICONICS</span>
+                  <div className="quest-eye">◉</div>
+                  <h2>{detailsMission.title}</h2>
+                  <span className="quest-rarity">Missao {detailsMission.difficulty}</span>
+                  <p>{detailsMission.isLocked ? detailsMission.lockedReason : detailsMission.details || detailsMission.summary}</p>
+                  <div className="quest-objectives">
+                    <h3>Objetivos</h3>
+                    {(detailsMission.tags?.length ? detailsMission.tags : [detailsMission.category, "comprovante", "influencia"]).map((item) => (
+                      <span key={item}>{item}</span>
+                    ))}
+                  </div>
+                  <div className="quest-reward">
+                    <span>Recompensa</span>
+                    <strong>+{detailsMission.reward_influence} XP</strong>
+                  </div>
+                  <div className="quest-detail-row"><span>Tempo limite</span><b>{detailsMission.time_limit_hours} horas</b></div>
+                  <div className="quest-detail-row"><span>Nivel</span><b>{detailsMission.required_level}</b></div>
+                  <div className="quest-detail-row"><span>Dificuldade</span><b>{detailsMission.difficulty}</b></div>
+
+                  {detailsMission.isLocked ? (
+                    <button type="button" disabled>Bloqueada</button>
+                  ) : selectedClaim?.status === "accepted" ? (
+                    <button type="button" onClick={() => setProofClaim(selectedClaim)}>Finalizar missao</button>
+                  ) : selectedClaim?.status === "submitted" ? (
+                    <button type="button" disabled>Em revisao</button>
+                  ) : selectedClaim?.status === "completed" ? (
+                    <button type="button" disabled>Concluida</button>
+                  ) : (
+                    <button type="button" onClick={() => acceptMission(detailsMission)} disabled={actionId === detailsMission.id || payload?.usingFallback}>
+                      {actionId === detailsMission.id ? "Aceitando..." : "Aceitar missao"}
+                    </button>
+                  )}
+                </>
+              ) : null}
             </aside>
-          </div>
-          <footer className="missions-footer">Somos Iconics. Somos cultura. Somos influencia.</footer>
+          </section>
+
+          <nav className="medieval-tabs">
+            {tabs.map((item) => (
+              <button key={item.id} type="button" className={tab === item.id ? "active" : ""} onClick={() => { setTab(item.id); setSelectedMission(null); }}>
+                {item.label}
+                {item.id === "active" && activeClaims.length ? <span>{activeClaims.length}</span> : null}
+                {item.id === "submitted" && submittedClaims.length ? <span>{submittedClaims.length}</span> : null}
+              </button>
+            ))}
+          </nav>
         </section>
       </main>
 
       {proofClaim ? (
         <div className="mission-modal">
-          <section className="mission-modal-panel">
+          <section className="mission-modal-panel parchment-modal">
             <h2>Finalizar missao</h2>
             <p>Envie uma descricao e anexe imagens ou videos como comprovante.</p>
             <textarea placeholder="Descreva o que foi feito" value={proofText} onChange={(e) => setProofText(e.target.value)} />
@@ -525,9 +308,7 @@ export default function MissoesPage() {
                   setUploadingProof(true);
                   try {
                     const uploaded: { name?: string; url?: string; type?: string }[] = [];
-                    for (const file of files) {
-                      uploaded.push(await uploadMissionFile(file, "proof"));
-                    }
+                    for (const file of files) uploaded.push(await uploadMissionFile(file));
                     setProofFiles((prev) => [...prev, ...uploaded]);
                   } catch (error) {
                     setMessage(error instanceof Error ? error.message : "Falha no upload do comprovante.");
@@ -550,179 +331,15 @@ export default function MissoesPage() {
           </section>
         </div>
       ) : null}
-
-      {reviewClaimDetails ? (
-        <div className="mission-modal">
-          <section className="mission-modal-panel">
-            <h2>{reviewClaimDetails.mission_title || `Envio #${reviewClaimDetails.id}`}</h2>
-            <p><strong>Enviado por:</strong> {reviewClaimDetails.profile_name || "Membro Iconics"}</p>
-            <p><strong>Texto enviado:</strong> {reviewClaimDetails.proof_text || "Sem texto."}</p>
-            <div className="proof-preview-grid">
-              {(reviewClaimDetails.proof_files || []).map((file) => (
-                <a key={file.url} href={file.url} target="_blank" rel="noreferrer">
-                  {file.type?.startsWith("image/") ? <img src={file.url} alt={file.name || "Comprovante"} /> : null}
-                  <span>{file.name || "Abrir comprovante"}</span>
-                </a>
-              ))}
-            </div>
-            <div className="mission-modal-actions">
-              <button type="button" onClick={() => setReviewClaimDetails(null)}>Fechar</button>
-              <button type="button" onClick={() => reviewClaim(reviewClaimDetails.id, "approve")}>Aprovar</button>
-              <button type="button" onClick={() => reviewClaim(reviewClaimDetails.id, "reject")}>Recusar</button>
-            </div>
-          </section>
-        </div>
-      ) : null}
-
-      {editingMission ? (
-        <div className="mission-modal">
-          <section className="mission-modal-panel">
-            <h2>Editar missao</h2>
-            <div className="mission-form">
-              <input value={editingMission.title} onChange={(e) => setEditingMission({ ...editingMission, title: e.target.value })} />
-              <textarea value={editingMission.summary} onChange={(e) => setEditingMission({ ...editingMission, summary: e.target.value })} />
-              <textarea value={editingMission.details || ""} onChange={(e) => setEditingMission({ ...editingMission, details: e.target.value })} />
-              <div className="mission-form-grid">
-                <input placeholder="XP" value={editingMission.reward_influence} onChange={(e) => setEditingMission({ ...editingMission, reward_influence: Number(e.target.value) })} />
-                <input placeholder="Nivel para aceitar" value={editingMission.required_level} onChange={(e) => setEditingMission({ ...editingMission, required_level: Number(e.target.value) })} />
-                <input placeholder="Nivel para ver" value={editingMission.visible_level} onChange={(e) => setEditingMission({ ...editingMission, visible_level: Number(e.target.value) })} />
-                <input placeholder="Horas" value={editingMission.time_limit_hours} onChange={(e) => setEditingMission({ ...editingMission, time_limit_hours: Number(e.target.value) })} />
-              </div>
-              <input placeholder="Categoria" value={editingMission.category} onChange={(e) => setEditingMission({ ...editingMission, category: e.target.value })} />
-              <input placeholder="Dificuldade" value={editingMission.difficulty} onChange={(e) => setEditingMission({ ...editingMission, difficulty: e.target.value })} />
-              <label className="mission-file-input">
-                Trocar imagem da missao
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={async (e) => {
-                    const file = e.target.files?.[0];
-                    if (!file) return;
-                    try {
-                      const uploaded = await uploadMissionFile(file, "mission-image");
-                      setEditingMission({ ...editingMission, image_url: uploaded.url });
-                    } catch (error) {
-                      setMessage(error instanceof Error ? error.message : "Falha no upload da imagem.");
-                    }
-                  }}
-                />
-              </label>
-              {editingMission.image_url ? <img className="mission-upload-preview" src={editingMission.image_url} alt="Preview da missao" /> : null}
-              <select value={editingMission.status} onChange={(e) => setEditingMission({ ...editingMission, status: e.target.value })}>
-                <option value="active">Ativa</option>
-                <option value="secret">Secreta</option>
-              </select>
-            </div>
-            <div className="mission-modal-actions">
-              <button type="button" onClick={() => setEditingMission(null)}>Cancelar</button>
-              <button type="button" onClick={updateMission}>Salvar edicao</button>
-            </div>
-          </section>
-        </div>
-      ) : null}
     </>
   );
 }
 
-function MissionHero() {
-  return (
-    <header className="missions-hero">
-      <div className="missions-brand">
-        <img src="/images/iconics-logo.png" alt="ICONICS" className="missions-logo" />
-        <span>Fraternidade de influencia</span>
-      </div>
-      <div className="missions-title-block">
-        <p className="missions-kicker">A influencia comeca aqui.</p>
-        <h1>Painel de Missao</h1>
-      </div>
-      <div className="missions-hero-art" aria-hidden="true" />
-    </header>
-  );
-}
-
-function MissionMenu({
-  active,
-  activePanel,
-  canManage,
-  onCreate,
-  onReview,
-}: {
-  active: string;
-  activePanel: PanelMode;
-  canManage?: boolean;
-  onCreate: () => void;
-  onReview: () => void;
-}) {
-  return (
-    <aside className="missions-left">
-      <nav className="missions-menu">
-        {navItems.map(([label, href]) => (
-          <a key={href} href={href} className={active === href && activePanel === "missions" ? "active" : ""}>{label}</a>
-        ))}
-        {canManage ? (
-          <>
-            <button type="button" className={activePanel === "review" ? "active" : ""} onClick={onReview}>Revisao da lideranca</button>
-            <button type="button" className={activePanel === "create" ? "active" : ""} onClick={onCreate}>Criar missao</button>
-          </>
-        ) : null}
-      </nav>
-      <section className="missions-status">
-        <p>Iconics status</p>
-        <strong>A ordem conecta.</strong>
-        <span>O impacto permanece.</span>
-      </section>
-    </aside>
-  );
-}
-
-function AgentCard({ profile, percent }: { profile?: MissionProfile; percent: number }) {
-  return (
-    <section className="agent-card">
-      <div className="agent-top">
-        <img src={profile?.avatar_url || "/images/iconics_emblem_main.png"} alt={profile?.nome || "Membro Iconics"} />
-        <div>
-          <h2>{profile?.nome || "Membro Iconics"}</h2>
-          <p>{profile?.rankLabel || "Recem-chegado"}</p>
-        </div>
-      </div>
-      <div className="agent-stat">
-        <span>XP</span>
-        <strong>{profile?.xp || 0}</strong>
-      </div>
-      <div className="mission-progress"><div style={{ width: `${percent}%` }} /></div>
-      <small>Nivel {profile?.level || 0} - {percent}% para o proximo nivel</small>
-    </section>
-  );
-}
-
-function ActivityCard({ activity }: { activity: Payload["activity"] }) {
-  return (
-    <section className="activity-card">
-      <h2>Atividade recente</h2>
-      {activity.length === 0 ? <p className="muted">Sem atividade recente.</p> : null}
-      {activity.map((item) => (
-        <div key={item.id} className="activity-mission-card">
-          <img src={item.mission_image_url || "/images/portal_scene_secondary.png"} alt={item.mission_title || item.title} />
-          <div>
-            <span>{item.mission_title || item.title}</span>
-            <p>{item.description || item.mission_summary || "Movimento registrado no painel."}</p>
-            <small>{formatMissionStatus(item.mission_status)} - {item.influence_delta > 0 ? `+${item.influence_delta}` : item.influence_delta} XP</small>
-          </div>
-        </div>
-      ))}
-    </section>
-  );
-}
-
-function formatMissionStatus(status?: string) {
-  const labels: Record<string, string> = {
-    accepted: "Aceita",
-    submitted: "Em revisao",
-    completed: "Concluida",
-    rejected: "Recusada",
-    active: "Disponivel",
-    secret: "Secreta",
-    registrada: "Registrada",
-  };
-  return labels[String(status || "")] || String(status || "Registrada");
+function getQuestIcon(category: string) {
+  const normalized = category.toLowerCase();
+  if (normalized.includes("social")) return "✦";
+  if (normalized.includes("recrut")) return "⚑";
+  if (normalized.includes("evento")) return "◆";
+  if (normalized.includes("misterio") || normalized.includes("enigma")) return "◉";
+  return "✧";
 }
