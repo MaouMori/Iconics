@@ -649,6 +649,16 @@
     url("/images/footer_magic_mist.png") center / cover;
 }
 
+.clean-card-showcase {
+  width: min(1260px, 100%);
+  margin: 0 auto;
+  padding: 28px;
+}
+
+.clean-card-showcase .member-mission-card {
+  margin-top: 0;
+}
+
 .member-mission-card img {
   width: 180px;
   height: 180px;

@@ -66,24 +66,7 @@ export default function MissionCardPage() {
       <TopBar />
       <main className="missions-page">
         <section className="missions-shell">
-          <header className="missions-hero compact-hero">
-            <div className="missions-brand"><img src="/images/iconics-logo.png" alt="ICONICS" className="missions-logo" /><span>Identidade de membro</span></div>
-            <div className="missions-title-block">
-              <p className="missions-kicker">Seu registro de influencia</p>
-              <h1>Meu Card</h1>
-              {profile ? (
-                <div className="hero-level">
-                  <span>Nivel {profile.level}</span>
-                  <div><i style={{ width: `${Math.min(100, Math.round((profile.xp / Math.max(profile.nextInfluence, 1)) * 100))}%` }} /></div>
-                  <small>{profile.xp} / {profile.nextInfluence} XP</small>
-                </div>
-              ) : null}
-            </div>
-            <div className="missions-hero-art" aria-hidden="true" />
-          </header>
-          <div className="missions-layout two-col">
-            <MissionMenu active="/missoes/meu-card" canManage={profile?.canManage} />
-            <section className="missions-board mission-card-showcase">
+          <section className="missions-board mission-card-showcase clean-card-showcase">
               {message ? <div className="mission-empty">{message}</div> : null}
               {profile ? (
                 <article className="member-mission-card">
@@ -117,7 +100,6 @@ export default function MissionCardPage() {
                 </article>
               </section>
             </section>
-          </div>
         </section>
       </main>
     </>
@@ -145,26 +127,4 @@ function formatStatus(status?: string) {
     rejected: "Recusada",
   };
   return labels[String(status || "")] || "Registrada";
-}
-
-function MissionMenu({ active, canManage }: { active: string; canManage?: boolean }) {
-  const navItems = [["Missoes", "/missoes"], ["Meu painel", "/missoes/painel"], ["Rankings", "/missoes/ranking"], ["Eventos", "/missoes/eventos"], ["Meu card", "/missoes/meu-card"]];
-  return (
-    <aside className="missions-left">
-      <nav className="missions-menu">
-        {navItems.map(([label, href]) => <a key={href} href={href} className={active === href ? "active" : ""}>{label}</a>)}
-        {canManage ? (
-          <>
-            <a href="/missoes#revisao-lideranca">Revisao da lideranca</a>
-            <a href="/missoes#criar-missao">Criar missao</a>
-          </>
-        ) : null}
-      </nav>
-      <section className="missions-status">
-        <p>Iconics status</p>
-        <strong>A ordem conecta.</strong>
-        <span>O impacto permanece.</span>
-      </section>
-    </aside>
-  );
 }
