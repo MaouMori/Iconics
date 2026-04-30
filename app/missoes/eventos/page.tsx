@@ -39,14 +39,15 @@ export default function MissionEventsPage() {
         <section className="missions-shell">
           <section className="missions-board missions-list clean-page-panel">
               {message ? <div className="mission-empty">{message}</div> : null}
+              {!message && events.length === 0 ? <div className="mission-empty">Nenhum evento cadastrado no momento.</div> : null}
               {events.map((event) => (
                 <article className="mission-card event-card" key={event.id}>
                   <div className="mission-image-wrap"><img src={event.imagem_url || "/images/mansao.png"} alt={event.titulo} /></div>
                   <div className="mission-body">
                     <div className="mission-heading"><div><h2>{event.titulo}</h2><p>{event.descricao || "Evento Iconics"}</p></div></div>
                     <div className="mission-meta">
-                      <div><strong>{event.data_evento || "Data"}</strong><span>quando</span></div>
-                      <div><strong>{event.horario || "--"}</strong><span>horario</span></div>
+                      <div><strong>{formatEventDate(event.data_evento)}</strong><span>quando</span></div>
+                      <div><strong>{formatEventTime(event.horario)}</strong><span>horario</span></div>
                       <div><strong>{event.local || "Iconics"}</strong><span>local</span></div>
                     </div>
                   </div>
@@ -57,4 +58,16 @@ export default function MissionEventsPage() {
       </main>
     </>
   );
+}
+
+function formatEventDate(value?: string | null) {
+  if (!value) return "Data";
+  const [year, month, day] = value.split("-");
+  if (year && month && day) return `${day}/${month}/${year}`;
+  return value;
+}
+
+function formatEventTime(value?: string | null) {
+  if (!value) return "--";
+  return value.slice(0, 5);
 }

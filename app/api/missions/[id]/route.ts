@@ -54,3 +54,25 @@ export async function PATCH(req: NextRequest, context: RouteContext) {
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ ok: true, mission: data });
 }
+
+export async function DELETE(req: NextRequest, context: RouteContext) {
+  const auth = await getAuthedProfile(req);
+  if ("error" in auth) return auth.error;
+  if (!canManageMissions(auth.profile.cargo)) {
+    return NextResponse.json({ error: "Apenas lideranca pode deletar missoes." }, { status: 403 });
+  }
+
+  const { id } = await context.params;
+  const missionId = Number(id);
+  if (!Number.isFinite(missionId)) {
+    return NextResponse.json({ error: "Missao invalida." }, { status: 400 });
+  }
+
+  const { error } = await supabaseAdmin
+    .from("guild_missions")
+    .update({ status: "archived", updated_at: new Date().toISOString() })
+    .eq("id", missionId);
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  return NextResponse.json({ ok: true });
+}
