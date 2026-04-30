@@ -14,6 +14,11 @@ type MissionClaim = {
   proof_text?: string | null;
   proof_links?: string[] | null;
   proof_files?: { name?: string; url?: string; type?: string }[] | null;
+  mission_title?: string;
+  mission_reward?: number;
+  profile_name?: string;
+  profile_avatar_url?: string | null;
+  profile_cargo?: string | null;
   accepted_at: string;
   submitted_at?: string | null;
   completed_at?: string | null;
@@ -67,6 +72,7 @@ const tabs = [
   { id: "available", label: "Disponiveis" },
   { id: "active", label: "Aceitas" },
   { id: "submitted", label: "Finalizadas" },
+  { id: "review", label: "Para aprovar" },
   { id: "secret", label: "Secretas" },
 ] as const;
 
@@ -87,9 +93,11 @@ export default function MissoesPage() {
   const [actionId, setActionId] = useState<number | null>(null);
   const [message, setMessage] = useState("");
   const [proofClaim, setProofClaim] = useState<MissionClaim | null>(null);
+  const [reviewClaimDetails, setReviewClaimDetails] = useState<MissionClaim | null>(null);
   const [proofText, setProofText] = useState("");
-  const [proofLinks, setProofLinks] = useState("");
-  const [proofFiles, setProofFiles] = useState("");
+  const [proofFiles, setProofFiles] = useState<{ name?: string; url?: string; type?: string }[]>([]);
+  const [uploadingProof, setUploadingProof] = useState(false);
+  const [uploadingMissionImage, setUploadingMissionImage] = useState(false);
   const [editingMission, setEditingMission] = useState<Mission | null>(null);
   const [createForm, setCreateForm] = useState({
     title: "",
@@ -102,6 +110,7 @@ export default function MissoesPage() {
     difficulty: "media",
     category: "geral",
     status: "active",
+    image_url: "",
   });
 
   async function getToken() {
@@ -148,6 +157,21 @@ export default function MissoesPage() {
     return data;
   }
 
+  async function uploadMissionFile(file: File, purpose: "proof" | "mission-image") {
+    const token = await getToken();
+    const form = new FormData();
+    form.append("file", file);
+    form.append("purpose", purpose);
+    const response = await fetch("/api/missions/upload", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+      body: form,
+    });
+    const data = await response.json().catch(() => null);
+    if (!response.ok) throw new Error(data?.error || "Falha no upload.");
+    return data.file as { name: string; url: string; type: string };
+  }
+
   async function acceptMission(missionId: number) {
     setActionId(missionId);
     setMessage("");
@@ -171,18 +195,13 @@ export default function MissoesPage() {
         method: "POST",
         body: JSON.stringify({
           proof_text: proofText,
-          proof_links: proofLinks.split("\n").map((item) => item.trim()).filter(Boolean),
-          proof_files: proofFiles
-            .split("\n")
-            .map((url) => url.trim())
-            .filter(Boolean)
-            .map((url) => ({ url, name: url.split("/").pop() || "comprovante" })),
+          proof_links: [],
+          proof_files: proofFiles,
         }),
       });
       setProofClaim(null);
       setProofText("");
-      setProofLinks("");
-      setProofFiles("");
+      setProofFiles([]);
       setTab("submitted");
       setMessage("Comprovantes enviados. A lideranca vai revisar sua missao.");
       await loadMissions();
@@ -196,7 +215,7 @@ export default function MissoesPage() {
     setMessage("");
     try {
       await apiAction("/api/missions", { method: "POST", body: JSON.stringify(createForm) });
-      setCreateForm({ ...createForm, title: "", summary: "", details: "" });
+      setCreateForm({ ...createForm, title: "", summary: "", details: "", image_url: "" });
       setMessage("Missao criada e publicada no painel.");
       await loadMissions();
     } catch (error) {
@@ -239,6 +258,7 @@ export default function MissoesPage() {
   const claims = payload?.claims || [];
   const activeClaims = claims.filter((claim) => claim.status === "accepted");
   const submittedClaims = claims.filter((claim) => claim.status === "submitted" || claim.status === "completed" || claim.status === "rejected");
+  const pendingReviewClaims = (payload?.adminClaims || []).filter((claim) => claim.status === "submitted");
   const profile = payload?.profile;
   const xpPercent = profile ? Math.min(100, Math.round((profile.xp / Math.max(profile.nextInfluence, 1)) * 100)) : 0;
 
@@ -280,17 +300,40 @@ export default function MissoesPage() {
 
             <section className="missions-board">
               <div className="missions-tabs" role="tablist" aria-label="Filtros de missao">
-                {tabs.map((item) => (
+                {tabs.filter((item) => item.id !== "review" || profile?.canManage).map((item) => (
                   <button key={item.id} type="button" className={tab === item.id ? "active" : ""} onClick={() => setTab(item.id)}>
                     {item.label}
                     {item.id === "active" && activeClaims.length ? <span>{activeClaims.length}</span> : null}
                     {item.id === "submitted" && submittedClaims.length ? <span>{submittedClaims.length}</span> : null}
+                    {item.id === "review" && pendingReviewClaims.length ? <span>{pendingReviewClaims.length}</span> : null}
                   </button>
                 ))}
               </div>
 
               <div className="missions-list">
-                {visibleMissions.length === 0 ? (
+                {tab === "review" && profile?.canManage ? (
+                  pendingReviewClaims.length === 0 ? (
+                    <div className="mission-empty">Nenhuma missao aguardando aprovacao.</div>
+                  ) : (
+                    pendingReviewClaims.map((claim) => (
+                      <article key={claim.id} className="review-card">
+                        <div className="review-member">
+                          <img src={claim.profile_avatar_url || "/images/iconics_emblem_main.png"} alt={claim.profile_name || "Membro"} />
+                          <div>
+                            <h2>{claim.mission_title}</h2>
+                            <p>{claim.profile_name} enviou comprovantes para revisao.</p>
+                            <span>{claim.profile_cargo || "membro"} - +{claim.mission_reward || 0} XP</span>
+                          </div>
+                        </div>
+                        <div className="mission-modal-actions">
+                          <button type="button" onClick={() => setReviewClaimDetails(claim)}>Ver detalhes</button>
+                          <button type="button" onClick={() => reviewClaim(claim.id, "approve")} disabled={actionId === claim.id}>Aprovar</button>
+                          <button type="button" onClick={() => reviewClaim(claim.id, "reject")} disabled={actionId === claim.id}>Recusar</button>
+                        </div>
+                      </article>
+                    ))
+                  )
+                ) : visibleMissions.length === 0 ? (
                   <div className="mission-empty">Nenhuma missao nesta aba.</div>
                 ) : (
                   visibleMissions.map((mission) => {
@@ -355,6 +398,26 @@ export default function MissoesPage() {
                     <input placeholder="Titulo" value={createForm.title} onChange={(e) => setCreateForm({ ...createForm, title: e.target.value })} />
                     <textarea placeholder="Resumo" value={createForm.summary} onChange={(e) => setCreateForm({ ...createForm, summary: e.target.value })} />
                     <textarea placeholder="Detalhes" value={createForm.details} onChange={(e) => setCreateForm({ ...createForm, details: e.target.value })} />
+                    <label className="mission-file-input">
+                      {uploadingMissionImage ? "Enviando imagem..." : "Enviar imagem da missao"}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          setUploadingMissionImage(true);
+                          try {
+                            const uploaded = await uploadMissionFile(file, "mission-image");
+                            setCreateForm({ ...createForm, image_url: uploaded.url });
+                          } catch (error) {
+                            setMessage(error instanceof Error ? error.message : "Falha no upload da imagem.");
+                          }
+                          setUploadingMissionImage(false);
+                        }}
+                      />
+                    </label>
+                    {createForm.image_url ? <img className="mission-upload-preview" src={createForm.image_url} alt="Preview da missao" /> : null}
                     <div className="mission-form-grid">
                       <input placeholder="XP" value={createForm.reward_influence} onChange={(e) => setCreateForm({ ...createForm, reward_influence: e.target.value })} />
                       <input placeholder="Nivel para aceitar" value={createForm.required_level} onChange={(e) => setCreateForm({ ...createForm, required_level: e.target.value })} />
@@ -374,6 +437,7 @@ export default function MissoesPage() {
                       <span>Envio #{claim.id}</span>
                       <p>{claim.proof_text || "Comprovantes enviados sem texto."}</p>
                       <div>
+                        <button type="button" onClick={() => setReviewClaimDetails(claim)}>Detalhes</button>
                         <button type="button" onClick={() => reviewClaim(claim.id, "approve")} disabled={actionId === claim.id}>Aprovar</button>
                         <button type="button" onClick={() => reviewClaim(claim.id, "reject")} disabled={actionId === claim.id}>Recusar</button>
                       </div>
@@ -393,13 +457,64 @@ export default function MissoesPage() {
         <div className="mission-modal">
           <section className="mission-modal-panel">
             <h2>Finalizar missao</h2>
-            <p>Envie textos, links de imagens, videos ou qualquer prova da realizacao.</p>
+            <p>Envie uma descricao e anexe imagens ou videos como comprovante.</p>
             <textarea placeholder="Descreva o que foi feito" value={proofText} onChange={(e) => setProofText(e.target.value)} />
-            <textarea placeholder="Links de posts, imagens ou videos, um por linha" value={proofLinks} onChange={(e) => setProofLinks(e.target.value)} />
-            <textarea placeholder="Arquivos hospedados, um link por linha" value={proofFiles} onChange={(e) => setProofFiles(e.target.value)} />
+            <label className="mission-file-input">
+              {uploadingProof ? "Enviando arquivo..." : "Anexar imagem ou video"}
+              <input
+                type="file"
+                accept="image/*,video/*"
+                multiple
+                onChange={async (e) => {
+                  const files = Array.from(e.target.files || []);
+                  if (!files.length) return;
+                  setUploadingProof(true);
+                  try {
+                    const uploaded: { name?: string; url?: string; type?: string }[] = [];
+                    for (const file of files) {
+                      uploaded.push(await uploadMissionFile(file, "proof"));
+                    }
+                    setProofFiles((prev) => [...prev, ...uploaded]);
+                  } catch (error) {
+                    setMessage(error instanceof Error ? error.message : "Falha no upload do comprovante.");
+                  }
+                  setUploadingProof(false);
+                }}
+              />
+            </label>
+            {proofFiles.length ? (
+              <div className="proof-preview-grid">
+                {proofFiles.map((file) => (
+                  <a key={file.url} href={file.url} target="_blank" rel="noreferrer">{file.name || "Comprovante"}</a>
+                ))}
+              </div>
+            ) : null}
             <div className="mission-modal-actions">
               <button type="button" onClick={() => setProofClaim(null)}>Cancelar</button>
-              <button type="button" onClick={submitProof} disabled={actionId === proofClaim.id}>Enviar para revisao</button>
+              <button type="button" onClick={submitProof} disabled={actionId === proofClaim.id || uploadingProof}>Enviar para revisao</button>
+            </div>
+          </section>
+        </div>
+      ) : null}
+
+      {reviewClaimDetails ? (
+        <div className="mission-modal">
+          <section className="mission-modal-panel">
+            <h2>{reviewClaimDetails.mission_title || `Envio #${reviewClaimDetails.id}`}</h2>
+            <p><strong>Enviado por:</strong> {reviewClaimDetails.profile_name || "Membro Iconics"}</p>
+            <p><strong>Texto enviado:</strong> {reviewClaimDetails.proof_text || "Sem texto."}</p>
+            <div className="proof-preview-grid">
+              {(reviewClaimDetails.proof_files || []).map((file) => (
+                <a key={file.url} href={file.url} target="_blank" rel="noreferrer">
+                  {file.type?.startsWith("image/") ? <img src={file.url} alt={file.name || "Comprovante"} /> : null}
+                  <span>{file.name || "Abrir comprovante"}</span>
+                </a>
+              ))}
+            </div>
+            <div className="mission-modal-actions">
+              <button type="button" onClick={() => setReviewClaimDetails(null)}>Fechar</button>
+              <button type="button" onClick={() => reviewClaim(reviewClaimDetails.id, "approve")}>Aprovar</button>
+              <button type="button" onClick={() => reviewClaim(reviewClaimDetails.id, "reject")}>Recusar</button>
             </div>
           </section>
         </div>
@@ -421,6 +536,24 @@ export default function MissoesPage() {
               </div>
               <input placeholder="Categoria" value={editingMission.category} onChange={(e) => setEditingMission({ ...editingMission, category: e.target.value })} />
               <input placeholder="Dificuldade" value={editingMission.difficulty} onChange={(e) => setEditingMission({ ...editingMission, difficulty: e.target.value })} />
+              <label className="mission-file-input">
+                Trocar imagem da missao
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    try {
+                      const uploaded = await uploadMissionFile(file, "mission-image");
+                      setEditingMission({ ...editingMission, image_url: uploaded.url });
+                    } catch (error) {
+                      setMessage(error instanceof Error ? error.message : "Falha no upload da imagem.");
+                    }
+                  }}
+                />
+              </label>
+              {editingMission.image_url ? <img className="mission-upload-preview" src={editingMission.image_url} alt="Preview da missao" /> : null}
               <select value={editingMission.status} onChange={(e) => setEditingMission({ ...editingMission, status: e.target.value })}>
                 <option value="active">Ativa</option>
                 <option value="secret">Secreta</option>

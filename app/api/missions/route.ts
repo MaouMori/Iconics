@@ -92,6 +92,7 @@ type MissionRow = {
 type ClaimRow = {
   id: number;
   mission_id: number;
+  profile_id?: string;
   status: string;
   [key: string]: unknown;
 };
@@ -231,6 +232,29 @@ export async function GET(req: NextRequest) {
         .limit(80)
     : { data: [] };
 
+  const adminProfileIds = Array.from(
+    new Set(((adminClaimsData || []) as ClaimRow[]).map((claim) => String(claim.profile_id || "")).filter(Boolean))
+  );
+  const { data: adminClaimProfiles } = adminProfileIds.length
+    ? await supabaseAdmin
+        .from("profiles")
+        .select("id, nome, cargo, avatar_url")
+        .in("id", adminProfileIds)
+    : { data: [] };
+
+  const adminClaims = ((adminClaimsData || []) as ClaimRow[]).map((claim) => {
+    const mission = missions.find((item) => Number(item.id) === Number(claim.mission_id));
+    const owner = ((adminClaimProfiles || []) as ProfileRow[]).find((item) => String(item.id) === String(claim.profile_id));
+    return {
+      ...claim,
+      mission_title: String(mission?.title || `Missao #${claim.mission_id}`),
+      mission_reward: Number(mission?.reward_influence || 0),
+      profile_name: owner?.nome || "Membro Iconics",
+      profile_avatar_url: owner?.avatar_url || null,
+      profile_cargo: owner?.cargo || null,
+    };
+  });
+
   const decoratedMissions = missions
     .filter((mission) => profileInfo.level >= toInt(mission.visible_level, 0) || profileInfo.canManage)
     .map((mission) => {
@@ -262,7 +286,7 @@ export async function GET(req: NextRequest) {
     levels,
     missions: decoratedMissions,
     claims,
-    adminClaims: adminClaimsData || [],
+    adminClaims,
     ranking,
     activity: activityData || [],
     usingFallback,
