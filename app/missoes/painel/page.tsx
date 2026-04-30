@@ -238,6 +238,11 @@ function MissionMenu({ active, canManage }: { active: string; canManage?: boolea
           </>
         ) : null}
       </nav>
+      <section className="missions-status">
+        <p>Iconics status</p>
+        <strong>A ordem conecta.</strong>
+        <span>O impacto permanece.</span>
+      </section>
     </aside>
   );
 }

@@ -63,7 +63,16 @@ type Payload = {
   missions: Mission[];
   claims: MissionClaim[];
   adminClaims: MissionClaim[];
-  activity: { id: number; title: string; description?: string | null; influence_delta: number }[];
+  activity: {
+    id: number;
+    title: string;
+    description?: string | null;
+    influence_delta: number;
+    mission_title?: string;
+    mission_summary?: string;
+    mission_image_url?: string;
+    mission_status?: string;
+  }[];
   levels?: { level: number; required_xp: number; label?: string | null }[];
   usingFallback?: boolean;
 };
@@ -692,12 +701,28 @@ function ActivityCard({ activity }: { activity: Payload["activity"] }) {
       <h2>Atividade recente</h2>
       {activity.length === 0 ? <p className="muted">Sem atividade recente.</p> : null}
       {activity.map((item) => (
-        <div key={item.id} className="activity-item">
-          <span>{item.title}</span>
-          <p>{item.description || "Movimento registrado no painel."}</p>
-          <strong>{item.influence_delta > 0 ? `+${item.influence_delta}` : item.influence_delta}</strong>
+        <div key={item.id} className="activity-mission-card">
+          <img src={item.mission_image_url || "/images/portal_scene_secondary.png"} alt={item.mission_title || item.title} />
+          <div>
+            <span>{item.mission_title || item.title}</span>
+            <p>{item.description || item.mission_summary || "Movimento registrado no painel."}</p>
+            <small>{formatMissionStatus(item.mission_status)} - {item.influence_delta > 0 ? `+${item.influence_delta}` : item.influence_delta} XP</small>
+          </div>
         </div>
       ))}
     </section>
   );
+}
+
+function formatMissionStatus(status?: string) {
+  const labels: Record<string, string> = {
+    accepted: "Aceita",
+    submitted: "Em revisao",
+    completed: "Concluida",
+    rejected: "Recusada",
+    active: "Disponivel",
+    secret: "Secreta",
+    registrada: "Registrada",
+  };
+  return labels[String(status || "")] || String(status || "Registrada");
 }

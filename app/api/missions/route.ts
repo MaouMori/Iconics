@@ -97,6 +97,15 @@ type ClaimRow = {
   [key: string]: unknown;
 };
 
+type ActivityRow = {
+  id: number;
+  mission_id?: number | null;
+  title: string;
+  description?: string | null;
+  influence_delta: number;
+  created_at?: string;
+};
+
 type ProfileRow = {
   id: string;
   nome?: string | null;
@@ -198,10 +207,22 @@ export async function GET(req: NextRequest) {
 
   const { data: activityData } = await supabaseAdmin
     .from("guild_mission_activity")
-    .select("id, title, description, influence_delta, created_at")
+    .select("id, mission_id, title, description, influence_delta, created_at")
     .or(`profile_id.eq.${userId},profile_id.is.null`)
     .order("created_at", { ascending: false })
     .limit(8);
+
+  const activity = ((activityData || []) as ActivityRow[]).map((item) => {
+    const mission = missions.find((missionItem) => Number(missionItem.id) === Number(item.mission_id));
+    const claim = claims.find((claimItem) => Number(claimItem.mission_id) === Number(item.mission_id));
+    return {
+      ...item,
+      mission_title: String(mission?.title || item.title || "Missao Iconics"),
+      mission_summary: String(mission?.summary || item.description || "Movimento registrado no painel."),
+      mission_image_url: String(mission?.image_url || "/images/portal_scene_secondary.png"),
+      mission_status: claim?.status || mission?.status || "registrada",
+    };
+  });
 
   const { data: profilesWithMissionData, error: profilesError } = await supabaseAdmin
     .from("profiles")
@@ -288,7 +309,7 @@ export async function GET(req: NextRequest) {
     claims,
     adminClaims,
     ranking,
-    activity: activityData || [],
+    activity,
     usingFallback,
   });
 }

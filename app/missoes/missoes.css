@@ -944,6 +944,51 @@
   border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
+.activity-mission-card,
+.mission-summary-card {
+  display: grid;
+  grid-template-columns: 86px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  padding: 12px;
+  border: 1px solid rgba(192, 132, 252, 0.18);
+  border-radius: 8px;
+  background: rgba(5, 4, 15, 0.58);
+}
+
+.activity-mission-card img,
+.mission-summary-card img {
+  width: 86px;
+  height: 72px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 1px solid rgba(217, 70, 239, 0.24);
+}
+
+.activity-mission-card span,
+.mission-summary-card span {
+  display: block;
+  color: #fff;
+  font-weight: 800;
+}
+
+.activity-mission-card p,
+.mission-summary-card p {
+  margin: 4px 0 0;
+  color: #b9a9d7;
+  line-height: 1.45;
+}
+
+.activity-mission-card small,
+.mission-summary-card small {
+  display: block;
+  margin-top: 8px;
+  color: #f5d0fe;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 11px;
+}
+
 .activity-item p,
 .muted {
   margin: 4px 0 0;
@@ -996,8 +1041,16 @@
   .card-mission-lists,
   .level-row,
   .level-create-row,
-  .level-table-head {
+  .level-table-head,
+  .activity-mission-card,
+  .mission-summary-card {
     grid-template-columns: 1fr;
+  }
+
+  .activity-mission-card img,
+  .mission-summary-card img {
+    width: 100%;
+    height: 160px;
   }
 
   .mission-body {

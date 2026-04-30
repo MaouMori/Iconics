@@ -17,6 +17,7 @@ type RankProfile = {
 
 export default function MissionRankingPage() {
   const [ranking, setRanking] = useState<RankProfile[]>([]);
+  const [canManage, setCanManage] = useState(false);
   const [message, setMessage] = useState("Carregando ranking...");
 
   useEffect(() => {
@@ -36,6 +37,7 @@ export default function MissionRankingPage() {
       }
 
       setRanking(payload.ranking || []);
+      setCanManage(Boolean(payload.profile?.canManage));
       setMessage("");
     }
 
@@ -60,7 +62,7 @@ export default function MissionRankingPage() {
           </header>
 
           <div className="missions-layout two-col">
-            <MissionMenu active="/missoes/ranking" />
+            <MissionMenu active="/missoes/ranking" canManage={canManage} />
             <section className="missions-board mission-page-panel">
               {message ? <div className="mission-empty">{message}</div> : null}
               {ranking.map((profile, index) => (
@@ -83,7 +85,7 @@ export default function MissionRankingPage() {
   );
 }
 
-function MissionMenu({ active }: { active: string }) {
+function MissionMenu({ active, canManage }: { active: string; canManage?: boolean }) {
   const navItems = [
     ["Missoes", "/missoes"],
     ["Meu painel", "/missoes/painel"],
@@ -98,7 +100,18 @@ function MissionMenu({ active }: { active: string }) {
         {navItems.map(([label, href]) => (
           <a key={href} href={href} className={active === href ? "active" : ""}>{label}</a>
         ))}
+        {canManage ? (
+          <>
+            <a href="/missoes#revisao-lideranca">Revisao da lideranca</a>
+            <a href="/missoes#criar-missao">Criar missao</a>
+          </>
+        ) : null}
       </nav>
+      <section className="missions-status">
+        <p>Iconics status</p>
+        <strong>A ordem conecta.</strong>
+        <span>O impacto permanece.</span>
+      </section>
     </aside>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import TopBar from "@/components/Topbar";
+import { supabase } from "@/lib/supabase";
 import { useEffect, useState } from "react";
 import "../missoes.css";
 
@@ -16,6 +17,7 @@ type EventItem = {
 
 export default function MissionEventsPage() {
   const [events, setEvents] = useState<EventItem[]>([]);
+  const [canManage, setCanManage] = useState(false);
   const [message, setMessage] = useState("Carregando eventos...");
 
   useEffect(() => {
@@ -27,6 +29,13 @@ export default function MissionEventsPage() {
         return;
       }
       setEvents(payload || []);
+      const { data } = await supabase.auth.getSession();
+      const token = data.session?.access_token;
+      if (token) {
+        const missionResponse = await fetch("/api/missions", { headers: { Authorization: `Bearer ${token}` } });
+        const missionPayload = await missionResponse.json().catch(() => null);
+        if (missionResponse.ok) setCanManage(Boolean(missionPayload.profile?.canManage));
+      }
       setMessage("");
     }
     load();
@@ -43,7 +52,7 @@ export default function MissionEventsPage() {
             <div className="missions-hero-art" aria-hidden="true" />
           </header>
           <div className="missions-layout two-col">
-            <MissionMenu active="/missoes/eventos" />
+            <MissionMenu active="/missoes/eventos" canManage={canManage} />
             <section className="missions-board missions-list">
               {message ? <div className="mission-empty">{message}</div> : null}
               {events.map((event) => (
@@ -67,7 +76,24 @@ export default function MissionEventsPage() {
   );
 }
 
-function MissionMenu({ active }: { active: string }) {
+function MissionMenu({ active, canManage }: { active: string; canManage?: boolean }) {
   const navItems = [["Missoes", "/missoes"], ["Meu painel", "/missoes/painel"], ["Rankings", "/missoes/ranking"], ["Eventos", "/missoes/eventos"], ["Meu card", "/missoes/meu-card"]];
-  return <aside className="missions-left"><nav className="missions-menu">{navItems.map(([label, href]) => <a key={href} href={href} className={active === href ? "active" : ""}>{label}</a>)}</nav></aside>;
+  return (
+    <aside className="missions-left">
+      <nav className="missions-menu">
+        {navItems.map(([label, href]) => <a key={href} href={href} className={active === href ? "active" : ""}>{label}</a>)}
+        {canManage ? (
+          <>
+            <a href="/missoes#revisao-lideranca">Revisao da lideranca</a>
+            <a href="/missoes#criar-missao">Criar missao</a>
+          </>
+        ) : null}
+      </nav>
+      <section className="missions-status">
+        <p>Iconics status</p>
+        <strong>A ordem conecta.</strong>
+        <span>O impacto permanece.</span>
+      </section>
+    </aside>
+  );
 }
