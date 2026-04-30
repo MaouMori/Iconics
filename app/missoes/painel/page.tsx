@@ -128,22 +128,8 @@ export default function MissionPanelPage() {
       <TopBar />
       <main className="missions-page">
         <section className="missions-shell">
-          <header className="missions-hero compact-hero">
-            <div className="missions-brand">
-              <img src="/images/iconics-logo.png" alt="ICONICS" className="missions-logo" />
-              <span>Controle pessoal</span>
-            </div>
-            <div className="missions-title-block">
-              <p className="missions-kicker">Seu progresso e comandos</p>
-              <h1>Meu Painel</h1>
-            </div>
-            <div className="missions-hero-art" aria-hidden="true" />
-          </header>
-
           {message ? <div className="missions-alert">{message}</div> : null}
-          <div className="missions-layout two-col">
-            <MissionMenu active="/missoes/painel" canManage={profile?.canManage} />
-            <section className="missions-board mission-page-grid">
+          <section className="missions-board mission-page-grid clean-page-panel">
               <article className="agent-card">
                 <div className="agent-top">
                   <img src={profile?.avatar_url || "/images/iconics_emblem_main.png"} alt={profile?.nome || "Membro"} />
@@ -218,31 +204,8 @@ export default function MissionPanelPage() {
                 </article>
               ) : null}
             </section>
-          </div>
         </section>
       </main>
     </>
-  );
-}
-
-function MissionMenu({ active, canManage }: { active: string; canManage?: boolean }) {
-  const navItems = [["Missoes", "/missoes"], ["Meu painel", "/missoes/painel"], ["Rankings", "/missoes/ranking"], ["Eventos", "/missoes/eventos"], ["Meu card", "/missoes/meu-card"]];
-  return (
-    <aside className="missions-left">
-      <nav className="missions-menu">
-        {navItems.map(([label, href]) => <a key={href} href={href} className={active === href ? "active" : ""}>{label}</a>)}
-        {canManage ? (
-          <>
-            <a href="/missoes#revisao-lideranca">Revisao da lideranca</a>
-            <a href="/missoes#criar-missao">Criar missao</a>
-          </>
-        ) : null}
-      </nav>
-      <section className="missions-status">
-        <p>Iconics status</p>
-        <strong>A ordem conecta.</strong>
-        <span>O impacto permanece.</span>
-      </section>
-    </aside>
   );
 }

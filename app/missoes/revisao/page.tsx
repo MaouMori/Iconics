@@ -94,14 +94,8 @@ export default function RevisaoMissoesPage() {
       <TopBar />
       <main className="missions-page">
         <section className="missions-shell">
-          <header className="missions-hero compact-hero">
-            <div className="missions-brand"><img src="/images/iconics-logo.png" alt="ICONICS" className="missions-logo" /><span>Guilda Iconics</span></div>
-            <div className="missions-title-block"><p className="missions-kicker">Conselho da ordem</p><h1>Revisao</h1></div>
-            <div className="missions-hero-art" aria-hidden="true" />
-          </header>
-
           {message ? <div className="missions-alert">{message}</div> : null}
-          <section className="missions-board missions-list">
+          <section className="missions-board missions-list clean-page-panel">
             {!payload?.profile?.canManage ? (
               <div className="mission-empty">Apenas lideranca pode revisar missoes.</div>
             ) : pendingClaims.length === 0 ? (

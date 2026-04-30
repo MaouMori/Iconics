@@ -655,6 +655,11 @@
   padding: 28px;
 }
 
+.clean-page-panel {
+  width: min(1260px, 100%);
+  margin: 0 auto;
+}
+
 .clean-card-showcase .member-mission-card {
   margin-top: 0;
 }

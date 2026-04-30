@@ -109,14 +109,8 @@ export default function CriarMissaoPage() {
       <TopBar />
       <main className="missions-page">
         <section className="missions-shell">
-          <header className="missions-hero compact-hero">
-            <div className="missions-brand"><img src="/images/iconics-logo.png" alt="ICONICS" className="missions-logo" /><span>Guilda Iconics</span></div>
-            <div className="missions-title-block"><p className="missions-kicker">Forje novos contratos</p><h1>Criar Missao</h1></div>
-            <div className="missions-hero-art" aria-hidden="true" />
-          </header>
-
           {message ? <div className="missions-alert">{message}</div> : null}
-          <section className="missions-board mission-page-panel">
+          <section className="missions-board mission-page-panel clean-page-panel">
             {!profile?.canManage ? (
               <div className="mission-empty">Apenas lideranca pode criar missoes.</div>
             ) : (
