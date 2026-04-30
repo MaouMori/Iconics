@@ -59,6 +59,7 @@ type Payload = {
   claims: MissionClaim[];
   adminClaims: MissionClaim[];
   activity: { id: number; title: string; description?: string | null; influence_delta: number }[];
+  levels?: { level: number; required_xp: number; label?: string | null }[];
   usingFallback?: boolean;
 };
 
@@ -89,6 +90,7 @@ export default function MissoesPage() {
   const [proofText, setProofText] = useState("");
   const [proofLinks, setProofLinks] = useState("");
   const [proofFiles, setProofFiles] = useState("");
+  const [editingMission, setEditingMission] = useState<Mission | null>(null);
   const [createForm, setCreateForm] = useState({
     title: "",
     summary: "",
@@ -202,6 +204,22 @@ export default function MissoesPage() {
     }
   }
 
+  async function updateMission() {
+    if (!editingMission) return;
+    setMessage("");
+    try {
+      await apiAction(`/api/missions/${editingMission.id}`, {
+        method: "PATCH",
+        body: JSON.stringify(editingMission),
+      });
+      setEditingMission(null);
+      setMessage("Missao atualizada.");
+      await loadMissions();
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Nao foi possivel editar a missao.");
+    }
+  }
+
   async function reviewClaim(claimId: number, action: "approve" | "reject") {
     setActionId(claimId);
     try {
@@ -300,6 +318,9 @@ export default function MissoesPage() {
                           </div>
                         </div>
                         <div className="mission-actions">
+                          {profile?.canManage ? (
+                            <button type="button" onClick={() => setEditingMission(mission)}>Editar</button>
+                          ) : null}
                           {mission.isLocked ? (
                             <button type="button" disabled>Bloqueada</button>
                           ) : claim?.status === "accepted" ? (
@@ -379,6 +400,35 @@ export default function MissoesPage() {
             <div className="mission-modal-actions">
               <button type="button" onClick={() => setProofClaim(null)}>Cancelar</button>
               <button type="button" onClick={submitProof} disabled={actionId === proofClaim.id}>Enviar para revisao</button>
+            </div>
+          </section>
+        </div>
+      ) : null}
+
+      {editingMission ? (
+        <div className="mission-modal">
+          <section className="mission-modal-panel">
+            <h2>Editar missao</h2>
+            <div className="mission-form">
+              <input value={editingMission.title} onChange={(e) => setEditingMission({ ...editingMission, title: e.target.value })} />
+              <textarea value={editingMission.summary} onChange={(e) => setEditingMission({ ...editingMission, summary: e.target.value })} />
+              <textarea value={editingMission.details || ""} onChange={(e) => setEditingMission({ ...editingMission, details: e.target.value })} />
+              <div className="mission-form-grid">
+                <input placeholder="XP" value={editingMission.reward_influence} onChange={(e) => setEditingMission({ ...editingMission, reward_influence: Number(e.target.value) })} />
+                <input placeholder="Nivel para aceitar" value={editingMission.required_level} onChange={(e) => setEditingMission({ ...editingMission, required_level: Number(e.target.value) })} />
+                <input placeholder="Nivel para ver" value={editingMission.visible_level} onChange={(e) => setEditingMission({ ...editingMission, visible_level: Number(e.target.value) })} />
+                <input placeholder="Horas" value={editingMission.time_limit_hours} onChange={(e) => setEditingMission({ ...editingMission, time_limit_hours: Number(e.target.value) })} />
+              </div>
+              <input placeholder="Categoria" value={editingMission.category} onChange={(e) => setEditingMission({ ...editingMission, category: e.target.value })} />
+              <input placeholder="Dificuldade" value={editingMission.difficulty} onChange={(e) => setEditingMission({ ...editingMission, difficulty: e.target.value })} />
+              <select value={editingMission.status} onChange={(e) => setEditingMission({ ...editingMission, status: e.target.value })}>
+                <option value="active">Ativa</option>
+                <option value="secret">Secreta</option>
+              </select>
+            </div>
+            <div className="mission-modal-actions">
+              <button type="button" onClick={() => setEditingMission(null)}>Cancelar</button>
+              <button type="button" onClick={updateMission}>Salvar edicao</button>
             </div>
           </section>
         </div>

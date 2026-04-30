@@ -559,6 +559,54 @@
   text-align: center;
 }
 
+.hero-level {
+  width: min(420px, 100%);
+  margin: 16px auto 0;
+  color: #e9d5ff;
+}
+
+.hero-level span,
+.hero-level small {
+  display: block;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.hero-level div {
+  height: 9px;
+  margin: 8px 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  overflow: hidden;
+}
+
+.hero-level i {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #a855f7, #d946ef);
+}
+
+.card-mission-lists {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.level-row {
+  display: grid;
+  grid-template-columns: 70px 1fr 1fr;
+  gap: 8px;
+}
+
+.level-row input {
+  min-height: 40px;
+  border: 1px solid rgba(216, 180, 254, 0.2);
+  border-radius: 8px;
+  background: rgba(5, 4, 15, 0.72);
+  color: #fff;
+  padding: 10px;
+}
+
 .mission-actions button:disabled {
   color: #c4b5fd;
   border-color: rgba(196, 181, 253, 0.22);
@@ -762,7 +810,9 @@
   .rank-row,
   .event-card,
   .member-mission-card,
-  .member-mission-card footer {
+  .member-mission-card footer,
+  .card-mission-lists,
+  .level-row {
     grid-template-columns: 1fr;
   }
 

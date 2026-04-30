@@ -107,14 +107,32 @@ type ProfileRow = {
   mission_influence?: number | null;
 };
 
+type LevelRule = {
+  level: number;
+  required_xp: number;
+  label?: string | null;
+};
+
 function toInt(value: unknown, fallback: number) {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? Math.max(0, Math.floor(parsed)) : fallback;
 }
 
-function buildProfile(profile: ProfileRow) {
-  const level = getMissionLevel(profile);
+function getLevelFromXp(xp: number, rules: LevelRule[]) {
+  if (!rules.length) return Math.floor(xp / 500);
+  return rules.reduce((current, rule) => (xp >= Number(rule.required_xp || 0) ? Number(rule.level) : current), 0);
+}
+
+function getNextXp(level: number, rules: LevelRule[]) {
+  const next = rules.find((rule) => Number(rule.level) > level);
+  return next ? Number(next.required_xp || 0) : getNextLevelInfluence(level);
+}
+
+function buildProfile(profile: ProfileRow, levels: LevelRule[] = []) {
   const xp = getMissionXp(profile);
+  const storedLevel = getMissionLevel(profile);
+  const level = Math.max(storedLevel, getLevelFromXp(xp, levels));
+  const levelRule = levels.find((rule) => Number(rule.level) === level);
   return {
     id: profile.id,
     nome: profile.nome,
@@ -123,8 +141,8 @@ function buildProfile(profile: ProfileRow) {
     level,
     xp,
     influence: xp,
-    nextInfluence: getNextLevelInfluence(level),
-    rankLabel: getMissionRankLabel(level),
+    nextInfluence: getNextXp(level, levels),
+    rankLabel: levelRule?.label || getMissionRankLabel(level),
     canManage: canManageMissions(profile.cargo),
   };
 }
@@ -134,7 +152,19 @@ export async function GET(req: NextRequest) {
   if ("error" in auth) return auth.error;
 
   const { profile, userId } = auth;
-  const profileInfo = buildProfile(profile);
+  const { data: levelsData } = await supabaseAdmin
+    .from("guild_mission_levels")
+    .select("level, required_xp, label")
+    .order("level", { ascending: true });
+  const levels = ((levelsData || []) as LevelRule[]).sort((a, b) => Number(a.level) - Number(b.level));
+
+  const { data: missionProfile } = await supabaseAdmin
+    .from("profiles")
+    .select("id, nome, cargo, avatar_url, mission_xp, mission_level")
+    .eq("id", userId)
+    .maybeSingle();
+
+  const profileInfo = buildProfile((missionProfile || profile) as ProfileRow, levels);
   let usingFallback = false;
 
   const { data: missionsData, error: missionsError } = await supabaseAdmin
@@ -172,15 +202,24 @@ export async function GET(req: NextRequest) {
     .order("created_at", { ascending: false })
     .limit(8);
 
-  const { data: profilesData } = await supabaseAdmin
+  const { data: profilesWithMissionData, error: profilesError } = await supabaseAdmin
     .from("profiles")
     .select("id, nome, cargo, avatar_url, mission_xp, mission_level")
     .order("mission_level", { ascending: false })
     .order("mission_xp", { ascending: false })
     .limit(50);
 
+  let profilesData = profilesWithMissionData as ProfileRow[] | null;
+  if (profilesError) {
+    const fallbackProfiles = await supabaseAdmin
+      .from("profiles")
+      .select("id, nome, cargo, avatar_url")
+      .limit(50);
+    profilesData = fallbackProfiles.data as ProfileRow[] | null;
+  }
+
   const ranking = ((profilesData || []) as ProfileRow[])
-    .map((item) => buildProfile(item))
+    .map((item) => buildProfile(item, levels))
     .sort((a, b) => b.level - a.level || b.xp - a.xp || String(a.nome || "").localeCompare(String(b.nome || "")));
 
   const { data: adminClaimsData } = profileInfo.canManage
@@ -220,6 +259,7 @@ export async function GET(req: NextRequest) {
 
   return NextResponse.json({
     profile: profileInfo,
+    levels,
     missions: decoratedMissions,
     claims,
     adminClaims: adminClaimsData || [],

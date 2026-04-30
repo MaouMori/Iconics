@@ -55,6 +55,29 @@ create index if not exists idx_guild_mission_claims_status
 create index if not exists idx_profiles_mission_rank
   on public.profiles(mission_level desc, mission_xp desc);
 
+create table if not exists public.guild_mission_levels (
+  level integer primary key,
+  required_xp integer not null,
+  label text null
+);
+
+insert into public.guild_mission_levels (level, required_xp, label)
+values
+  (0, 0, 'Recem-chegado'),
+  (1, 500, 'Iniciado'),
+  (2, 1000, 'Iniciado'),
+  (3, 1500, 'Iniciado'),
+  (4, 2000, 'Ascendente'),
+  (5, 2600, 'Ascendente'),
+  (6, 3200, 'Ascendente'),
+  (7, 3900, 'Ascendente'),
+  (8, 4700, 'Veterano'),
+  (9, 5600, 'Veterano'),
+  (10, 6600, 'Veterano'),
+  (11, 7700, 'Veterano'),
+  (12, 9000, 'Iconics Elite')
+on conflict (level) do nothing;
+
 create table if not exists public.guild_mission_activity (
   id bigserial primary key,
   mission_id bigint null references public.guild_missions(id) on delete set null,

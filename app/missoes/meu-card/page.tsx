@@ -13,10 +13,28 @@ type Profile = {
   level: number;
   xp: number;
   rankLabel: string;
+  nextInfluence: number;
+};
+
+type Claim = {
+  id: number;
+  mission_id: number;
+  status: string;
+  accepted_at: string;
+  submitted_at?: string | null;
+  completed_at?: string | null;
+};
+
+type Mission = {
+  id: number;
+  title: string;
+  summary: string;
+  claim?: Claim | null;
 };
 
 export default function MissionCardPage() {
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [missions, setMissions] = useState<Mission[]>([]);
   const [message, setMessage] = useState("Carregando card...");
 
   useEffect(() => {
@@ -34,6 +52,7 @@ export default function MissionCardPage() {
         return;
       }
       setProfile(payload.profile);
+      setMissions(payload.missions || []);
       setMessage("");
     }
     load();
@@ -46,7 +65,17 @@ export default function MissionCardPage() {
         <section className="missions-shell">
           <header className="missions-hero compact-hero">
             <div className="missions-brand"><img src="/images/iconics-logo.png" alt="ICONICS" className="missions-logo" /><span>Identidade de membro</span></div>
-            <div className="missions-title-block"><p className="missions-kicker">Seu registro de influencia</p><h1>Meu Card</h1></div>
+            <div className="missions-title-block">
+              <p className="missions-kicker">Seu registro de influencia</p>
+              <h1>Meu Card</h1>
+              {profile ? (
+                <div className="hero-level">
+                  <span>Nivel {profile.level}</span>
+                  <div><i style={{ width: `${Math.min(100, Math.round((profile.xp / Math.max(profile.nextInfluence, 1)) * 100))}%` }} /></div>
+                  <small>{profile.xp} / {profile.nextInfluence} XP</small>
+                </div>
+              ) : null}
+            </div>
             <div className="missions-hero-art" aria-hidden="true" />
           </header>
           <div className="missions-layout two-col">
@@ -68,6 +97,22 @@ export default function MissionCardPage() {
                   </footer>
                 </article>
               ) : null}
+              <section className="card-mission-lists">
+                <article className="activity-card">
+                  <h2>Missoes aceitas</h2>
+                  {missions.filter((mission) => mission.claim?.status === "accepted").length === 0 ? <p className="muted">Nenhuma missao aceita.</p> : null}
+                  {missions.filter((mission) => mission.claim?.status === "accepted").map((mission) => (
+                    <div className="activity-item" key={mission.id}><span>{mission.title}</span><p>{mission.summary}</p><strong>Aberta</strong></div>
+                  ))}
+                </article>
+                <article className="activity-card">
+                  <h2>Missoes finalizadas</h2>
+                  {missions.filter((mission) => ["submitted", "completed", "rejected"].includes(mission.claim?.status || "")).length === 0 ? <p className="muted">Nenhuma missao finalizada.</p> : null}
+                  {missions.filter((mission) => ["submitted", "completed", "rejected"].includes(mission.claim?.status || "")).map((mission) => (
+                    <div className="activity-item" key={mission.id}><span>{mission.title}</span><p>{mission.summary}</p><strong>{mission.claim?.status}</strong></div>
+                  ))}
+                </article>
+              </section>
             </section>
           </div>
         </section>

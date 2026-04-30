@@ -22,6 +22,7 @@ export default function MissionPanelPage() {
   const [selected, setSelected] = useState("");
   const [level, setLevel] = useState("");
   const [xpDelta, setXpDelta] = useState("");
+  const [levels, setLevels] = useState<{ level: number; required_xp: number; label?: string | null }[]>([]);
   const [message, setMessage] = useState("Carregando painel...");
 
   async function getToken() {
@@ -43,6 +44,7 @@ export default function MissionPanelPage() {
     }
     setProfile(payload.profile);
     setRanking(payload.ranking || []);
+    setLevels(payload.levels || []);
     setSelected(payload.profile?.id || "");
     setMessage("");
   }
@@ -68,6 +70,22 @@ export default function MissionPanelPage() {
       return;
     }
     setMessage("Perfil atualizado.");
+    await load();
+  }
+
+  async function saveLevels() {
+    const token = await getToken();
+    const response = await fetch("/api/missions/levels", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ levels }),
+    });
+    const payload = await response.json().catch(() => null);
+    if (!response.ok) {
+      setMessage(payload?.error || "Nao foi possivel salvar niveis.");
+      return;
+    }
+    setMessage("Tabela de XP por nivel atualizada.");
     await load();
   }
 
@@ -122,6 +140,36 @@ export default function MissionPanelPage() {
                   <p className="muted">Voce pode aceitar missoes, enviar comprovantes e acompanhar seu progresso. Ajustes de XP e nivel ficam com lideres, vice-lideres e conselheiros.</p>
                 </article>
               )}
+
+              {profile?.canManage ? (
+                <article className="activity-card level-editor">
+                  <h2>XP por nivel</h2>
+                  <p className="muted">Controle quanto XP cada nivel precisa. Nivel 0 deve ficar com 0 XP.</p>
+                  {levels.map((item, index) => (
+                    <div className="level-row" key={item.level}>
+                      <input value={item.level} onChange={(e) => {
+                        const next = [...levels];
+                        next[index] = { ...next[index], level: Number(e.target.value) };
+                        setLevels(next);
+                      }} />
+                      <input value={item.required_xp} onChange={(e) => {
+                        const next = [...levels];
+                        next[index] = { ...next[index], required_xp: Number(e.target.value) };
+                        setLevels(next);
+                      }} />
+                      <input value={item.label || ""} placeholder="Titulo" onChange={(e) => {
+                        const next = [...levels];
+                        next[index] = { ...next[index], label: e.target.value };
+                        setLevels(next);
+                      }} />
+                    </div>
+                  ))}
+                  <div className="mission-modal-actions">
+                    <button type="button" onClick={() => setLevels([...levels, { level: levels.length, required_xp: 0, label: "" }])}>Adicionar nivel</button>
+                    <button type="button" onClick={saveLevels}>Salvar tabela</button>
+                  </div>
+                </article>
+              ) : null}
             </section>
           </div>
         </section>

@@ -30,9 +30,17 @@ export async function PATCH(req: NextRequest, context: RouteContext) {
   }
 
   const nextXp = Math.max(0, getMissionXp(target) + (Number.isFinite(xpDelta) ? Math.floor(xpDelta) : 0));
+  const { data: levels } = await supabaseAdmin
+    .from("guild_mission_levels")
+    .select("level, required_xp")
+    .order("level", { ascending: true });
+  const levelByXp = (levels || []).reduce(
+    (current, rule) => (nextXp >= Number(rule.required_xp || 0) ? Number(rule.level) : current),
+    0
+  );
   const nextLevel = Number.isFinite(setLevel as number)
     ? Math.max(0, Math.floor(setLevel as number))
-    : Math.max(getMissionLevel(target), Math.floor(nextXp / 500));
+    : Math.max(getMissionLevel(target), levelByXp);
 
   const { data, error } = await supabaseAdmin
     .from("profiles")

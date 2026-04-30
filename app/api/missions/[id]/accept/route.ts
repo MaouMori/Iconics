@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { getAuthedProfile } from "@/lib/apiAuth";
-import { getMissionLevel } from "@/lib/missionRules";
+import { getMissionLevel, getMissionXp } from "@/lib/missionRules";
 
 type RouteContext = {
   params: Promise<{ id: string }>;
@@ -18,6 +18,11 @@ export async function POST(req: NextRequest, context: RouteContext) {
   }
 
   const { profile, userId } = auth;
+  const { data: missionProfile } = await supabaseAdmin
+    .from("profiles")
+    .select("id, cargo, mission_xp, mission_level")
+    .eq("id", userId)
+    .maybeSingle();
   const { data: mission, error: missionError } = await supabaseAdmin
     .from("guild_missions")
     .select("*")
@@ -28,7 +33,16 @@ export async function POST(req: NextRequest, context: RouteContext) {
     return NextResponse.json({ error: "Missao nao encontrada." }, { status: 404 });
   }
 
-  const level = getMissionLevel(profile);
+  const { data: levels } = await supabaseAdmin
+    .from("guild_mission_levels")
+    .select("level, required_xp")
+    .order("level", { ascending: true });
+  const profileForLevel = missionProfile || profile;
+  const xpLevel = (levels || []).reduce(
+    (current, rule) => (getMissionXp(profileForLevel) >= Number(rule.required_xp || 0) ? Number(rule.level) : current),
+    0
+  );
+  const level = Math.max(getMissionLevel(profileForLevel), xpLevel);
   const visibleLevel = Number(mission.visible_level || 0);
   if (level < visibleLevel) {
     return NextResponse.json({ error: "Esta missao ainda nao esta visivel para seu nivel." }, { status: 403 });
