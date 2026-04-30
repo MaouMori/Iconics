@@ -23,6 +23,7 @@ export default function MissionPanelPage() {
   const [level, setLevel] = useState("");
   const [xpDelta, setXpDelta] = useState("");
   const [levels, setLevels] = useState<{ level: number; required_xp: number; label?: string | null }[]>([]);
+  const [levelDraft, setLevelDraft] = useState({ level: "", required_xp: "", label: "" });
   const [message, setMessage] = useState("Carregando painel...");
 
   async function getToken() {
@@ -44,7 +45,7 @@ export default function MissionPanelPage() {
     }
     setProfile(payload.profile);
     setRanking(payload.ranking || []);
-    setLevels(payload.levels || []);
+    setLevels(payload.levels?.length ? payload.levels : [{ level: 0, required_xp: 0, label: "Inicial" }]);
     setSelected(payload.profile?.id || "");
     setMessage("");
   }
@@ -74,11 +75,12 @@ export default function MissionPanelPage() {
   }
 
   async function saveLevels() {
+    const normalized = normalizeLevels(levels);
     const token = await getToken();
     const response = await fetch("/api/missions/levels", {
       method: "PUT",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ levels }),
+      body: JSON.stringify({ levels: normalized }),
     });
     const payload = await response.json().catch(() => null);
     if (!response.ok) {
@@ -86,7 +88,39 @@ export default function MissionPanelPage() {
       return;
     }
     setMessage("Tabela de XP por nivel atualizada.");
+    setLevels(normalized);
     await load();
+  }
+
+  function normalizeLevels(items: { level: number; required_xp: number; label?: string | null }[]) {
+    const byLevel = new Map<number, { level: number; required_xp: number; label?: string | null }>();
+    items.forEach((item) => {
+      const itemLevel = Math.max(0, Math.floor(Number(item.level) || 0));
+      const requiredXp = Math.max(0, Math.floor(Number(item.required_xp) || 0));
+      byLevel.set(itemLevel, { level: itemLevel, required_xp: itemLevel === 0 ? 0 : requiredXp, label: String(item.label || "").trim() || null });
+    });
+    byLevel.set(0, { level: 0, required_xp: 0, label: byLevel.get(0)?.label || "Inicial" });
+    return Array.from(byLevel.values()).sort((a, b) => a.level - b.level);
+  }
+
+  function addOrUpdateLevel() {
+    const nextLevel = Number(levelDraft.level);
+    const nextXp = Number(levelDraft.required_xp);
+    if (!Number.isFinite(nextLevel) || nextLevel < 0 || !Number.isFinite(nextXp) || nextXp < 0) {
+      setMessage("Informe um nivel e uma quantidade de XP validos.");
+      return;
+    }
+    const merged = normalizeLevels([
+      ...levels,
+      {
+        level: Math.floor(nextLevel),
+        required_xp: Math.floor(nextXp),
+        label: levelDraft.label,
+      },
+    ]);
+    setLevels(merged);
+    setLevelDraft({ level: "", required_xp: "", label: "" });
+    setMessage("Nivel adicionado na tabela. Clique em Salvar tabela para publicar.");
   }
 
   return (
@@ -108,7 +142,7 @@ export default function MissionPanelPage() {
 
           {message ? <div className="missions-alert">{message}</div> : null}
           <div className="missions-layout two-col">
-            <MissionMenu active="/missoes/painel" />
+            <MissionMenu active="/missoes/painel" canManage={profile?.canManage} />
             <section className="missions-board mission-page-grid">
               <article className="agent-card">
                 <div className="agent-top">
@@ -144,28 +178,41 @@ export default function MissionPanelPage() {
               {profile?.canManage ? (
                 <article className="activity-card level-editor">
                   <h2>XP por nivel</h2>
-                  <p className="muted">Controle quanto XP cada nivel precisa. Nivel 0 deve ficar com 0 XP.</p>
-                  {levels.map((item, index) => (
-                    <div className="level-row" key={item.level}>
-                      <input value={item.level} onChange={(e) => {
-                        const next = [...levels];
-                        next[index] = { ...next[index], level: Number(e.target.value) };
-                        setLevels(next);
-                      }} />
-                      <input value={item.required_xp} onChange={(e) => {
-                        const next = [...levels];
-                        next[index] = { ...next[index], required_xp: Number(e.target.value) };
-                        setLevels(next);
-                      }} />
-                      <input value={item.label || ""} placeholder="Titulo" onChange={(e) => {
-                        const next = [...levels];
-                        next[index] = { ...next[index], label: e.target.value };
-                        setLevels(next);
-                      }} />
+                  <p className="muted">Digite o nivel e o XP necessario. A tabela abaixo mostra todos os niveis publicados e pode ser editada a qualquer momento.</p>
+                  <div className="level-create-row">
+                    <input placeholder="Nivel" value={levelDraft.level} onChange={(e) => setLevelDraft({ ...levelDraft, level: e.target.value })} />
+                    <input placeholder="XP necessario" value={levelDraft.required_xp} onChange={(e) => setLevelDraft({ ...levelDraft, required_xp: e.target.value })} />
+                    <input placeholder="Titulo do nivel" value={levelDraft.label} onChange={(e) => setLevelDraft({ ...levelDraft, label: e.target.value })} />
+                    <button type="button" onClick={addOrUpdateLevel}>Adicionar</button>
+                  </div>
+                  <div className="level-table-scroll">
+                    <div className="level-table-head">
+                      <span>Nivel</span>
+                      <span>XP necessario</span>
+                      <span>Titulo</span>
                     </div>
-                  ))}
+                    {normalizeLevels(levels).map((item, index) => (
+                      <div className="level-row" key={`${item.level}-${index}`}>
+                        <input value={item.level} onChange={(e) => {
+                          const next = normalizeLevels(levels);
+                          next[index] = { ...next[index], level: Number(e.target.value) };
+                          setLevels(normalizeLevels(next));
+                        }} />
+                        <input value={item.required_xp} disabled={item.level === 0} onChange={(e) => {
+                          const next = normalizeLevels(levels);
+                          next[index] = { ...next[index], required_xp: Number(e.target.value) };
+                          setLevels(normalizeLevels(next));
+                        }} />
+                        <input value={item.label || ""} placeholder="Titulo" onChange={(e) => {
+                          const next = normalizeLevels(levels);
+                          next[index] = { ...next[index], label: e.target.value };
+                          setLevels(normalizeLevels(next));
+                        }} />
+                      </div>
+                    ))}
+                  </div>
                   <div className="mission-modal-actions">
-                    <button type="button" onClick={() => setLevels([...levels, { level: levels.length, required_xp: 0, label: "" }])}>Adicionar nivel</button>
+                    <button type="button" onClick={() => setLevels(normalizeLevels(levels))}>Organizar tabela</button>
                     <button type="button" onClick={saveLevels}>Salvar tabela</button>
                   </div>
                 </article>
@@ -178,7 +225,19 @@ export default function MissionPanelPage() {
   );
 }
 
-function MissionMenu({ active }: { active: string }) {
+function MissionMenu({ active, canManage }: { active: string; canManage?: boolean }) {
   const navItems = [["Missoes", "/missoes"], ["Meu painel", "/missoes/painel"], ["Rankings", "/missoes/ranking"], ["Eventos", "/missoes/eventos"], ["Meu card", "/missoes/meu-card"]];
-  return <aside className="missions-left"><nav className="missions-menu">{navItems.map(([label, href]) => <a key={href} href={href} className={active === href ? "active" : ""}>{label}</a>)}</nav></aside>;
+  return (
+    <aside className="missions-left">
+      <nav className="missions-menu">
+        {navItems.map(([label, href]) => <a key={href} href={href} className={active === href ? "active" : ""}>{label}</a>)}
+        {canManage ? (
+          <>
+            <a href="/missoes#revisao-lideranca">Revisao da lideranca</a>
+            <a href="/missoes#criar-missao">Criar missao</a>
+          </>
+        ) : null}
+      </nav>
+    </aside>
+  );
 }

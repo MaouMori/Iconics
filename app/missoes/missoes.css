@@ -132,10 +132,18 @@
   gap: 18px;
 }
 
+.missions-right {
+  max-height: min(980px, calc(100vh - 250px));
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
 .missions-menu {
   border-radius: 8px;
   overflow: hidden;
   padding: 10px;
+  max-height: min(620px, calc(100vh - 260px));
+  overflow-y: auto;
 }
 
 .missions-menu a,
@@ -199,6 +207,17 @@
   overflow: hidden;
 }
 
+.mission-panel-scroll,
+.missions-list,
+.mission-page-grid {
+  max-height: min(760px, calc(100vh - 360px));
+  overflow-y: auto;
+}
+
+.mission-panel-scroll {
+  padding: 14px;
+}
+
 .missions-tabs {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
@@ -234,6 +253,21 @@
   display: flex;
   flex-direction: column;
   gap: 14px;
+}
+
+.mission-manage-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px;
+  border: 1px solid rgba(192, 132, 252, 0.2);
+  border-radius: 8px;
+  background: rgba(5, 4, 15, 0.52);
+}
+
+.mission-manage-panel h2 {
+  margin: 0;
+  color: #f5f3ff;
 }
 
 .mission-card {
@@ -689,13 +723,70 @@
   gap: 8px;
 }
 
-.level-row input {
+.level-create-row,
+.level-table-head {
+  display: grid;
+  grid-template-columns: 110px 1fr 1fr 130px;
+  gap: 8px;
+}
+
+.level-table-scroll {
+  max-height: 360px;
+  overflow-y: auto;
+  display: grid;
+  gap: 8px;
+  padding-right: 4px;
+}
+
+.level-table-head {
+  grid-template-columns: 70px 1fr 1fr;
+  color: #c4b5fd;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 11px;
+  padding: 0 2px;
+}
+
+.level-row input,
+.level-create-row input {
   min-height: 40px;
   border: 1px solid rgba(216, 180, 254, 0.2);
   border-radius: 8px;
   background: rgba(5, 4, 15, 0.72);
   color: #fff;
   padding: 10px;
+}
+
+.level-row input:disabled {
+  opacity: 0.72;
+}
+
+.level-create-row button {
+  min-height: 40px;
+  border-radius: 8px;
+  border: 1px solid rgba(217, 70, 239, 0.58);
+  background: rgba(126, 34, 206, 0.24);
+  color: #f5d0fe;
+  cursor: pointer;
+}
+
+.missions-menu::-webkit-scrollbar,
+.missions-list::-webkit-scrollbar,
+.missions-right::-webkit-scrollbar,
+.mission-page-grid::-webkit-scrollbar,
+.mission-panel-scroll::-webkit-scrollbar,
+.level-table-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+
+.missions-menu::-webkit-scrollbar-thumb,
+.missions-list::-webkit-scrollbar-thumb,
+.missions-right::-webkit-scrollbar-thumb,
+.mission-page-grid::-webkit-scrollbar-thumb,
+.mission-panel-scroll::-webkit-scrollbar-thumb,
+.level-table-scroll::-webkit-scrollbar-thumb {
+  background: rgba(192, 132, 252, 0.42);
+  border-radius: 999px;
 }
 
 .mission-actions button:disabled {
@@ -903,7 +994,9 @@
   .member-mission-card,
   .member-mission-card footer,
   .card-mission-lists,
-  .level-row {
+  .level-row,
+  .level-create-row,
+  .level-table-head {
     grid-template-columns: 1fr;
   }
 

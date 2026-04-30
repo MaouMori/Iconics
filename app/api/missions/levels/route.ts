@@ -18,18 +18,30 @@ export async function PUT(req: NextRequest) {
 
   const body = await req.json().catch(() => null);
   const levels = Array.isArray(body?.levels) ? body.levels : [];
-  const rows: LevelInput[] = levels
+  const byLevel = new Map<number, LevelInput>();
+  levels
     .map((item: { level?: unknown; required_xp?: unknown; label?: unknown }) => ({
       level: Number(item.level),
       required_xp: Number(item.required_xp),
       label: String(item.label || "").trim() || null,
     }))
     .filter((item: LevelInput) => Number.isInteger(item.level) && item.level >= 0 && Number.isFinite(item.required_xp) && item.required_xp >= 0)
-    .sort((a: LevelInput, b: LevelInput) => a.level - b.level);
+    .forEach((item: LevelInput) => {
+      byLevel.set(item.level, { ...item, required_xp: item.level === 0 ? 0 : item.required_xp });
+    });
+
+  const rows = Array.from(byLevel.values()).sort((a: LevelInput, b: LevelInput) => a.level - b.level);
 
   if (!rows.length || rows[0].level !== 0 || rows[0].required_xp !== 0) {
     return NextResponse.json({ error: "O nivel 0 precisa existir com XP 0." }, { status: 400 });
   }
+
+  const submittedLevels = rows.map((row) => row.level).join(",");
+  const { error: deleteError } = await supabaseAdmin
+    .from("guild_mission_levels")
+    .delete()
+    .not("level", "in", `(${submittedLevels})`);
+  if (deleteError) return NextResponse.json({ error: deleteError.message }, { status: 500 });
 
   const { error } = await supabaseAdmin.from("guild_mission_levels").upsert(rows, { onConflict: "level" });
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
