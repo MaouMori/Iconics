@@ -37,23 +37,28 @@ export default function MissionEventsPage() {
       <TopBar />
       <main className="missions-page">
         <section className="missions-shell">
-          <section className="missions-board missions-list clean-page-panel">
-              {message ? <div className="mission-empty">{message}</div> : null}
-              {!message && events.length === 0 ? <div className="mission-empty">Nenhum evento cadastrado no momento.</div> : null}
-              {events.map((event) => (
-                <article className="mission-card event-card" key={event.id}>
-                  <div className="mission-image-wrap"><img src={event.imagem_url || "/images/mansao.png"} alt={event.titulo} /></div>
-                  <div className="mission-body">
-                    <div className="mission-heading"><div><h2>{event.titulo}</h2><p>{event.descricao || "Evento Iconics"}</p></div></div>
-                    <div className="mission-meta">
-                      <div><strong>{formatEventDate(event.data_evento)}</strong><span>quando</span></div>
-                      <div><strong>{formatEventTime(event.horario)}</strong><span>horario</span></div>
-                      <div><strong>{event.local || "Iconics"}</strong><span>local</span></div>
+          <section className="missions-board missions-list clean-page-panel events-full-panel">
+            {message ? <div className="mission-empty">{message}</div> : null}
+            {!message && events.length === 0 ? <div className="mission-empty">Nenhum evento cadastrado no momento.</div> : null}
+            {events.map((event) => (
+              <article className="mission-card event-card" key={event.id}>
+                <div className="mission-image-wrap"><img src={event.imagem_url || "/images/mansao.png"} alt={event.titulo} /></div>
+                <div className="mission-body">
+                  <div className="mission-heading">
+                    <div>
+                      <h2>{event.titulo}</h2>
+                      <p>{event.descricao || "Evento Iconics"}</p>
                     </div>
                   </div>
-                </article>
-              ))}
-            </section>
+                  <div className="mission-meta">
+                    <div><strong>{formatEventDate(event.data_evento)}</strong><span>quando</span></div>
+                    <div><strong>{formatEventTime(event.horario)}</strong><span>horario</span></div>
+                    <div><strong>{event.local || "Iconics"}</strong><span>local</span></div>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </section>
         </section>
       </main>
     </>

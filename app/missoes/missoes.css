@@ -685,6 +685,37 @@
   grid-template-columns: 260px minmax(0, 1fr);
 }
 
+.events-full-panel {
+  width: 100%;
+  max-height: calc(100vh - 124px);
+  min-height: calc(100vh - 124px);
+  margin: 0;
+  padding: 16px;
+  gap: 16px;
+}
+
+.events-full-panel .event-card {
+  grid-template-columns: clamp(300px, 24vw, 430px) minmax(0, 1fr);
+  min-height: clamp(220px, 24vh, 300px);
+}
+
+.events-full-panel .mission-image-wrap {
+  min-height: clamp(220px, 24vh, 300px);
+}
+
+.events-full-panel .mission-body {
+  padding: 24px 22px 20px 0;
+}
+
+.events-full-panel .mission-heading h2 {
+  font-size: clamp(1.45rem, 2vw, 2.3rem);
+}
+
+.events-full-panel .mission-heading p {
+  font-size: clamp(1rem, 1vw, 1.12rem);
+  line-height: 1.65;
+}
+
 .member-mission-card {
   width: min(760px, 100%);
   margin: 24px auto;
