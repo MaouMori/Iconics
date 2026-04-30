@@ -157,12 +157,9 @@ export default function TopBar({
     const navItems = [
       { label: "Painel", href: "/painel", icon: "P" },
       { label: "Missoes", href: "/missoes", icon: "M" },
-      { label: "Rankings", href: "/missoes/ranking", icon: "R" },
-      { label: "Eventos", href: "/missoes/eventos", icon: "E" },
       { label: "Rede", href: "/rede", icon: "N" },
       { label: "Notificacoes", href: "/rede", icon: "!" },
       { label: "Mensagens", href: "/rede/mensagens", icon: "@" },
-      { label: "Meu card", href: "/missoes/meu-card", icon: "C" },
       { label: "Configuracoes", href: "/rede/config", icon: "S" },
     ];
     const coreItems = [

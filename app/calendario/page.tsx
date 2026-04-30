@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import TopBar from "@/components/Topbar";
+import PartnersBar from "@/components/PartnersBar";
 import Link from "next/link";
 
 type EventItem = {
@@ -104,6 +105,7 @@ export default function CalendarioPage() {
   return (
     <>
       <TopBar />
+      <PartnersBar />
 
       <main style={pageStyle}>
         <div style={bgGlowTop} />

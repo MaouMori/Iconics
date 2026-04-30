@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useEffect } from "react";
 import TopBar from "@/components/Topbar";
+import PartnersBar from "@/components/PartnersBar";
 import CityMap from "@/components/mansao/CityMap";
 import "./mansao.css";
 
@@ -25,6 +26,7 @@ export default function MansaoPage() {
   return (
     <>
       <TopBar />
+      <PartnersBar />
       <main className="maps-app">
         <aside className="maps-sidebar">
           <p className="maps-kicker">Fraternidade FiveM</p>

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import TopBar from "@/components/Topbar";
+import PartnersBar from "@/components/PartnersBar";
 import Spinner from "@/components/Spinner";
 
 type Partner = {
@@ -37,6 +38,7 @@ export default function ParceriasPage() {
   return (
     <>
       <TopBar />
+      <PartnersBar />
       <main style={pageStyle}>
         <div style={glowTop} />
         <div style={glowBottom} />

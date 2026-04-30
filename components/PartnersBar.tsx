@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
+import { supabase } from "@/lib/supabase";
 
 type Partner = {
   id: number;
@@ -14,9 +15,26 @@ type Partner = {
 export default function PartnersBar() {
   const [partners, setPartners] = useState<Partner[]>([]);
   const [isMobile, setIsMobile] = useState(false);
+  const [isLogged, setIsLogged] = useState(false);
   const pathname = usePathname();
-  const isMansaoPage = pathname === "/mansao";
-  const hiddenByRoute = pathname?.startsWith("/admin") || pathname?.startsWith("/painel");
+  const rightSideRoutes = pathname === "/calendario" || pathname === "/mansao" || pathname === "/parcerias" || pathname?.startsWith("/parceria/");
+  const hiddenByRoute = pathname?.startsWith("/admin") || pathname?.startsWith("/painel") || pathname?.startsWith("/missoes") || pathname?.startsWith("/rede");
+
+  useEffect(() => {
+    async function checkSession() {
+      const { data } = await supabase.auth.getSession();
+      setIsLogged(Boolean(data.session));
+    }
+
+    checkSession();
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsLogged(Boolean(session));
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   useEffect(() => {
     async function load() {
@@ -41,14 +59,14 @@ export default function PartnersBar() {
     return () => window.removeEventListener("resize", syncMobile);
   }, []);
 
-  if (partners.length === 0 || isMobile || hiddenByRoute) return null;
+  if (partners.length === 0 || isMobile || hiddenByRoute || (rightSideRoutes && !isLogged)) return null;
 
   return (
     <div
       style={{
         ...sidebarStyle,
-        left: isMansaoPage ? undefined : 12,
-        right: isMansaoPage ? 12 : undefined,
+        left: rightSideRoutes ? undefined : 12,
+        right: rightSideRoutes ? 12 : undefined,
       }}
     >
       <div style={headerStyle}>
