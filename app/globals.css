@@ -31,6 +31,21 @@ table {
   }
 }
 
+@media (min-width: 1080px) {
+  body.has-app-sidebar main {
+    padding-left: 288px;
+  }
+
+  body.has-app-sidebar .painel-shell,
+  body.has-app-sidebar .missions-shell {
+    padding-top: 28px;
+  }
+
+  body.has-app-sidebar .social-app {
+    padding-top: 18px;
+  }
+}
+
 @keyframes iconics-spin {
   to { transform: rotate(360deg); }
 }

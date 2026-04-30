@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import Spinner from "@/components/Spinner";
+import TopBar from "@/components/Topbar";
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -127,14 +128,19 @@ export default function RedeConfigPage() {
 
   if (loading) {
     return (
-      <main className="rede-loader">
-        <Spinner texto="Carregando configuracoes..." />
-      </main>
+      <>
+        <TopBar />
+        <main className="rede-loader">
+          <Spinner texto="Carregando configuracoes..." />
+        </main>
+      </>
     );
   }
 
   return (
-    <main className="social-app">
+    <>
+      <TopBar />
+      <main className="social-app">
       <section className="social-shell">
         <header className="social-topbar">
           <div className="brand-left">
@@ -219,6 +225,7 @@ export default function RedeConfigPage() {
       </section>
 
       {status ? <div className="status-toast">{status}</div> : null}
-    </main>
+      </main>
+    </>
   );
 }

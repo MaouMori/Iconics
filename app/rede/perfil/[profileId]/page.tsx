@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Spinner from "@/components/Spinner";
+import TopBar from "@/components/Topbar";
 import NotificationBell from "@/components/NotificationBell";
 import { supabase } from "@/lib/supabase";
 import "../../rede.css";
@@ -129,22 +130,30 @@ export default function RedeProfilePage() {
 
   if (loading) {
     return (
-      <main className="rede-loader">
-        <Spinner texto="Carregando perfil..." />
-      </main>
+      <>
+        <TopBar />
+        <main className="rede-loader">
+          <Spinner texto="Carregando perfil..." />
+        </main>
+      </>
     );
   }
 
   if (!payload) {
     return (
-      <main className="rede-loader">
-        <p>{status || "Perfil nao encontrado."}</p>
-      </main>
+      <>
+        <TopBar />
+        <main className="rede-loader">
+          <p>{status || "Perfil nao encontrado."}</p>
+        </main>
+      </>
     );
   }
 
   return (
-    <main className="social-app">
+    <>
+      <TopBar />
+      <main className="social-app">
       <section className="social-shell">
         <header className="social-topbar">
           <div className="brand-left">
@@ -196,6 +205,7 @@ export default function RedeProfilePage() {
       </section>
 
       {status ? <div className="status-toast">{status}</div> : null}
-    </main>
+      </main>
+    </>
   );
 }

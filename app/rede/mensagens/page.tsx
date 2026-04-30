@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Spinner from "@/components/Spinner";
+import TopBar from "@/components/Topbar";
 import NotificationBell from "@/components/NotificationBell";
 import { supabase } from "@/lib/supabase";
 import "../rede.css";
@@ -292,14 +293,19 @@ export default function RedeMensagensPage() {
 
   if (loading) {
     return (
-      <main className="rede-loader">
-        <Spinner texto="Carregando mensagens..." />
-      </main>
+      <>
+        <TopBar />
+        <main className="rede-loader">
+          <Spinner texto="Carregando mensagens..." />
+        </main>
+      </>
     );
   }
 
   return (
-    <main className="social-app">
+    <>
+      <TopBar />
+      <main className="social-app">
       <section className="social-shell">
         <header className="social-topbar">
           <div className="brand-left">
@@ -469,6 +475,7 @@ export default function RedeMensagensPage() {
       </section>
 
       {status ? <div className="status-toast">{status}</div> : null}
-    </main>
+      </main>
+    </>
   );
 }

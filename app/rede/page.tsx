@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import Spinner from "@/components/Spinner";
+import TopBar from "@/components/Topbar";
 import { supabase } from "@/lib/supabase";
 import NotificationBell from "@/components/NotificationBell";
 import Link from "next/link";
@@ -484,15 +485,20 @@ export default function RedePage() {
 
   if (loading) {
     return (
-      <main className="rede-loader">
-        <Spinner texto="Carregando Rede Iconics..." />
-      </main>
+      <>
+        <TopBar />
+        <main className="rede-loader">
+          <Spinner texto="Carregando Rede Iconics..." />
+        </main>
+      </>
     );
   }
 
   return (
-    <main className="social-app">
-      <section className="social-shell">
+    <>
+      <TopBar />
+      <main className="social-app">
+        <section className="social-shell">
         <header className="social-topbar">
           <div className="brand-left">
             <img
@@ -754,7 +760,8 @@ export default function RedePage() {
         <input value={editAvatar} onChange={(e) => setEditAvatar(e.target.value)} />
         <textarea value={editBio} onChange={(e) => setEditBio(e.target.value)} />
         <button onClick={saveProfile} disabled={savingProfile || uploading}>Salvar meu perfil</button>
-      </section>
-    </main>
+        </section>
+      </main>
+    </>
   );
 }
