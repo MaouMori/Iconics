@@ -202,6 +202,9 @@ export default function MissoesPage() {
       <TopBar />
       <main className="missions-page medieval-missions-page">
         <section className="medieval-board-shell">
+          <div className="mission-side-banner" aria-hidden="true">
+            <span>ICONICS</span>
+          </div>
           <header className="medieval-sign">
             <span>A influencia comeca aqui</span>
             <h1>Painel de Missoes</h1>
@@ -214,6 +217,9 @@ export default function MissoesPage() {
             <div className="quest-board">
               <div className="quest-board-rail left" />
               <div className="quest-board-rail right" />
+              <span className="quest-red-thread thread-one" aria-hidden="true" />
+              <span className="quest-red-thread thread-two" aria-hidden="true" />
+              <span className="quest-red-thread thread-three" aria-hidden="true" />
               <div className="quest-scroll-grid">
                 {visibleMissions.length === 0 ? (
                   <div className="quest-empty">Nenhum pergaminho neste mural.</div>
