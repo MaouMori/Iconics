@@ -157,7 +157,6 @@ export default function TopBar({
     const nextInfluence = Math.max(Number(profile?.nextInfluence || 1), 1);
     const xpPercent = Math.min(100, Math.round((xp / nextInfluence) * 100));
     const navItems = [
-      { label: "Site principal", href: "/", icon: "H" },
       { label: "Painel", href: "/painel", icon: "P" },
       { label: "Missoes", href: "/missoes", icon: "M" },
       { label: "Ranking", href: "/missoes/ranking", icon: "R" },
@@ -182,6 +181,7 @@ export default function TopBar({
       <aside style={sidebarStyle}>
         <Link href="/" style={sidebarLogoStyle} title="Voltar ao site principal">
           <img src="/images/iconics-logo.png" alt="ICONICS" style={sidebarLogoImageStyle} />
+          <span style={sidebarLogoHintStyle}>Site principal</span>
         </Link>
 
         <section style={sidebarProfileStyle}>
@@ -360,15 +360,29 @@ const sidebarLogoStyle: React.CSSProperties = {
   minHeight: 112,
   display: "grid",
   placeItems: "center",
+  position: "relative",
   borderRadius: 8,
   border: "1px solid rgba(192,132,252,.2)",
   background: "rgba(77,22,132,.16)",
+  textDecoration: "none",
 };
 
 const sidebarLogoImageStyle: React.CSSProperties = {
   width: 150,
   height: "auto",
   objectFit: "contain",
+};
+
+const sidebarLogoHintStyle: React.CSSProperties = {
+  position: "absolute",
+  left: 10,
+  right: 10,
+  bottom: 7,
+  color: "#c4b5fd",
+  fontSize: 10,
+  letterSpacing: ".12em",
+  textAlign: "center",
+  textTransform: "uppercase",
 };
 
 const sidebarProfileStyle: React.CSSProperties = {
