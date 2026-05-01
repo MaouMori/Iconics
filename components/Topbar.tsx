@@ -157,6 +157,7 @@ export default function TopBar({
     const nextInfluence = Math.max(Number(profile?.nextInfluence || 1), 1);
     const xpPercent = Math.min(100, Math.round((xp / nextInfluence) * 100));
     const navItems = [
+      { label: "Site principal", href: "/", icon: "H" },
       { label: "Painel", href: "/painel", icon: "P" },
       { label: "Missoes", href: "/missoes", icon: "M" },
       { label: "Ranking", href: "/missoes/ranking", icon: "R" },
@@ -179,7 +180,7 @@ export default function TopBar({
 
     return (
       <aside style={sidebarStyle}>
-        <Link href="/painel" style={sidebarLogoStyle}>
+        <Link href="/" style={sidebarLogoStyle} title="Voltar ao site principal">
           <img src="/images/iconics-logo.png" alt="ICONICS" style={sidebarLogoImageStyle} />
         </Link>
 
