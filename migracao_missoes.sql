@@ -108,8 +108,8 @@ values
     array['conteudo', 'social']
   ),
   (
-    'enigma-de-nyx',
-    'Enigma de Nyx',
+    'enigma-de-entidade',
+    'Enigma de Entidade',
     'Um simbolo foi ocultado na mansao. Encontre e decifre.',
     'Observe pistas em eventos, lore e imagens do site. A resposta precisa ser validada pela staff.',
     'misterio',

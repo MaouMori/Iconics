@@ -232,7 +232,7 @@ export default function LorePage() {
                 <p>
                   Entre os membros mais antigos, uma frase sempre retorna como
                   aviso, lembrança ou maldição. Um nome envolto em sombras,
-                  raramente dito em voz alta: “Maldita seja Nyx.”
+                  raramente dito em voz alta: “Maldita seja Entidade.”
                 </p>
               </div>
             </div>
@@ -242,4 +242,3 @@ export default function LorePage() {
     </>
   );
 }
-
