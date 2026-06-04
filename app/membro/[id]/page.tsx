@@ -262,8 +262,8 @@ function nextLightbox() {
           </article>
 
           <article className="member-wiki-card member-wiki-card-wide">
-            <h3>Lore Pessoal</h3>
-            <p>{member.meta || "Uma jornada de transformacao e ascensao. Cada passo foi dado com proposito, construindo uma presenca que nao passa despercebida."}</p>
+            <h3>Resumo Pessoal</h3>
+            <p>{member.meta || "Sem resumo informado."}</p>
           </article>
 
           <article className="member-wiki-card member-wiki-card-wide">

@@ -168,28 +168,6 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="lore-hero">
-          <div className="lore-bg"></div>
-          <div className="lore-overlay"></div>
-          <div className="lore-particles"></div>
-
-          <div className="lore-content">
-            <span className="lore-badge">Arquivos da Fraternidade</span>
-
-            <h2 className="lore-title">Lore</h2>
-            <h3 className="lore-subtitle">ICONICS - Conventus Nycis</h3>
-
-            <div className="lore-divider"></div>
-
-            <p className="lore-text">
-              Na Universidade de Orleans, onde luzes de festas iluminam o campus e milhares de cameras
-              registram cada momento, existe uma fraternidade que domina tanto os holofotes quanto as sombras.
-            </p>
-
-            <a href="/lore" className="lore-btn">Explorar Arquivos</a>
-          </div>
-        </section>
-
         <section className="iconics-calendar-section" id="calendario">
           <div className="calendar-bg-particles"></div>
 

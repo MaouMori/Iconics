@@ -32,7 +32,7 @@ const fallbackMissions = [
     slug: "enigma-de-entidade",
     title: "Enigma de Entidade",
     summary: "Um simbolo foi ocultado na mansao. Encontre e decifre.",
-    details: "Observe pistas em eventos, lore e imagens do site. A resposta precisa ser validada pela staff.",
+    details: "Observe pistas em eventos e imagens do site. A resposta precisa ser validada pela staff.",
     category: "misterio",
     difficulty: "alta",
     required_level: 4,
