@@ -441,7 +441,7 @@ export default function AdminFormularioPage() {
                         onChange={(event) => updateField(selectedIndex, { type: event.target.value as FieldType })}
                       >
                         {fieldTypes.map((type) => (
-                          <option key={type} value={type}>
+                          <option key={type} value={type} style={optionStyle}>
                             {fieldTypeLabels[type]}
                           </option>
                         ))}
@@ -565,9 +565,9 @@ function renderPreviewField(field: FieldDef) {
       <label key={field.id} style={wrapperStyle}>
         {field.label}
         <select style={previewInputStyle} disabled>
-          <option>Selecione uma opcao</option>
+          <option style={optionStyle}>Selecione uma opcao</option>
           {(field.options || []).map((option) => (
-            <option key={option}>{option}</option>
+            <option key={option} style={optionStyle}>{option}</option>
           ))}
         </select>
       </label>
@@ -797,7 +797,15 @@ const inputStyle: React.CSSProperties = {
 
 const selectStyle: React.CSSProperties = {
   ...inputStyle,
+  minWidth: 220,
+  background: "#21162f",
+  color: "#ffffff",
   colorScheme: "dark",
+};
+
+const optionStyle: React.CSSProperties = {
+  background: "#21162f",
+  color: "#ffffff",
 };
 
 const descriptionStyle: React.CSSProperties = {
