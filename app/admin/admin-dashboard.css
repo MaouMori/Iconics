@@ -133,7 +133,14 @@
   display: flex;
   justify-content: flex-end;
   gap: 10px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+}
+
+.admin-top-actions::-webkit-scrollbar {
+  display: none;
 }
 
 .admin-top-btn {
@@ -149,6 +156,8 @@
   text-decoration: none;
   font-weight: 700;
   cursor: pointer;
+  white-space: nowrap;
+  flex: 0 0 auto;
 }
 
 .admin-top-btn.danger {

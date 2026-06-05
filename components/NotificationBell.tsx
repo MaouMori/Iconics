@@ -108,6 +108,8 @@ const bellStyle: React.CSSProperties = {
   justifyContent: "center",
   gap: 6,
   minHeight: 38,
+  whiteSpace: "nowrap",
+  flex: "0 0 auto",
 };
 
 const badgeStyle: React.CSSProperties = {

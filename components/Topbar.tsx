@@ -255,15 +255,16 @@ export default function TopBar({
         left: "50%",
         transform: "translateX(-50%)",
         zIndex: 100,
-        width: "min(96vw, 760px)",
+        width: "min(96vw, 920px)",
       }}
     >
       <nav
+        className="topbar-inline-nav"
         style={{
           display: "flex",
           alignItems: "center",
-          justifyContent: "center",
-          flexWrap: "wrap",
+          justifyContent: isMobile ? "flex-start" : "center",
+          flexWrap: "nowrap",
           gap: 8,
           padding: isMobile ? "8px 10px" : "10px 14px",
           borderRadius: isMobile ? 18 : 999,
@@ -272,6 +273,9 @@ export default function TopBar({
           backdropFilter: "blur(16px)",
           boxShadow: "0 0 40px rgba(91,33,182,.18)",
           width: "100%",
+          overflowX: "auto",
+          overflowY: "hidden",
+          scrollbarWidth: "none",
         }}
       >
         <Link href="/" style={linkStyle}>
@@ -326,6 +330,8 @@ const linkStyle: React.CSSProperties = {
   color: "white",
   textDecoration: "none",
   background: "rgba(255,255,255,.05)",
+  whiteSpace: "nowrap",
+  flex: "0 0 auto",
 };
 
 const buttonStyle: React.CSSProperties = {
@@ -335,6 +341,8 @@ const buttonStyle: React.CSSProperties = {
   background: "rgba(220,38,38,.18)",
   border: "1px solid rgba(255,255,255,.06)",
   cursor: "pointer",
+  whiteSpace: "nowrap",
+  flex: "0 0 auto",
 };
 
 const sidebarStyle: React.CSSProperties = {

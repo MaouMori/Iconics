@@ -23,6 +23,14 @@ table {
   width: 100%;
 }
 
+.topbar-inline-nav::-webkit-scrollbar {
+  display: none;
+}
+
+.topbar-inline-nav {
+  -ms-overflow-style: none;
+}
+
 @media (max-width: 900px) {
   main {
     width: 100%;

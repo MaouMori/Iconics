@@ -128,12 +128,22 @@ button,input,textarea{font:inherit}
   background:rgba(10,8,18,.72);
   backdrop-filter:blur(16px);
   box-shadow:0 0 40px rgba(91,33,182,.18);
+  max-width:96vw;
+  overflow-x:auto;
+  overflow-y:hidden;
+  scrollbar-width:none;
+}
+
+.navbar::-webkit-scrollbar{
+  display:none;
 }
 
 .nav-link{
   padding:10px 16px;
   border-radius:999px;
   transition:.25s ease;
+  white-space:nowrap;
+  flex:0 0 auto;
 }
 
 .nav-link:hover,
@@ -2554,7 +2564,7 @@ button,input,textarea{font:inherit}
   display: flex;
   align-items: center;
   gap: 18px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   justify-content: center;
 }
 
