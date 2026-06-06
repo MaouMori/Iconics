@@ -65,7 +65,7 @@ body {
   display: grid;
   grid-template-columns: minmax(300px, 420px) minmax(0, 1fr);
   gap: 34px;
-  align-items: stretch;
+  align-items: start;
 }
 
 .frame {
@@ -110,13 +110,14 @@ body {
 }
 
 .recruit-panel {
-  min-height: 720px;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 42px 30px;
+  padding: 34px 30px;
   text-align: center;
   overflow: hidden;
+  align-self: start;
 }
 
 .recruit-brand {
@@ -185,14 +186,14 @@ body {
 
 .recruit-description {
   max-width: 290px;
-  margin: 0 0 34px;
+  margin: 0 0 24px;
   color: var(--recruit-muted);
   font-size: 1.08rem;
   line-height: 1.55;
 }
 
 .recruit-benefits {
-  margin-top: auto;
+  margin-top: 4px;
   width: min(100%, 320px);
   display: grid;
   gap: 14px;
