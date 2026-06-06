@@ -118,6 +118,12 @@ export default function AdminPage() {
           <p className="admin-card-icon">◎</p>
           <button onClick={() => router.push("/recrutamento")}>Ver formulario</button>
         </article>
+
+        <article className="admin-card">
+          <h3>Lore</h3>
+          <p className="admin-card-icon">IO</p>
+          <button onClick={() => router.push("/admin/lore")}>Editar wiki</button>
+        </article>
       </section>
 
       <section className="admin-table-wrap">

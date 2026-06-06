@@ -14,7 +14,8 @@ type AdminKey =
   | "vinculos"
   | "logs"
   | "candidaturas"
-  | "formulario";
+  | "formulario"
+  | "lore";
 
 type AdminShellProps = {
   active: AdminKey;
@@ -32,6 +33,7 @@ const NAV_ITEMS: Array<{ key: AdminKey; label: string; href: string }> = [
   { key: "usuarios", label: "Usuarios", href: "/admin/usuarios" },
   { key: "parcerias", label: "Parcerias", href: "/admin/parcerias" },
   { key: "vinculos", label: "Vinculos", href: "/admin/vinculos" },
+  { key: "lore", label: "Lore", href: "/admin/lore" },
   { key: "logs", label: "Logs", href: "/admin/logs" },
 ];
 
