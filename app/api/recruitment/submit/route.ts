@@ -8,6 +8,27 @@ type FieldDef = {
   required?: boolean;
 };
 
+async function getRecruitmentFormSettings() {
+  const { data: activeForm, error: activeError } = await supabaseAdmin
+    .from("recruitment_form_settings")
+    .select("*")
+    .eq("ativo", true)
+    .order("id", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (activeError || activeForm) {
+    return { data: activeForm, error: activeError };
+  }
+
+  return supabaseAdmin
+    .from("recruitment_form_settings")
+    .select("*")
+    .order("id", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
@@ -17,13 +38,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Dados inválidos." }, { status: 400 });
     }
 
-    const { data: formSettings, error: formError } = await supabaseAdmin
-      .from("recruitment_form_settings")
-      .select("*")
-      .eq("ativo", true)
-      .order("id", { ascending: false })
-      .limit(1)
-      .maybeSingle();
+    const { data: formSettings, error: formError } = await getRecruitmentFormSettings();
 
     if (formError || !formSettings) {
       return NextResponse.json({ error: "Formulário não encontrado." }, { status: 500 });

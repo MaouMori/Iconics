@@ -51,7 +51,12 @@ export default function RecrutamentoPage() {
           return;
         }
 
-        setForm(data);
+        setForm({
+          ...data,
+          titulo: data?.titulo || "Formulario Iconics",
+          descricao: data?.descricao || "Preencha os campos abaixo e nossa equipe entrara em contato o mais breve possivel.",
+          campos: Array.isArray(data?.campos) ? data.campos : [],
+        });
 
         const initial: Record<string, string> = {};
         (data?.campos || []).forEach((field: FieldDef) => {
@@ -214,8 +219,9 @@ export default function RecrutamentoPage() {
               <div className="recruit-bat">ICONICS</div>
             </div>
             <p className="recruit-kicker">Entre em contato</p>
-            <h1>{form?.titulo || "Formulario"}</h1>
+            <h1>Formulario</h1>
             <div className="recruit-divider" />
+            {form?.titulo ? <strong className="recruit-form-title">{form.titulo}</strong> : null}
             <p className="recruit-description">
               {form?.descricao || "Preencha os campos abaixo e nossa equipe entrara em contato o mais breve possivel."}
             </p>

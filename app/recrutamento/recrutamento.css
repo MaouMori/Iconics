@@ -116,6 +116,7 @@ body {
   justify-items: center;
   padding: 52px 42px;
   text-align: center;
+  overflow: hidden;
 }
 
 .recruit-arch {
@@ -157,17 +158,32 @@ body {
   margin: 18px 0 12px;
   color: #f7f0ff;
   font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(3.4rem, 5vw, 5.8rem);
+  font-size: clamp(2.9rem, 4.3vw, 4.8rem);
   font-weight: 700;
   line-height: .95;
   text-shadow: 0 0 28px rgba(168,85,247,.22);
+  max-width: 100%;
 }
 
 .recruit-divider {
   width: min(260px, 80%);
   height: 1px;
-  margin: 8px 0 30px;
+  margin: 8px 0 18px;
   background: linear-gradient(90deg, transparent, rgba(168,85,247,.9), transparent);
+}
+
+.recruit-form-title {
+  display: block;
+  max-width: 300px;
+  margin: 0 0 18px;
+  color: #d8b4fe;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.05rem;
+  font-weight: 400;
+  letter-spacing: .08em;
+  line-height: 1.35;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
 }
 
 .recruit-description {
