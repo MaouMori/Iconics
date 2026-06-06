@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { usePageVisibility } from "@/components/PageVisibilityGate";
 
 type Partner = {
   id: number;
@@ -16,6 +17,7 @@ export default function PartnersBar() {
   const [partners, setPartners] = useState<Partner[]>([]);
   const [isMobile, setIsMobile] = useState(false);
   const [isLogged, setIsLogged] = useState(false);
+  const { isEnabled } = usePageVisibility();
   const pathname = usePathname();
   const rightSideRoutes = pathname === "/calendario" || pathname === "/mansao" || pathname === "/parcerias" || pathname?.startsWith("/parceria/");
   const hiddenByRoute = pathname?.startsWith("/admin") || pathname?.startsWith("/painel") || pathname?.startsWith("/missoes") || pathname?.startsWith("/rede");
@@ -59,7 +61,7 @@ export default function PartnersBar() {
     return () => window.removeEventListener("resize", syncMobile);
   }, []);
 
-  if (partners.length === 0 || isMobile || hiddenByRoute || (rightSideRoutes && !isLogged)) return null;
+  if (!isEnabled("parcerias") || !isEnabled("parceria") || partners.length === 0 || isMobile || hiddenByRoute || (rightSideRoutes && !isLogged)) return null;
 
   return (
     <div

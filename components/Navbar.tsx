@@ -4,11 +4,13 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import NotificationBell from "@/components/NotificationBell";
+import { usePageVisibility } from "@/components/PageVisibilityGate";
 
 export default function Navbar() {
   const [isLogged, setIsLogged] = useState(false);
   const [loading, setLoading] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
+  const { isEnabled } = usePageVisibility();
 
   useEffect(() => {
     async function checkUser() {
@@ -70,11 +72,11 @@ export default function Navbar() {
           </div>
         </div>
 
-        <a href="#formulario" className="nav-link">Formulário</a>
-        <Link href="/lore" className="nav-link">Wiki</Link>
-        <Link href="/mansao" className="nav-link">Mansão</Link>
-        <Link href="/parcerias" className="nav-link">Parcerias</Link>
-        <Link href="/rankings" className="nav-link">Rankings</Link>
+        {isEnabled("recrutamento") && <a href="#formulario" className="nav-link">Formulário</a>}
+        {isEnabled("lore") && <Link href="/lore" className="nav-link">Wiki</Link>}
+        {isEnabled("mansao") && <Link href="/mansao" className="nav-link">Mansão</Link>}
+        {isEnabled("parcerias") && <Link href="/parcerias" className="nav-link">Parcerias</Link>}
+        {isEnabled("rankings") && <Link href="/rankings" className="nav-link">Rankings</Link>}
 
         {!loading && !isLogged && (
           <Link href="/login" className="nav-link nav-login">
@@ -85,12 +87,12 @@ export default function Navbar() {
         {!loading && isLogged && (
           <>
             <NotificationBell className="nav-link nav-login nav-bell" compact />
-            <Link href="/painel" className="nav-link nav-login">
+            {isEnabled("painel") && <Link href="/painel" className="nav-link nav-login">
               Painel
-            </Link>
-            <Link href="/missoes" className="nav-link nav-login">
+            </Link>}
+            {isEnabled("missoes") && <Link href="/missoes" className="nav-link nav-login">
               Missoes
-            </Link>
+            </Link>}
 
             <button
               type="button"

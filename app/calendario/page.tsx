@@ -5,6 +5,7 @@ import { supabase } from "@/lib/supabase";
 import TopBar from "@/components/Topbar";
 import PartnersBar from "@/components/PartnersBar";
 import Link from "next/link";
+import { usePageVisibility } from "@/components/PageVisibilityGate";
 
 type EventItem = {
   id: number;
@@ -29,6 +30,7 @@ export default function CalendarioPage() {
   const [selectedDate, setSelectedDate] = useState(formatDate(hoje));
   const [events, setEvents] = useState<EventItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const { isEnabled } = usePageVisibility();
 
   useEffect(() => {
     async function carregarEventos() {
@@ -215,11 +217,11 @@ export default function CalendarioPage() {
                           {event.descricao || "Sem descrição"}
                         </div>
 
-                        <div style={eventActionsRowStyle}>
+                        {isEnabled("eventos") && <div style={eventActionsRowStyle}>
                           <Link href={`/evento/${event.id}`} style={eventDetailsBtnStyle}>
                             Saiba mais
                           </Link>
-                        </div>
+                        </div>}
                       </div>
 
                       <div style={imageBoxStyle}>

@@ -3,6 +3,7 @@ import "@/styles/style.css";
 import "@/styles/calendar.css";
 import Navbar from "@/components/Navbar";
 import Link from "next/link";
+import PageVisibilityGate from "@/components/PageVisibilityGate";
 
 export default function HomePage() {
   return (
@@ -77,6 +78,7 @@ export default function HomePage() {
           </div>
         </section>
 
+        <PageVisibilityGate pageKey="membros">
         <section className="members" id="members">
           <div className="members-bg-gallery">
             <div
@@ -168,6 +170,7 @@ export default function HomePage() {
           </div>
         </section>
 
+        <PageVisibilityGate pageKey="calendario">
         <section className="iconics-calendar-section" id="calendario">
           <div className="calendar-bg-particles"></div>
 
@@ -238,7 +241,10 @@ export default function HomePage() {
             </div>
           </div>
         </section>
+        </PageVisibilityGate>
+        </PageVisibilityGate>
 
+        <PageVisibilityGate pageKey="recrutamento">
         <section className="formulario" id="formulario">
           <div className="form-box">
             <h2>Quer entrar para a ICONICS?</h2>
@@ -247,6 +253,9 @@ export default function HomePage() {
               Abrir formulario</Link></div>
           </div>
         </section>
+        </PageVisibilityGate>
+
+        <PageVisibilityGate pageKey="painel">
         <section className="login-preview" id="login-preview">
   <div className="login-preview-glow"></div>
 
@@ -270,8 +279,10 @@ export default function HomePage() {
       </a>
     </div>
   </div>
-</section>
+        </section>
+        </PageVisibilityGate>
 
+        <PageVisibilityGate pageKey="parcerias">
         <section className="formulario" id="parcerias-preview" style={{ textAlign: "center", padding: "80px 24px" }}>
           <div className="form-box">
             <h2>Nossos Parceiros</h2>
@@ -281,6 +292,7 @@ export default function HomePage() {
             </Link></div>
           </div>
         </section>
+        </PageVisibilityGate>
 
         <footer className="footer">
           <div className="footer-mist"></div>

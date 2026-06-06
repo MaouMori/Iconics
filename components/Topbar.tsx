@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import NotificationBell from "@/components/NotificationBell";
+import { usePageVisibility } from "@/components/PageVisibilityGate";
 
 type TopBarProps = {
   showPainel?: boolean;
@@ -20,6 +21,7 @@ export default function TopBar({
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useState("");
   const [alertCount, setAlertCount] = useState(0);
+  const { isEnabled } = usePageVisibility();
   const [profile, setProfile] = useState<{
     nome?: string | null;
     cargo?: string | null;
@@ -166,7 +168,12 @@ export default function TopBar({
       { label: "Notificacoes", href: "/rede", icon: "!" },
       { label: "Mensagens", href: "/rede/mensagens", icon: "@" },
       { label: "Configuracoes", href: "/rede/config", icon: "S" },
-    ];
+    ].filter((item) => {
+      if (item.href.startsWith("/painel")) return isEnabled("painel");
+      if (item.href.startsWith("/missoes")) return isEnabled("missoes");
+      if (item.href.startsWith("/rede")) return isEnabled("rede");
+      return true;
+    });
     const missionAdminItems = [
       { label: "Criar missao", href: "/missoes/criar", icon: "+" },
       { label: "Revisao", href: "/missoes/revisao", icon: "V" },
@@ -176,7 +183,13 @@ export default function TopBar({
       { label: "Mansao", href: "/mansao", icon: "I" },
       { label: "Calendario", href: "/calendario", icon: "D" },
       { label: "Parcerias", href: "/parcerias", icon: "L" },
-    ];
+    ].filter((item) => {
+      if (item.href.startsWith("/lore")) return isEnabled("lore");
+      if (item.href.startsWith("/mansao")) return isEnabled("mansao");
+      if (item.href.startsWith("/calendario")) return isEnabled("calendario");
+      if (item.href.startsWith("/parcerias")) return isEnabled("parcerias");
+      return true;
+    });
 
     return (
       <aside style={sidebarStyle}>
@@ -283,31 +296,31 @@ export default function TopBar({
           Voltar ao site
         </Link>
 
-        {!loading && isLogged && showPainel && (
+        {!loading && isLogged && showPainel && isEnabled("painel") && (
           <Link href="/painel" style={linkStyle}>
             Painel
           </Link>
         )}
 
-        {!loading && isLogged && (
+        {!loading && isLogged && isEnabled("missoes") && (
           <Link href="/missoes" style={linkStyle}>
             Missoes
           </Link>
         )}
 
-        {!loading && isLogged && (
+        {!loading && isLogged && isEnabled("rede") && (
           <Link href="/rede" style={linkStyle}>
             Rede{alertCount > 0 ? ` (${alertCount})` : ""}
           </Link>
         )}
 
-        <Link href="/rankings" style={linkStyle}>
+        {isEnabled("rankings") && <Link href="/rankings" style={linkStyle}>
           Rankings
-        </Link>
+        </Link>}
 
-        <Link href="/lore" style={linkStyle}>
+        {isEnabled("lore") && <Link href="/lore" style={linkStyle}>
           Wiki
-        </Link>
+        </Link>}
 
         {!loading && isLogged && (
           <NotificationBell className="topbar-bell-link" />

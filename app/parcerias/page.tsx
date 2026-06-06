@@ -5,6 +5,7 @@ import Link from "next/link";
 import TopBar from "@/components/Topbar";
 import PartnersBar from "@/components/PartnersBar";
 import Spinner from "@/components/Spinner";
+import { usePageVisibility } from "@/components/PageVisibilityGate";
 
 type Partner = {
   id: number;
@@ -19,6 +20,7 @@ type Partner = {
 export default function ParceriasPage() {
   const [partners, setPartners] = useState<Partner[]>([]);
   const [loading, setLoading] = useState(true);
+  const { isEnabled } = usePageVisibility();
 
   useEffect(() => {
     async function load() {
@@ -62,7 +64,7 @@ export default function ParceriasPage() {
               {partners.map((p) => (
                 <Link
                   key={p.id}
-                  href={`/parceria/${p.id}`}
+                  href={isEnabled("parceria") ? `/parceria/${p.id}` : "/parcerias"}
                   style={{ textDecoration: "none" }}
                 >
                   <div style={cardStyle}>
@@ -107,19 +109,19 @@ export default function ParceriasPage() {
                       <span style={chipStyle}>Parceiro</span>
                     </div>
 
-                    <span style={cardArrow}>Ver detalhes →</span>
+                    {isEnabled("parceria") && <span style={cardArrow}>Ver detalhes →</span>}
                   </div>
                 </Link>
               ))}
             </div>
           )}
 
-          <div style={ctaWrap}>
+          {isEnabled("recrutamento") && <div style={ctaWrap}>
             <p style={ctaText}>Quer ser parceiro da Iconics?</p>
             <a href="/recrutamento" style={ctaBtn}>
               Quero ser parceiro
             </a>
-          </div>
+          </div>}
         </section>
       </main>
     </>
