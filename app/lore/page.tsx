@@ -126,7 +126,7 @@ export default function LorePage() {
         <header className="wiki-hero">
           <div>
             <p>Arquivo da Fraternidade</p>
-            <h1>Wiki ICONICS</h1>
+            <h1>Wiki <span>ICONICS</span></h1>
           </div>
           <span>Lore, casos, personagens, datas, relacoes e registros internos em formato de enciclopedia.</span>
         </header>
