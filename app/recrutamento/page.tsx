@@ -215,8 +215,8 @@ export default function RecrutamentoPage() {
         <div className="recruit-grain" />
         <div className="recruit-shell">
           <aside className="recruit-panel frame">
-            <div className="recruit-arch">
-              <div className="recruit-bat">ICONICS</div>
+            <div className="recruit-brand">
+              <img src="/images/iconics-logo.png" alt="ICONICS" />
             </div>
             <p className="recruit-kicker">Entre em contato</p>
             <h1>Formulario</h1>
