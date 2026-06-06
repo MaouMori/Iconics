@@ -362,6 +362,92 @@
   place-items: center;
 }
 
+.admin-page-control-head,
+.admin-page-toggle-card {
+  border: 1px solid rgba(201,156,255,.24);
+  background: rgba(255,255,255,.04);
+  box-shadow: 0 18px 50px rgba(0,0,0,.24);
+}
+
+.admin-page-control-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  border-radius: 18px;
+  padding: 16px;
+}
+
+.admin-page-control-head strong {
+  color: #f9e6a8;
+}
+
+.admin-page-control-head button,
+.admin-page-toggle-card button {
+  min-height: 40px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.06);
+  color: #fff;
+  padding: 0 14px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.admin-page-control-head button {
+  background: linear-gradient(90deg, #0f766e, #10b981);
+  border: none;
+}
+
+.admin-page-control-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.admin-page-toggle-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 14px;
+  border-radius: 18px;
+  padding: 16px;
+}
+
+.admin-page-toggle-card h2 {
+  margin: 0 0 6px;
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+.admin-page-toggle-card p {
+  margin: 0 0 10px;
+  color: #d8cceb;
+  line-height: 1.5;
+}
+
+.admin-page-toggle-card code {
+  color: #f9e6a8;
+  overflow-wrap: anywhere;
+}
+
+.admin-page-toggle-card.enabled button {
+  background: rgba(16,185,129,.18);
+  border-color: rgba(16,185,129,.45);
+  color: #bbf7d0;
+}
+
+.admin-page-toggle-card.disabled {
+  opacity: .72;
+}
+
+.admin-page-toggle-card.disabled button {
+  background: rgba(220,38,38,.18);
+  border-color: rgba(248,113,113,.45);
+  color: #fecaca;
+}
+
 .lore-admin-toolbar,
 .lore-admin-grid,
 .lore-admin-editor,

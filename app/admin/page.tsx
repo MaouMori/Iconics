@@ -124,6 +124,12 @@ export default function AdminPage() {
           <p className="admin-card-icon">IO</p>
           <button onClick={() => router.push("/admin/lore")}>Editar wiki</button>
         </article>
+
+        <article className="admin-card">
+          <h3>Paginas</h3>
+          <p className="admin-card-icon">ON</p>
+          <button onClick={() => router.push("/admin/paginas")}>Ativar/desativar</button>
+        </article>
       </section>
 
       <section className="admin-table-wrap">
