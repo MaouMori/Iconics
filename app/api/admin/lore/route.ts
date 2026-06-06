@@ -2,7 +2,16 @@ import { NextRequest, NextResponse } from "next/server";
 import { getAuthedProfile } from "@/lib/apiAuth";
 import { hasAdminAccess } from "@/lib/roles";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import { LORE_SETTINGS_KEY, LorePageItem, normalizeLorePage, sortLorePages } from "@/lib/lore";
+import {
+  deriveLoreCategories,
+  LORE_CATEGORIES_KEY,
+  LORE_SETTINGS_KEY,
+  LoreCategory,
+  LorePageItem,
+  normalizeLoreCategory,
+  normalizeLorePage,
+  sortLorePages,
+} from "@/lib/lore";
 
 async function requireAdmin(req: NextRequest) {
   const auth = await getAuthedProfile(req);
@@ -21,18 +30,26 @@ export async function GET(req: NextRequest) {
 
   const { data, error } = await supabaseAdmin
     .from("site_settings")
-    .select("value")
-    .eq("key", LORE_SETTINGS_KEY)
-    .maybeSingle();
+    .select("key, value")
+    .in("key", [LORE_SETTINGS_KEY, LORE_CATEGORIES_KEY]);
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  const rawPages = Array.isArray(data?.value) ? (data.value as Partial<LorePageItem>[]) : [];
+  const pagesRow = data?.find((row) => row.key === LORE_SETTINGS_KEY);
+  const categoriesRow = data?.find((row) => row.key === LORE_CATEGORIES_KEY);
+  const rawPages = Array.isArray(pagesRow?.value) ? (pagesRow.value as Partial<LorePageItem>[]) : [];
+  const rawCategories = Array.isArray(categoriesRow?.value)
+    ? (categoriesRow.value as Partial<LoreCategory>[])
+    : [];
   const pages = sortLorePages(rawPages.map((page, index) => normalizeLorePage(page, index)));
+  const categories = deriveLoreCategories(
+    pages,
+    rawCategories.map((category, index) => normalizeLoreCategory(category, index))
+  );
 
-  return NextResponse.json({ pages });
+  return NextResponse.json({ pages, categories });
 }
 
 export async function PUT(req: NextRequest) {
@@ -41,6 +58,9 @@ export async function PUT(req: NextRequest) {
 
   const body = await req.json().catch(() => null);
   const rawPages = Array.isArray(body?.pages) ? (body.pages as Partial<LorePageItem>[]) : null;
+  const rawCategories = Array.isArray(body?.categories)
+    ? (body.categories as Partial<LoreCategory>[])
+    : [];
 
   if (!rawPages) {
     return NextResponse.json({ error: "Lista de paginas invalida." }, { status: 400 });
@@ -61,18 +81,29 @@ export async function PUT(req: NextRequest) {
     seen.add(slug);
     return { ...normalized, slug, id: normalized.id || slug };
   });
+  const categories = deriveLoreCategories(
+    pages,
+    rawCategories.map((category, index) => normalizeLoreCategory(category, index))
+  );
 
   const { error } = await supabaseAdmin
     .from("site_settings")
-    .upsert({
-      key: LORE_SETTINGS_KEY,
-      value: pages,
-      updated_at: new Date().toISOString(),
-    });
+    .upsert([
+      {
+        key: LORE_SETTINGS_KEY,
+        value: pages,
+        updated_at: new Date().toISOString(),
+      },
+      {
+        key: LORE_CATEGORIES_KEY,
+        value: categories,
+        updated_at: new Date().toISOString(),
+      },
+    ]);
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  return NextResponse.json({ ok: true, pages });
+  return NextResponse.json({ ok: true, pages, categories });
 }

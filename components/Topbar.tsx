@@ -172,6 +172,7 @@ export default function TopBar({
       { label: "Revisao", href: "/missoes/revisao", icon: "V" },
     ];
     const coreItems = [
+      { label: "Wiki", href: "/lore", icon: "W" },
       { label: "Mansao", href: "/mansao", icon: "I" },
       { label: "Calendario", href: "/calendario", icon: "D" },
       { label: "Parcerias", href: "/parcerias", icon: "L" },
@@ -302,6 +303,10 @@ export default function TopBar({
 
         <Link href="/rankings" style={linkStyle}>
           Rankings
+        </Link>
+
+        <Link href="/lore" style={linkStyle}>
+          Wiki
         </Link>
 
         {!loading && isLogged && (

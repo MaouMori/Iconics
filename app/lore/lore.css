@@ -122,6 +122,8 @@ body {
 }
 
 .wiki-nav-group button {
+  display: grid;
+  gap: 3px;
   text-align: left;
   border: 0;
   border-left: 2px solid transparent;
@@ -129,6 +131,20 @@ body {
   color: var(--wiki-text);
   padding: 8px 10px;
   cursor: pointer;
+}
+
+.wiki-nav-group p {
+  margin: -2px 0 2px;
+  color: var(--wiki-muted);
+  font-size: .82rem;
+  line-height: 1.5;
+}
+
+.wiki-nav-group small {
+  color: var(--wiki-gold);
+  font-size: .72rem;
+  text-transform: uppercase;
+  letter-spacing: .08em;
 }
 
 .wiki-nav-group button.active,
@@ -171,8 +187,7 @@ body {
 }
 
 .wiki-content {
-  display: grid;
-  gap: 16px;
+  display: flow-root;
 }
 
 .wiki-content h2,
@@ -186,6 +201,7 @@ body {
 .wiki-content h2 {
   margin-top: 10px;
   font-size: 2rem;
+  clear: both;
 }
 
 .wiki-content h3 {
@@ -198,17 +214,62 @@ body {
   line-height: 1.9;
 }
 
+.wiki-content p {
+  margin: 0 0 16px;
+}
+
 .wiki-content ul {
+  margin: 0 0 16px;
   padding-left: 22px;
 }
 
 .wiki-content blockquote {
+  margin: 0 0 16px;
   border-left: 3px solid var(--wiki-gold);
   background: rgba(255,255,255,.04);
   color: #f1d994;
   padding: 14px 16px;
   border-radius: 8px;
   line-height: 1.8;
+}
+
+.wiki-block-image {
+  margin: 4px 0 18px;
+  border: 1px solid rgba(255,255,255,.1);
+  background: rgba(255,255,255,.035);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.wiki-block-image.full {
+  width: 100%;
+  clear: both;
+}
+
+.wiki-block-image.left {
+  float: left;
+  width: min(44%, 320px);
+  margin: 4px 20px 14px 0;
+}
+
+.wiki-block-image.right {
+  float: right;
+  width: min(44%, 320px);
+  margin: 4px 0 14px 20px;
+}
+
+.wiki-block-image img {
+  display: block;
+  width: 100%;
+  max-height: 460px;
+  object-fit: cover;
+}
+
+.wiki-block-image figcaption {
+  color: var(--wiki-muted);
+  font-size: .84rem;
+  line-height: 1.5;
+  padding: 10px 12px;
 }
 
 .wiki-infobox {
@@ -281,5 +342,12 @@ body {
     position: relative;
     top: 0;
     max-height: none;
+  }
+
+  .wiki-block-image.left,
+  .wiki-block-image.right {
+    float: none;
+    width: 100%;
+    margin: 4px 0 18px;
   }
 }

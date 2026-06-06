@@ -71,6 +71,7 @@ export default function Navbar() {
         </div>
 
         <a href="#formulario" className="nav-link">Formulário</a>
+        <Link href="/lore" className="nav-link">Wiki</Link>
         <Link href="/mansao" className="nav-link">Mansão</Link>
         <Link href="/parcerias" className="nav-link">Parcerias</Link>
         <Link href="/rankings" className="nav-link">Rankings</Link>

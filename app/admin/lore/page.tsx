@@ -3,25 +3,90 @@
 import AdminShell from "@/components/AdminShell";
 import Spinner from "@/components/Spinner";
 import Toast from "@/components/Toast";
-import { LorePageItem, normalizeLoreSlug } from "@/lib/lore";
+import {
+  LORE_KIND_LABELS,
+  LoreCategory,
+  LoreContentBlock,
+  LorePageItem,
+  LorePageKind,
+  normalizeLoreSlug,
+} from "@/lib/lore";
 import { hasAdminAccess, normalizeRole } from "@/lib/roles";
 import { supabase } from "@/lib/supabase";
 import { useEffect, useMemo, useState } from "react";
 
-function createLorePage(existing: LorePageItem[]): LorePageItem {
+const blockLabels: Record<LoreContentBlock["type"], string> = {
+  heading: "Titulo",
+  text: "Texto",
+  image: "Imagem",
+  quote: "Citacao",
+  list: "Lista",
+};
+
+function createBlock(type: LoreContentBlock["type"]): LoreContentBlock {
+  return {
+    id: `block-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+    type,
+    title: type === "heading" ? "Nova secao" : "",
+    body: type === "text" ? "Escreva um novo trecho da wiki." : "",
+    image_url: "",
+    caption: "",
+    align: "full",
+  };
+}
+
+function createLorePage(existing: LorePageItem[], category = "Historia"): LorePageItem {
   const next = existing.length + 1;
   return {
     id: `lore-${Date.now()}`,
     slug: `nova-pagina-${next}`,
-    title: "Nova pagina de lore",
-    category: "Historia",
+    title: "Nova pagina da wiki",
+    category,
+    kind: "lore",
     summary: "Resumo curto para aparecer na wiki.",
-    content: "## Titulo da secao\n\nEscreva a lore aqui.\n\n> Use citacoes para profecias, regras ou registros antigos.",
+    content: "",
     image_url: "",
+    date: "",
+    age: "",
+    relationships: "",
+    location: "",
+    status: "",
+    blocks: [
+      { ...createBlock("heading"), title: "Contexto" },
+      { ...createBlock("text"), body: "Conte a historia, caso ou registro aqui." },
+    ],
     tags: ["Iconics"],
     order: existing.length,
     published: true,
   };
+}
+
+function createCategory(existing: LoreCategory[]): LoreCategory {
+  const next = existing.length + 1;
+  return {
+    id: `categoria-${Date.now()}`,
+    name: `Nova categoria ${next}`,
+    description: "Descricao curta da categoria.",
+    order: existing.length,
+  };
+}
+
+function renderPreviewBlock(block: LoreContentBlock) {
+  if (block.type === "heading") return <h3 key={block.id}>{block.title || "Secao sem titulo"}</h3>;
+  if (block.type === "quote") return <blockquote key={block.id}>{block.body || "Citacao sem texto."}</blockquote>;
+  if (block.type === "list") {
+    const items = String(block.body || "").split("\n").map((item) => item.trim()).filter(Boolean);
+    return <ul key={block.id}>{items.map((item) => <li key={item}>{item}</li>)}</ul>;
+  }
+  if (block.type === "image") {
+    return (
+      <figure key={block.id} className={`wiki-preview-image ${block.align || "full"}`}>
+        {block.image_url ? <img src={block.image_url} alt={block.caption || "Imagem da wiki"} /> : <div>Imagem</div>}
+        {block.caption ? <figcaption>{block.caption}</figcaption> : null}
+      </figure>
+    );
+  }
+  return <p key={block.id}>{block.body || "Texto vazio."}</p>;
 }
 
 export default function AdminLorePage() {
@@ -29,20 +94,17 @@ export default function AdminLorePage() {
   const [permitido, setPermitido] = useState(false);
   const [token, setToken] = useState("");
   const [pages, setPages] = useState<LorePageItem[]>([]);
+  const [categories, setCategories] = useState<LoreCategory[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [saving, setSaving] = useState(false);
   const [mensagem, setMensagem] = useState("");
 
   const selected = pages[selectedIndex] || null;
-
-  const categories = useMemo(() => {
-    return Array.from(new Set(pages.map((page) => page.category || "Historia")));
-  }, [pages]);
+  const categoryNames = useMemo(() => categories.map((category) => category.name), [categories]);
 
   useEffect(() => {
     async function load() {
       const { data: userData } = await supabase.auth.getUser();
-
       if (!userData.user) {
         window.location.href = "/login";
         return;
@@ -71,7 +133,13 @@ export default function AdminLorePage() {
       });
       const payload = await response.json().catch(() => ({}));
       const loadedPages = Array.isArray(payload.pages) ? payload.pages : [];
-      setPages(loadedPages.length > 0 ? loadedPages : [createLorePage([])]);
+      const loadedCategories = Array.isArray(payload.categories) ? payload.categories : [];
+      const fallbackCategories = loadedCategories.length > 0
+        ? loadedCategories
+        : [{ id: "historia", name: "Historia", description: "Lore principal da fraternidade.", order: 0 }];
+
+      setCategories(fallbackCategories);
+      setPages(loadedPages.length > 0 ? loadedPages : [createLorePage([], fallbackCategories[0].name)]);
       setLoading(false);
     }
 
@@ -86,17 +154,42 @@ export default function AdminLorePage() {
         if (patch.title !== undefined && (!page.slug || page.slug.startsWith("nova-pagina"))) {
           next.slug = normalizeLoreSlug(patch.title) || page.slug;
         }
-        if (patch.tags !== undefined) {
-          next.tags = patch.tags;
-        }
         return next;
       })
     );
   }
 
+  function updateBlock(blockIndex: number, patch: Partial<LoreContentBlock>) {
+    if (!selected) return;
+    const blocks = [...(selected.blocks || [])];
+    blocks[blockIndex] = { ...blocks[blockIndex], ...patch };
+    updatePage(selectedIndex, { blocks });
+  }
+
+  function addBlock(type: LoreContentBlock["type"]) {
+    if (!selected) return;
+    updatePage(selectedIndex, { blocks: [...(selected.blocks || []), createBlock(type)] });
+  }
+
+  function removeBlock(blockIndex: number) {
+    if (!selected) return;
+    updatePage(selectedIndex, { blocks: (selected.blocks || []).filter((_, index) => index !== blockIndex) });
+  }
+
+  function moveBlock(blockIndex: number, direction: -1 | 1) {
+    if (!selected) return;
+    const target = blockIndex + direction;
+    const blocks = [...(selected.blocks || [])];
+    if (target < 0 || target >= blocks.length) return;
+    const [item] = blocks.splice(blockIndex, 1);
+    blocks.splice(target, 0, item);
+    updatePage(selectedIndex, { blocks });
+  }
+
   function addPage() {
+    const category = categories[0]?.name || "Historia";
     setPages((current) => {
-      const next = [...current, createLorePage(current)];
+      const next = [...current, createLorePage(current, category)];
       setSelectedIndex(next.length - 1);
       return next;
     });
@@ -138,13 +231,34 @@ export default function AdminLorePage() {
     });
   }
 
+  function addCategory() {
+    setCategories((current) => [...current, createCategory(current)]);
+  }
+
+  function updateCategory(index: number, patch: Partial<LoreCategory>) {
+    setCategories((current) =>
+      current.map((category, categoryIndex) =>
+        categoryIndex === index ? { ...category, ...patch } : category
+      )
+    );
+  }
+
+  function removeCategory(index: number) {
+    const category = categories[index];
+    if (!category || pages.some((page) => page.category === category.name)) {
+      setMensagem("Mova as paginas dessa categoria antes de excluir.");
+      return;
+    }
+    setCategories((current) => current.filter((_, categoryIndex) => categoryIndex !== index));
+  }
+
   async function savePages() {
     setMensagem("");
     setSaving(true);
 
-    const invalid = pages.find((page) => !page.title.trim() || !page.slug.trim());
+    const invalid = pages.find((page) => !page.title.trim() || !page.slug.trim() || !page.category.trim());
     if (invalid) {
-      setMensagem("Toda pagina precisa ter titulo e slug.");
+      setMensagem("Toda pagina precisa ter titulo, slug e categoria.");
       setSaving(false);
       return;
     }
@@ -155,25 +269,26 @@ export default function AdminLorePage() {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ pages }),
+      body: JSON.stringify({ pages, categories }),
     });
     const payload = await response.json().catch(() => ({}));
 
     if (!response.ok) {
-      setMensagem(payload.error || "Erro ao salvar lore.");
+      setMensagem(payload.error || "Erro ao salvar wiki.");
       setSaving(false);
       return;
     }
 
     setPages(payload.pages || pages);
+    setCategories(payload.categories || categories);
     setSaving(false);
-    setMensagem("Lore salva com sucesso.");
+    setMensagem("Wiki salva com sucesso.");
   }
 
   if (loading) {
     return (
       <AdminShell active="lore" title="Lore Iconics">
-        <div className="admin-lore-loading"><Spinner texto="Carregando lore..." /></div>
+        <div className="admin-lore-loading"><Spinner texto="Carregando wiki..." /></div>
       </AdminShell>
     );
   }
@@ -189,34 +304,61 @@ export default function AdminLorePage() {
   return (
     <AdminShell
       active="lore"
-      title="Editor de Lore"
-      description="Crie paginas, organize capitulos e publique a wiki da fraternidade."
+      title="Editor da Wiki"
+      description="Crie lore, casos, personagens e registros com categorias, imagens e ficha lateral."
     >
       <section className="lore-admin-toolbar">
         <div>
           <strong>{pages.length}</strong>
-          <span> paginas cadastradas</span>
+          <span> paginas / </span>
+          <strong>{categories.length}</strong>
+          <span> categorias</span>
         </div>
         <div className="lore-admin-actions">
           <a href="/lore" target="_blank" rel="noreferrer">Ver wiki</a>
           <button onClick={addPage}>Nova pagina</button>
-          <button onClick={savePages} disabled={saving}>{saving ? "Salvando..." : "Salvar lore"}</button>
+          <button onClick={savePages} disabled={saving}>{saving ? "Salvando..." : "Salvar wiki"}</button>
         </div>
       </section>
 
-      <section className="lore-admin-grid">
+      <section className="lore-category-panel">
+        <div className="lore-category-head">
+          <h2>Categorias</h2>
+          <button onClick={addCategory}>Nova categoria</button>
+        </div>
+        <div className="lore-category-list">
+          {categories.map((category, index) => (
+            <div key={category.id} className="lore-category-card">
+              <input
+                value={category.name}
+                onChange={(event) => updateCategory(index, { name: event.target.value })}
+                placeholder="Nome da categoria"
+              />
+              <input
+                value={category.description || ""}
+                onChange={(event) => updateCategory(index, { description: event.target.value })}
+                placeholder="Descricao"
+              />
+              <button onClick={() => removeCategory(index)}>Excluir</button>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="lore-admin-grid wiki-builder-grid">
         <aside className="lore-admin-list">
           {categories.map((category) => (
-            <div key={category} className="lore-admin-group">
-              <h3>{category}</h3>
-              {pages.map((page, index) => page.category === category ? (
+            <div key={category.id} className="lore-admin-group">
+              <h3>{category.name}</h3>
+              {category.description ? <p>{category.description}</p> : null}
+              {pages.map((page, index) => page.category === category.name ? (
                 <button
                   key={page.id}
                   className={`lore-admin-item ${selectedIndex === index ? "active" : ""}`}
                   onClick={() => setSelectedIndex(index)}
                 >
                   <strong>{page.title}</strong>
-                  <span>{page.published ? "Publicado" : "Rascunho"} / {page.slug}</span>
+                  <span>{LORE_KIND_LABELS[page.kind || "lore"]} / {page.published ? "Publicado" : "Rascunho"}</span>
                 </button>
               ) : null)}
             </div>
@@ -230,7 +372,7 @@ export default function AdminLorePage() {
               <div>
                 <button onClick={() => movePage(selectedIndex, -1)}>Subir</button>
                 <button onClick={() => movePage(selectedIndex, 1)}>Descer</button>
-                <button onClick={() => duplicatePage(selectedIndex)}>Duplicar</button>
+                <button onClick={() => duplicatePage(selectedIndex)}>Copiar</button>
                 <button className="danger" onClick={() => removePage(selectedIndex)}>Excluir</button>
               </div>
             </div>
@@ -246,33 +388,138 @@ export default function AdminLorePage() {
               </label>
               <label>
                 Categoria
-                <input value={selected.category} onChange={(event) => updatePage(selectedIndex, { category: event.target.value })} />
+                <select value={selected.category} onChange={(event) => updatePage(selectedIndex, { category: event.target.value })}>
+                  {categoryNames.map((category) => <option key={category} value={category}>{category}</option>)}
+                </select>
+              </label>
+              <label>
+                Tipo
+                <select value={selected.kind || "lore"} onChange={(event) => updatePage(selectedIndex, { kind: event.target.value as LorePageKind })}>
+                  {Object.entries(LORE_KIND_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+                </select>
+              </label>
+              <label className="wide">
+                Resumo
+                <textarea value={selected.summary} onChange={(event) => updatePage(selectedIndex, { summary: event.target.value })} />
+              </label>
+              <label>
+                Data
+                <input value={selected.date || ""} onChange={(event) => updatePage(selectedIndex, { date: event.target.value })} placeholder="Ex: 2026 / Era I / 05-06-2026" />
+              </label>
+              <label>
+                Idade
+                <input value={selected.age || ""} onChange={(event) => updatePage(selectedIndex, { age: event.target.value })} placeholder="Ex: 19 anos / Desconhecida" />
+              </label>
+              <label>
+                Relacionamentos
+                <input value={selected.relationships || ""} onChange={(event) => updatePage(selectedIndex, { relationships: event.target.value })} />
+              </label>
+              <label>
+                Local
+                <input value={selected.location || ""} onChange={(event) => updatePage(selectedIndex, { location: event.target.value })} />
+              </label>
+              <label>
+                Status
+                <input value={selected.status || ""} onChange={(event) => updatePage(selectedIndex, { status: event.target.value })} />
               </label>
               <label>
                 Tags
                 <input value={(selected.tags || []).join(", ")} onChange={(event) => updatePage(selectedIndex, { tags: event.target.value.split(",").map((tag) => tag.trim()).filter(Boolean) })} />
               </label>
               <label className="wide">
-                Resumo
-                <textarea value={selected.summary} onChange={(event) => updatePage(selectedIndex, { summary: event.target.value })} />
-              </label>
-              <label className="wide">
-                Imagem de capa
-                <input value={selected.image_url || ""} onChange={(event) => updatePage(selectedIndex, { image_url: event.target.value })} placeholder="/images/mansao.png ou URL" />
-              </label>
-              <label className="wide">
-                Conteudo
-                <textarea className="lore-content-editor" value={selected.content} onChange={(event) => updatePage(selectedIndex, { content: event.target.value })} />
+                Imagem da ficha
+                <input value={selected.image_url || ""} onChange={(event) => updatePage(selectedIndex, { image_url: event.target.value })} placeholder="/images/arquivo.png ou URL" />
               </label>
               <label className="lore-check">
                 <input type="checkbox" checked={selected.published !== false} onChange={(event) => updatePage(selectedIndex, { published: event.target.checked })} />
                 Publicar na wiki
               </label>
             </div>
+
+            <div className="lore-block-toolbar">
+              <strong>Conteudo do artigo</strong>
+              {Object.entries(blockLabels).map(([type, label]) => (
+                <button key={type} onClick={() => addBlock(type as LoreContentBlock["type"])}>{label}</button>
+              ))}
+            </div>
+
+            <div className="lore-block-list">
+              {(selected.blocks || []).map((block, blockIndex) => (
+                <section key={block.id} className="lore-block-card">
+                  <header>
+                    <strong>{blockLabels[block.type]}</strong>
+                    <div>
+                      <button onClick={() => moveBlock(blockIndex, -1)}>Up</button>
+                      <button onClick={() => moveBlock(blockIndex, 1)}>Down</button>
+                      <button className="danger" onClick={() => removeBlock(blockIndex)}>X</button>
+                    </div>
+                  </header>
+                  <label>
+                    Tipo
+                    <select value={block.type} onChange={(event) => updateBlock(blockIndex, { type: event.target.value as LoreContentBlock["type"] })}>
+                      {Object.entries(blockLabels).map(([type, label]) => <option key={type} value={type}>{label}</option>)}
+                    </select>
+                  </label>
+                  {block.type === "heading" ? (
+                    <label>
+                      Titulo da secao
+                      <input value={block.title || ""} onChange={(event) => updateBlock(blockIndex, { title: event.target.value })} />
+                    </label>
+                  ) : null}
+                  {block.type !== "heading" && block.type !== "image" ? (
+                    <label>
+                      Texto
+                      <textarea value={block.body || ""} onChange={(event) => updateBlock(blockIndex, { body: event.target.value })} placeholder={block.type === "list" ? "Uma linha por item" : ""} />
+                    </label>
+                  ) : null}
+                  {block.type === "image" ? (
+                    <>
+                      <label>
+                        URL da imagem
+                        <input value={block.image_url || ""} onChange={(event) => updateBlock(blockIndex, { image_url: event.target.value })} />
+                      </label>
+                      <label>
+                        Legenda
+                        <input value={block.caption || ""} onChange={(event) => updateBlock(blockIndex, { caption: event.target.value })} />
+                      </label>
+                      <label>
+                        Posicao
+                        <select value={block.align || "full"} onChange={(event) => updateBlock(blockIndex, { align: event.target.value as LoreContentBlock["align"] })}>
+                          <option value="full">Largura total</option>
+                          <option value="left">Esquerda</option>
+                          <option value="right">Direita</option>
+                        </select>
+                      </label>
+                    </>
+                  ) : null}
+                </section>
+              ))}
+            </div>
           </article>
         ) : (
-          <article className="lore-admin-editor empty">Crie uma pagina de lore para comecar.</article>
+          <article className="lore-admin-editor empty">Crie uma pagina da wiki para comecar.</article>
         )}
+
+        {selected ? (
+          <aside className="lore-admin-preview">
+            <span>{selected.published !== false ? "Publicado" : "Rascunho"}</span>
+            <h2>{selected.title}</h2>
+            <p>{selected.summary}</p>
+            {selected.image_url ? <img src={selected.image_url} alt={selected.title} /> : null}
+            <dl>
+              <div><dt>Tipo</dt><dd>{LORE_KIND_LABELS[selected.kind || "lore"]}</dd></div>
+              <div><dt>Categoria</dt><dd>{selected.category}</dd></div>
+              {selected.date ? <div><dt>Data</dt><dd>{selected.date}</dd></div> : null}
+              {selected.age ? <div><dt>Idade</dt><dd>{selected.age}</dd></div> : null}
+              {selected.relationships ? <div><dt>Relacionamentos</dt><dd>{selected.relationships}</dd></div> : null}
+              {selected.location ? <div><dt>Local</dt><dd>{selected.location}</dd></div> : null}
+              {selected.status ? <div><dt>Status</dt><dd>{selected.status}</dd></div> : null}
+            </dl>
+            <div className="lore-preview-content">
+              {(selected.blocks || []).map(renderPreviewBlock)}
+            </div>
+          </aside>
+        ) : null}
       </section>
 
       {mensagem && <Toast mensagem={mensagem} onClose={() => setMensagem("")} />}
