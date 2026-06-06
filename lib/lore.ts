@@ -2,7 +2,7 @@ export type LorePageKind = "lore" | "caso" | "personagem" | "local" | "evento" |
 
 export type LoreContentBlock = {
   id: string;
-  type: "heading" | "text" | "image" | "quote" | "list";
+  type: "heading" | "text" | "image" | "media" | "quote" | "list";
   title?: string;
   body?: string;
   image_url?: string;
@@ -68,7 +68,7 @@ function normalizeLoreKind(value: unknown): LorePageKind {
 
 function normalizeBlockType(value: unknown): LoreContentBlock["type"] {
   const type = String(value || "text").trim().toLowerCase();
-  if (["heading", "text", "image", "quote", "list"].includes(type)) {
+  if (["heading", "text", "image", "media", "quote", "list"].includes(type)) {
     return type as LoreContentBlock["type"];
   }
   return "text";

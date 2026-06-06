@@ -19,6 +19,7 @@ const blockLabels: Record<LoreContentBlock["type"], string> = {
   heading: "Titulo",
   text: "Texto",
   image: "Imagem",
+  media: "Imagem + texto",
   quote: "Citacao",
   list: "Lista",
 };
@@ -28,7 +29,7 @@ function createBlock(type: LoreContentBlock["type"]): LoreContentBlock {
     id: `block-${Date.now()}-${Math.random().toString(16).slice(2)}`,
     type,
     title: type === "heading" ? "Nova secao" : "",
-    body: type === "text" ? "Escreva um novo trecho da wiki." : "",
+    body: type === "text" || type === "media" ? "Escreva um novo trecho da wiki." : "",
     image_url: "",
     caption: "",
     align: "full",
@@ -84,6 +85,20 @@ function renderPreviewBlock(block: LoreContentBlock) {
         {block.image_url ? <img src={block.image_url} alt={block.caption || "Imagem da wiki"} /> : <div>Imagem</div>}
         {block.caption ? <figcaption>{block.caption}</figcaption> : null}
       </figure>
+    );
+  }
+  if (block.type === "media") {
+    return (
+      <section key={block.id} className={`wiki-preview-media ${block.align === "right" ? "right" : "left"}`}>
+        <figure>
+          {block.image_url ? <img src={block.image_url} alt={block.caption || block.title || "Imagem da wiki"} /> : <div>Imagem</div>}
+          {block.caption ? <figcaption>{block.caption}</figcaption> : null}
+        </figure>
+        <div>
+          {block.title ? <h3>{block.title}</h3> : null}
+          <p>{block.body || "Texto vazio."}</p>
+        </div>
+      </section>
     );
   }
   return <p key={block.id}>{block.body || "Texto vazio."}</p>;
@@ -460,9 +475,9 @@ export default function AdminLorePage() {
                       {Object.entries(blockLabels).map(([type, label]) => <option key={type} value={type}>{label}</option>)}
                     </select>
                   </label>
-                  {block.type === "heading" ? (
+                  {block.type === "heading" || block.type === "media" ? (
                     <label>
-                      Titulo da secao
+                      {block.type === "media" ? "Titulo do bloco" : "Titulo da secao"}
                       <input value={block.title || ""} onChange={(event) => updateBlock(blockIndex, { title: event.target.value })} />
                     </label>
                   ) : null}
@@ -472,7 +487,7 @@ export default function AdminLorePage() {
                       <textarea value={block.body || ""} onChange={(event) => updateBlock(blockIndex, { body: event.target.value })} placeholder={block.type === "list" ? "Uma linha por item" : ""} />
                     </label>
                   ) : null}
-                  {block.type === "image" ? (
+                  {block.type === "image" || block.type === "media" ? (
                     <>
                       <label>
                         URL da imagem
@@ -485,9 +500,9 @@ export default function AdminLorePage() {
                       <label>
                         Posicao
                         <select value={block.align || "full"} onChange={(event) => updateBlock(blockIndex, { align: event.target.value as LoreContentBlock["align"] })}>
-                          <option value="full">Largura total</option>
-                          <option value="left">Esquerda</option>
-                          <option value="right">Direita</option>
+                          {block.type === "image" ? <option value="full">Largura total</option> : null}
+                          <option value="left">Imagem na esquerda</option>
+                          <option value="right">Imagem na direita</option>
                         </select>
                       </label>
                     </>

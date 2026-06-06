@@ -38,6 +38,20 @@ function renderLoreBlock(block: LoreContentBlock) {
       </figure>
     );
   }
+  if (block.type === "media") {
+    return (
+      <section key={block.id} className={`wiki-block-media ${block.align === "right" ? "right" : "left"}`}>
+        <figure>
+          {block.image_url ? <img src={block.image_url} alt={block.caption || block.title || "Imagem da wiki"} /> : null}
+          {block.caption ? <figcaption>{block.caption}</figcaption> : null}
+        </figure>
+        <div>
+          {block.title ? <h2>{block.title}</h2> : null}
+          <p>{block.body}</p>
+        </div>
+      </section>
+    );
+  }
   return <p key={block.id}>{block.body}</p>;
 }
 

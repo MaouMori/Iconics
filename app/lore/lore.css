@@ -272,6 +272,57 @@ body {
   padding: 10px 12px;
 }
 
+.wiki-block-media {
+  clear: both;
+  display: grid;
+  grid-template-columns: minmax(220px, 38%) minmax(0, 1fr);
+  gap: 22px;
+  align-items: center;
+  margin: 8px 0 22px;
+  padding: 16px;
+  border: 1px solid rgba(255,255,255,.1);
+  background: rgba(255,255,255,.035);
+  border-radius: 8px;
+}
+
+.wiki-block-media.right {
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 38%);
+}
+
+.wiki-block-media.right figure {
+  order: 2;
+}
+
+.wiki-block-media figure {
+  margin: 0;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.09);
+  background: rgba(0,0,0,.18);
+}
+
+.wiki-block-media img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+}
+
+.wiki-block-media figcaption {
+  color: var(--wiki-muted);
+  font-size: .84rem;
+  line-height: 1.5;
+  padding: 9px 10px;
+}
+
+.wiki-block-media h2 {
+  margin-top: 0;
+}
+
+.wiki-block-media p:last-child {
+  margin-bottom: 0;
+}
+
 .wiki-infobox {
   border: 1px solid rgba(255,255,255,.1);
   background: var(--wiki-panel-soft);
@@ -349,5 +400,14 @@ body {
     float: none;
     width: 100%;
     margin: 4px 0 18px;
+  }
+
+  .wiki-block-media,
+  .wiki-block-media.right {
+    grid-template-columns: 1fr;
+  }
+
+  .wiki-block-media.right figure {
+    order: 0;
   }
 }
