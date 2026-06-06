@@ -23,7 +23,13 @@ function renderLegacyContent(content: string) {
     });
 }
 
-function renderLoreBlock(block: LoreContentBlock) {
+type LightboxImage = {
+  src: string;
+  alt: string;
+  caption?: string;
+};
+
+function renderLoreBlock(block: LoreContentBlock, openImage: (image: LightboxImage) => void) {
   if (block.type === "heading") return <h2 key={block.id}>{block.title || "Secao"}</h2>;
   if (block.type === "quote") return <blockquote key={block.id}>{block.body}</blockquote>;
   if (block.type === "list") {
@@ -33,7 +39,15 @@ function renderLoreBlock(block: LoreContentBlock) {
   if (block.type === "image") {
     return (
       <figure key={block.id} className={`wiki-block-image ${block.align || "full"}`}>
-        {block.image_url ? <img src={block.image_url} alt={block.caption || "Imagem da wiki"} /> : null}
+        {block.image_url ? (
+          <button
+            type="button"
+            className="wiki-image-button"
+            onClick={() => openImage({ src: block.image_url || "", alt: block.caption || "Imagem da wiki", caption: block.caption })}
+          >
+            <img src={block.image_url} alt={block.caption || "Imagem da wiki"} />
+          </button>
+        ) : null}
         {block.caption ? <figcaption>{block.caption}</figcaption> : null}
       </figure>
     );
@@ -42,7 +56,15 @@ function renderLoreBlock(block: LoreContentBlock) {
     return (
       <section key={block.id} className={`wiki-block-media ${block.align === "right" ? "right" : "left"}`}>
         <figure>
-          {block.image_url ? <img src={block.image_url} alt={block.caption || block.title || "Imagem da wiki"} /> : null}
+          {block.image_url ? (
+            <button
+              type="button"
+              className="wiki-image-button"
+              onClick={() => openImage({ src: block.image_url || "", alt: block.caption || block.title || "Imagem da wiki", caption: block.caption })}
+            >
+              <img src={block.image_url} alt={block.caption || block.title || "Imagem da wiki"} />
+            </button>
+          ) : null}
           {block.caption ? <figcaption>{block.caption}</figcaption> : null}
         </figure>
         <div>
@@ -60,6 +82,7 @@ export default function LorePage() {
   const [categories, setCategories] = useState<LoreCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedSlug, setSelectedSlug] = useState("");
+  const [lightbox, setLightbox] = useState<LightboxImage | null>(null);
 
   useEffect(() => {
     async function loadLore() {
@@ -101,8 +124,10 @@ export default function LorePage() {
 
       <main className="wiki-page-shell">
         <header className="wiki-hero">
-          <p>Arquivo da Fraternidade</p>
-          <h1>Wiki ICONICS</h1>
+          <div>
+            <p>Arquivo da Fraternidade</p>
+            <h1>Wiki ICONICS</h1>
+          </div>
           <span>Lore, casos, personagens, datas, relacoes e registros internos em formato de enciclopedia.</span>
         </header>
 
@@ -142,15 +167,29 @@ export default function LorePage() {
                     {selected.category} / {LORE_KIND_LABELS[selected.kind || "lore"]}
                   </p>
                   <h2>{selected.title}</h2>
+                  <nav className="wiki-page-tabs" aria-label="Acoes da pagina">
+                    <span>Artigo</span>
+                    <span>Discussao</span>
+                    <span>Editar</span>
+                    <span>Historico</span>
+                  </nav>
                   <p className="wiki-summary">{selected.summary}</p>
                   <div className="wiki-content">
-                    {selected.blocks?.length ? selected.blocks.map(renderLoreBlock) : renderLegacyContent(selected.content)}
+                    {selected.blocks?.length
+                      ? selected.blocks.map((block) => renderLoreBlock(block, setLightbox))
+                      : renderLegacyContent(selected.content)}
                   </div>
                 </div>
 
                 <aside className="wiki-infobox">
                   {selected.image_url ? (
-                    <img src={selected.image_url} alt={selected.title} />
+                    <button
+                      type="button"
+                      className="wiki-image-button"
+                      onClick={() => setLightbox({ src: selected.image_url || "", alt: selected.title, caption: selected.title })}
+                    >
+                      <img src={selected.image_url} alt={selected.title} />
+                    </button>
                   ) : (
                     <div className="wiki-emblem">IO</div>
                   )}
@@ -171,6 +210,16 @@ export default function LorePage() {
           </section>
         )}
       </main>
+
+      {lightbox ? (
+        <div className="wiki-lightbox" role="dialog" aria-modal="true" onClick={() => setLightbox(null)}>
+          <button type="button" className="wiki-lightbox-close" onClick={() => setLightbox(null)}>Fechar</button>
+          <figure onClick={(event) => event.stopPropagation()}>
+            <img src={lightbox.src} alt={lightbox.alt} />
+            {lightbox.caption ? <figcaption>{lightbox.caption}</figcaption> : null}
+          </figure>
+        </div>
+      ) : null}
     </>
   );
 }
