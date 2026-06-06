@@ -116,6 +116,7 @@ button,input,textarea{font:inherit}
   left:50%;
   transform:translateX(-50%);
   z-index:50;
+  width:min(96vw, 1100px);
 }
 
 .navbar{
@@ -128,7 +129,8 @@ button,input,textarea{font:inherit}
   background:rgba(10,8,18,.72);
   backdrop-filter:blur(16px);
   box-shadow:0 0 40px rgba(91,33,182,.18);
-  max-width:96vw;
+  width:100%;
+  max-width:100%;
   overflow-x:auto;
   overflow-y:hidden;
   scrollbar-width:none;
@@ -2566,6 +2568,7 @@ button,input,textarea{font:inherit}
   gap: 18px;
   flex-wrap: nowrap;
   justify-content: center;
+  width: 100%;
 }
 
 @media (max-width: 960px) {

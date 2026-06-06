@@ -256,7 +256,7 @@ export default function TopBar({
         left: "50%",
         transform: "translateX(-50%)",
         zIndex: 100,
-        width: "min(96vw, 920px)",
+        width: "min(96vw, 1100px)",
       }}
     >
       <nav
