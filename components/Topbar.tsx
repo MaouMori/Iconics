@@ -179,11 +179,13 @@ export default function TopBar({
       { label: "Revisao", href: "/missoes/revisao", icon: "V" },
     ];
     const coreItems = [
+      { label: "Noticias", href: "/noticias", icon: "N" },
       { label: "Wiki", href: "/lore", icon: "W" },
       { label: "Mansao", href: "/mansao", icon: "I" },
       { label: "Calendario", href: "/calendario", icon: "D" },
       { label: "Parcerias", href: "/parcerias", icon: "L" },
     ].filter((item) => {
+      if (item.href.startsWith("/noticias")) return isEnabled("noticias");
       if (item.href.startsWith("/lore")) return isEnabled("lore");
       if (item.href.startsWith("/mansao")) return isEnabled("mansao");
       if (item.href.startsWith("/calendario")) return isEnabled("calendario");
@@ -316,6 +318,10 @@ export default function TopBar({
 
         {isEnabled("rankings") && <Link href="/rankings" style={linkStyle}>
           Rankings
+        </Link>}
+
+        {isEnabled("noticias") && <Link href="/noticias" style={linkStyle}>
+          Noticias
         </Link>}
 
         {isEnabled("lore") && <Link href="/lore" style={linkStyle}>

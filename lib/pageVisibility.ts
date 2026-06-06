@@ -12,6 +12,7 @@ export const PAGE_VISIBILITY_SETTINGS_KEY = "page_visibility";
 
 export const MANAGED_SITE_PAGES: ManagedSitePage[] = [
   { key: "home", label: "Home", path: "/", description: "Pagina inicial publica.", match: "exact" },
+  { key: "noticias", label: "Noticias", path: "/noticias", description: "Portal publico de noticias da Iconics.", match: "prefix" },
   { key: "recrutamento", label: "Formulario", path: "/recrutamento", description: "Formulario publico de recrutamento.", match: "exact" },
   { key: "lore", label: "Wiki / Lore", path: "/lore", description: "Wiki publica da Iconics.", match: "prefix" },
   { key: "mansao", label: "Mansao", path: "/mansao", description: "Mapa e pagina da mansao.", match: "exact" },

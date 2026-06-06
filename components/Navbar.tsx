@@ -73,6 +73,7 @@ export default function Navbar() {
         </div>
 
         {isEnabled("recrutamento") && <a href="#formulario" className="nav-link">Formulário</a>}
+        {isEnabled("noticias") && <Link href="/noticias" className="nav-link">Notícias</Link>}
         {isEnabled("lore") && <Link href="/lore" className="nav-link">Wiki</Link>}
         {isEnabled("mansao") && <Link href="/mansao" className="nav-link">Mansão</Link>}
         {isEnabled("parcerias") && <Link href="/parcerias" className="nav-link">Parcerias</Link>}
