@@ -54,8 +54,39 @@ export const DEFAULT_NEWS_ITEMS: NewsItem[] = [
       "As proximas semanas devem trazer novos eventos, atualizacoes no painel e publicacoes especiais na wiki.",
     ],
     contentBlocks: [
-      { id: "bloco-ciclo-1", type: "text", body: "A ICONICS iniciou uma nova fase de organizacao interna com foco em presenca, lore e participacao dos membros." },
-      { id: "bloco-ciclo-2", type: "text", body: "Segundo a administracao, o objetivo e transformar acontecimentos da cidade em registros oficiais da fraternidade." },
+      {
+        id: "bloco-ciclo-1",
+        type: "text",
+        body: "A nova fase da ICONICS nasce com uma proposta simples: transformar rotina em registro e presenca em legado. A diretoria afirma que a irmandade passa a organizar comunicados, missoes e acontecimentos em um fluxo mais constante, aproximando membros antigos e novos integrantes.",
+      },
+      {
+        id: "bloco-ciclo-2",
+        type: "media",
+        title: "Arquivo vivo",
+        body: "O painel administrativo ganha papel central nessa mudanca. Noticias, lore, paginas publicas e registros de atividade passam a ser tratados como parte de um arquivo vivo, onde cada atualizacao ajuda a contar a historia da fraternidade.",
+        image: "/images/lore.png",
+        imageAlt: "Arquivo roxo da lore da Iconics",
+        caption: "A wiki e o portal de noticias passam a caminhar juntos.",
+        align: "right",
+      },
+      {
+        id: "bloco-ciclo-3",
+        type: "callout",
+        body: "Mais do que crescer, a ICONICS quer deixar marcas reconheciveis em cada canto da cidade.",
+      },
+      {
+        id: "bloco-ciclo-4",
+        type: "titled_text",
+        title: "Proximos passos",
+        body: "Entre as proximas entregas estao novas publicacoes editoriais, melhorias no ranking, paginas especiais de parceiros e eventos com registro publico. A meta e fazer com que cada membro encontre um caminho claro para participar.",
+      },
+      {
+        id: "bloco-ciclo-5",
+        type: "image",
+        image: "/images/portal_scene_main.png",
+        imageAlt: "Portal roxo da Iconics",
+        caption: "A expansao tambem reforca a identidade visual sombria da fraternidade.",
+      },
     ],
     author: "Redacao Iconics",
     location: "Arquivo da Fraternidade",
@@ -84,6 +115,41 @@ export const DEFAULT_NEWS_ITEMS: NewsItem[] = [
     image: "/images/mission-guild-hall-bg.png",
     imageAlt: "Sala escura de guilda com luz roxa",
     caption: "Ambiente das missoes representa a base operacional da fraternidade.",
+    contentBlocks: [
+      {
+        id: "missoes-1",
+        type: "text",
+        body: "O novo sistema de missoes foi implementado com o objetivo de incentivar os membros a participarem ativamente da fraternidade, completarem desafios e conquistarem recompensas exclusivas.",
+      },
+      {
+        id: "missoes-2",
+        type: "media",
+        title: "Como funciona",
+        body: "As missoes sao organizadas por niveis e categorias, permitindo que cada membro escolha onde deseja focar seus esforcos. O progresso pode ser acompanhado diretamente no painel, com atualizacoes em tempo real e recompensas desbloqueaveis.",
+        image: "/images/mission-parchment-large.png",
+        imageAlt: "Pergaminho de missoes da Iconics",
+        caption: "Cada missao representa uma etapa dentro da jornada interna.",
+        align: "right",
+      },
+      {
+        id: "missoes-3",
+        type: "callout",
+        body: "Esse e mais que um sistema. E sobre proposito, presenca e legado.",
+      },
+      {
+        id: "missoes-4",
+        type: "image",
+        image: "/images/mission-guild-hall-bg.png",
+        imageAlt: "Sala de missoes iluminada em roxo",
+        caption: "A sala de missoes simboliza a organizacao dos membros ativos.",
+      },
+      {
+        id: "missoes-5",
+        type: "titled_text",
+        title: "Recompensas",
+        body: "Ao concluir missoes, os membros acumulam pontos que podem ser trocados por beneficios unicos, cargos especiais, acesso a areas exclusivas, itens raros e destaque no ranking interno.",
+      },
+    ],
     published: true,
     order: 1,
   },
@@ -103,6 +169,35 @@ export const DEFAULT_NEWS_ITEMS: NewsItem[] = [
     image: "/images/lore.png",
     imageAlt: "Arte da lore da Iconics",
     caption: "Arquivo de lore guarda a memoria narrativa da fraternidade.",
+    contentBlocks: [
+      {
+        id: "wiki-1",
+        type: "text",
+        body: "A Wiki ICONICS foi criada para funcionar como uma enciclopedia interna e publica. Nela, personagens, casos, lugares, datas e relacoes podem ser organizados em paginas com ficha, imagens e secoes narrativas.",
+      },
+      {
+        id: "wiki-2",
+        type: "media",
+        title: "Categorias e casos",
+        body: "A estrutura permite separar lore, investigacoes, eventos, membros importantes e registros de cidade. Cada pagina pode ganhar imagem de destaque, campos personalizados e blocos de texto com visual editorial.",
+        image: "/images/iconics_emblem_main.png",
+        imageAlt: "Emblema da Iconics",
+        caption: "O emblema marca paginas oficiais do arquivo.",
+        align: "left",
+      },
+      {
+        id: "wiki-3",
+        type: "callout",
+        body: "Toda memoria precisa de um lugar para existir. A wiki e esse lugar.",
+      },
+      {
+        id: "wiki-4",
+        type: "image",
+        image: "/images/valores.png",
+        imageAlt: "Valores da Iconics",
+        caption: "Valores e simbolos tambem podem virar registros permanentes.",
+      },
+    ],
     published: true,
     order: 2,
   },
@@ -122,6 +217,35 @@ export const DEFAULT_NEWS_ITEMS: NewsItem[] = [
     image: "/images/mansao.png",
     imageAlt: "Imagem da mansao Iconics",
     caption: "Mansao aparece como uma das paginas centrais do site.",
+    contentBlocks: [
+      {
+        id: "mansao-1",
+        type: "text",
+        body: "A mansao foi organizada como ponto central para receber membros, visitantes e aliados. O novo mapa ajuda a localizar entradas, areas de encontro e pontos importantes da sede.",
+      },
+      {
+        id: "mansao-2",
+        type: "media",
+        title: "Mapa interativo",
+        body: "A pagina da mansao permite consultar locais internos sem depender de explicacoes soltas. A ideia e facilitar eventos, reunioes e recepcao de novos convidados.",
+        image: "/images/mapa-cidade-fivem.png",
+        imageAlt: "Mapa da cidade",
+        caption: "O mapa serve como guia para quem chega pela primeira vez.",
+        align: "right",
+      },
+      {
+        id: "mansao-3",
+        type: "callout",
+        body: "Toda fraternidade precisa de um centro. A mansao e o ponto onde a presenca se torna encontro.",
+      },
+      {
+        id: "mansao-4",
+        type: "image",
+        image: "/images/mansao.png",
+        imageAlt: "Mansao da Iconics",
+        caption: "A sede representa o lado publico da irmandade.",
+      },
+    ],
     published: true,
     order: 3,
   },
@@ -141,6 +265,34 @@ export const DEFAULT_NEWS_ITEMS: NewsItem[] = [
     image: "/images/portal_scene_secondary.png",
     imageAlt: "Cena roxa de portal",
     caption: "Parcerias reforcam a rede publica da ICONICS.",
+    contentBlocks: [
+      {
+        id: "parcerias-1",
+        type: "text",
+        body: "A area de parcerias foi criada para dar visibilidade a comunidades, marcas e aliados que caminham junto da ICONICS. Cada parceiro pode ter pagina propria, imagem, descricao e links oficiais.",
+      },
+      {
+        id: "parcerias-2",
+        type: "media",
+        title: "Vitrine publica",
+        body: "A vitrine permite que visitantes conhecam rapidamente quem faz parte da rede. Para a administracao, o recurso tambem ajuda a manter acordos organizados e sempre acessiveis.",
+        image: "/images/portal_scene_main.png",
+        imageAlt: "Portal roxo da rede de aliados",
+        caption: "A rede de aliados ganha espaco fixo no site.",
+        align: "left",
+      },
+      {
+        id: "parcerias-3",
+        type: "titled_text",
+        title: "Paginas individuais",
+        body: "Quando uma parceria e publicada, ela pode receber conteudo proprio, beneficios, descricao detalhada e canais de contato. Isso transforma a pagina em um cartao publico permanente.",
+      },
+      {
+        id: "parcerias-4",
+        type: "callout",
+        body: "Parceria boa nao fica escondida. Ela vira parte da historia publica da fraternidade.",
+      },
+    ],
     published: true,
     order: 4,
   },
@@ -180,6 +332,11 @@ export function normalizeNewsItem(item: Partial<NewsItem>, index = 0): NewsItem 
       if (block.type === "media") return Boolean(block.image || block.body || block.title);
       return Boolean(block.body || block.title);
     });
+  const defaultNews = DEFAULT_NEWS_ITEMS.find((defaultItem) => defaultItem.slug === slug);
+  const defaultBlocks = defaultNews?.contentBlocks || [];
+  const normalizedContentBlocks = rawBlocks.length === 0 && defaultBlocks.length > 0
+    ? defaultBlocks
+    : contentBlocks;
 
   return {
     id: String(item.id || slug),
@@ -188,8 +345,8 @@ export function normalizeNewsItem(item: Partial<NewsItem>, index = 0): NewsItem 
     title,
     subtitle: String(item.subtitle || "Subtitulo da noticia.").trim(),
     summary: summary.length > 0 ? summary : ["Resumo da noticia."],
-    contentBlocks: contentBlocks.length > 0
-      ? contentBlocks
+    contentBlocks: normalizedContentBlocks.length > 0
+      ? normalizedContentBlocks
       : (summary.length > 0 ? summary : ["Resumo da noticia."]).map((line, blockIndex) => ({
         id: `summary-${index}-${blockIndex}`,
         type: "text",
