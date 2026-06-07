@@ -3,7 +3,7 @@
 import AdminShell from "@/components/AdminShell";
 import Spinner from "@/components/Spinner";
 import Toast from "@/components/Toast";
-import { NewsItem, normalizeNewsSlug } from "@/lib/newsData";
+import { NewsContentBlock, NewsItem, normalizeNewsSlug } from "@/lib/newsData";
 import { hasAdminAccess, normalizeRole } from "@/lib/roles";
 import { supabase } from "@/lib/supabase";
 import { useEffect, useState } from "react";
@@ -17,6 +17,13 @@ function createNews(existing: NewsItem[]): NewsItem {
     title: "Nova noticia da Iconics",
     subtitle: "Escreva uma chamada curta para aparecer abaixo do titulo.",
     summary: ["Primeiro paragrafo ou resumo da noticia."],
+    contentBlocks: [
+      {
+        id: `block-${Date.now()}`,
+        type: "text",
+        body: "Escreva o primeiro paragrafo da noticia aqui.",
+      },
+    ],
     author: "Redacao Iconics",
     location: "Arquivo da Fraternidade",
     time: "Agora",
@@ -27,6 +34,17 @@ function createNews(existing: NewsItem[]): NewsItem {
     urgent: false,
     published: true,
     order: existing.length,
+  };
+}
+
+function createNewsBlock(type: NewsContentBlock["type"]): NewsContentBlock {
+  return {
+    id: `block-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+    type,
+    body: type === "text" ? "Novo paragrafo da noticia." : "",
+    image: type === "image" ? "/images/iconics_emblem_main.png" : "",
+    imageAlt: "",
+    caption: "",
   };
 }
 
@@ -143,6 +161,35 @@ export default function AdminNoticiasPage() {
         featured: itemIndex === index ? checked : checked ? false : item.featured,
       }))
     );
+  }
+
+  function updateBlock(blockIndex: number, patch: Partial<NewsContentBlock>) {
+    if (!selected) return;
+    const contentBlocks = [...(selected.contentBlocks || [])];
+    contentBlocks[blockIndex] = { ...contentBlocks[blockIndex], ...patch };
+    updateNews(selectedIndex, { contentBlocks });
+  }
+
+  function addBlock(type: NewsContentBlock["type"]) {
+    if (!selected) return;
+    updateNews(selectedIndex, { contentBlocks: [...(selected.contentBlocks || []), createNewsBlock(type)] });
+  }
+
+  function removeBlock(blockIndex: number) {
+    if (!selected) return;
+    updateNews(selectedIndex, {
+      contentBlocks: (selected.contentBlocks || []).filter((_, index) => index !== blockIndex),
+    });
+  }
+
+  function moveBlock(blockIndex: number, direction: -1 | 1) {
+    if (!selected) return;
+    const target = blockIndex + direction;
+    const contentBlocks = [...(selected.contentBlocks || [])];
+    if (target < 0 || target >= contentBlocks.length) return;
+    const [item] = contentBlocks.splice(blockIndex, 1);
+    contentBlocks.splice(target, 0, item);
+    updateNews(selectedIndex, { contentBlocks });
   }
 
   async function saveNews() {
@@ -270,7 +317,7 @@ export default function AdminNoticiasPage() {
                 <textarea value={selected.subtitle} onChange={(event) => updateNews(selectedIndex, { subtitle: event.target.value })} />
               </label>
               <label className="wide">
-                Resumo e corpo da materia
+                Resumo da materia
                 <textarea
                   value={(selected.summary || []).join("\n")}
                   onChange={(event) => updateNews(selectedIndex, {
@@ -291,18 +338,81 @@ export default function AdminNoticiasPage() {
                 Legenda
                 <input value={selected.caption} onChange={(event) => updateNews(selectedIndex, { caption: event.target.value })} />
               </label>
-              <label className="lore-check">
-                <input type="checkbox" checked={selected.published !== false} onChange={(event) => updateNews(selectedIndex, { published: event.target.checked })} />
-                Publicar
-              </label>
-              <label className="lore-check">
-                <input type="checkbox" checked={Boolean(selected.featured)} onChange={(event) => setFeatured(selectedIndex, event.target.checked)} />
-                Manchete principal
-              </label>
-              <label className="lore-check">
-                <input type="checkbox" checked={Boolean(selected.urgent)} onChange={(event) => updateNews(selectedIndex, { urgent: event.target.checked })} />
-                Destaque urgente
-              </label>
+              <div className="news-toggle-row wide">
+                <button
+                  type="button"
+                  className={`news-toggle ${selected.published !== false ? "active" : ""}`}
+                  onClick={() => updateNews(selectedIndex, { published: selected.published === false })}
+                >
+                  <span>{selected.published !== false ? "Ativo" : "Off"}</span>
+                  Publicar
+                </button>
+                <button
+                  type="button"
+                  className={`news-toggle ${selected.featured ? "active" : ""}`}
+                  onClick={() => setFeatured(selectedIndex, !selected.featured)}
+                >
+                  <span>{selected.featured ? "Sim" : "Nao"}</span>
+                  Manchete principal
+                </button>
+                <button
+                  type="button"
+                  className={`news-toggle ${selected.urgent ? "active" : ""}`}
+                  onClick={() => updateNews(selectedIndex, { urgent: !selected.urgent })}
+                >
+                  <span>{selected.urgent ? "Sim" : "Nao"}</span>
+                  Destaque urgente
+                </button>
+              </div>
+            </div>
+
+            <div className="lore-block-toolbar">
+              <strong>Conteudo da noticia</strong>
+              <button onClick={() => addBlock("text")}>Adicionar texto</button>
+              <button onClick={() => addBlock("image")}>Adicionar imagem</button>
+            </div>
+
+            <div className="lore-block-list">
+              {(selected.contentBlocks || []).map((block, blockIndex) => (
+                <section key={block.id} className="lore-block-card">
+                  <header>
+                    <strong>{block.type === "image" ? "Imagem" : "Texto"}</strong>
+                    <div>
+                      <button onClick={() => moveBlock(blockIndex, -1)}>Up</button>
+                      <button onClick={() => moveBlock(blockIndex, 1)}>Down</button>
+                      <button className="danger" onClick={() => removeBlock(blockIndex)}>X</button>
+                    </div>
+                  </header>
+                  <label>
+                    Tipo
+                    <select value={block.type} onChange={(event) => updateBlock(blockIndex, { type: event.target.value as NewsContentBlock["type"] })}>
+                      <option value="text">Texto</option>
+                      <option value="image">Imagem</option>
+                    </select>
+                  </label>
+                  {block.type === "text" ? (
+                    <label>
+                      Texto
+                      <textarea value={block.body || ""} onChange={(event) => updateBlock(blockIndex, { body: event.target.value })} />
+                    </label>
+                  ) : (
+                    <>
+                      <label>
+                        URL da imagem
+                        <input value={block.image || ""} onChange={(event) => updateBlock(blockIndex, { image: event.target.value })} />
+                      </label>
+                      <label>
+                        Texto alternativo
+                        <input value={block.imageAlt || ""} onChange={(event) => updateBlock(blockIndex, { imageAlt: event.target.value })} />
+                      </label>
+                      <label>
+                        Legenda
+                        <input value={block.caption || ""} onChange={(event) => updateBlock(blockIndex, { caption: event.target.value })} />
+                      </label>
+                    </>
+                  )}
+                </section>
+              ))}
             </div>
           </article>
         ) : (
@@ -323,7 +433,16 @@ export default function AdminNoticiasPage() {
               <div><dt>Slug</dt><dd>{selected.slug}</dd></div>
             </dl>
             <div className="lore-preview-content">
-              {(selected.summary || []).map((line) => <p key={line}>{line}</p>)}
+              {(selected.contentBlocks || []).map((block) => (
+                block.type === "image" ? (
+                  <figure key={block.id} className="wiki-preview-image full">
+                    {block.image ? <img src={block.image} alt={block.imageAlt || selected.title} /> : <div>Imagem</div>}
+                    {block.caption ? <figcaption>{block.caption}</figcaption> : null}
+                  </figure>
+                ) : (
+                  <p key={block.id}>{block.body}</p>
+                )
+              ))}
             </div>
           </aside>
         ) : null}

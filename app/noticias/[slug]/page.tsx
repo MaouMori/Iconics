@@ -48,8 +48,15 @@ export default async function NoticiaDetalhePage({ params }: { params: Promise<{
             <figcaption style={captionStyle}>{news.caption}</figcaption>
           </figure>
 
-          {news.summary.map((paragraph) => (
-            <p key={paragraph} style={paragraphStyle}>{paragraph}</p>
+          {(news.contentBlocks || []).map((block) => (
+            block.type === "image" ? (
+              <figure key={block.id} style={figureStyle}>
+                <img src={block.image || news.image} alt={block.imageAlt || news.title} style={heroImageStyle} />
+                {block.caption ? <figcaption style={captionStyle}>{block.caption}</figcaption> : null}
+              </figure>
+            ) : (
+              <p key={block.id} style={paragraphStyle}>{block.body}</p>
+            )
           ))}
 
           <p style={paragraphStyle}>

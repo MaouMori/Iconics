@@ -1,3 +1,12 @@
+export type NewsContentBlock = {
+  id: string;
+  type: "text" | "image";
+  body?: string;
+  image?: string;
+  imageAlt?: string;
+  caption?: string;
+};
+
 export type NewsItem = {
   id?: string;
   slug: string;
@@ -5,6 +14,7 @@ export type NewsItem = {
   title: string;
   subtitle: string;
   summary: string[];
+  contentBlocks?: NewsContentBlock[];
   author: string;
   location: string;
   time: string;
@@ -40,6 +50,10 @@ export const DEFAULT_NEWS_ITEMS: NewsItem[] = [
       "A ICONICS iniciou uma nova fase de organizacao interna com foco em presenca, lore e participacao dos membros.",
       "Segundo a administracao, o objetivo e transformar acontecimentos da cidade em registros oficiais da fraternidade.",
       "As proximas semanas devem trazer novos eventos, atualizacoes no painel e publicacoes especiais na wiki.",
+    ],
+    contentBlocks: [
+      { id: "bloco-ciclo-1", type: "text", body: "A ICONICS iniciou uma nova fase de organizacao interna com foco em presenca, lore e participacao dos membros." },
+      { id: "bloco-ciclo-2", type: "text", body: "Segundo a administracao, o objetivo e transformar acontecimentos da cidade em registros oficiais da fraternidade." },
     ],
     author: "Redacao Iconics",
     location: "Arquivo da Fraternidade",
@@ -139,6 +153,20 @@ export function normalizeNewsItem(item: Partial<NewsItem>, index = 0): NewsItem 
       .split("\n")
       .map((line) => line.trim())
       .filter(Boolean);
+  const rawBlocks = Array.isArray(item.contentBlocks) ? item.contentBlocks : [];
+  const contentBlocks: NewsContentBlock[] = rawBlocks
+    .map((block, blockIndex) => {
+      const type: NewsContentBlock["type"] = block?.type === "image" ? "image" : "text";
+      return {
+        id: String(block?.id || `block-${index}-${blockIndex}`),
+        type,
+        body: String(block?.body || "").trim(),
+        image: String(block?.image || "").trim(),
+        imageAlt: String(block?.imageAlt || "").trim(),
+        caption: String(block?.caption || "").trim(),
+      };
+    })
+    .filter((block) => block.type === "image" ? Boolean(block.image) : Boolean(block.body));
 
   return {
     id: String(item.id || slug),
@@ -147,6 +175,13 @@ export function normalizeNewsItem(item: Partial<NewsItem>, index = 0): NewsItem 
     title,
     subtitle: String(item.subtitle || "Subtitulo da noticia.").trim(),
     summary: summary.length > 0 ? summary : ["Resumo da noticia."],
+    contentBlocks: contentBlocks.length > 0
+      ? contentBlocks
+      : (summary.length > 0 ? summary : ["Resumo da noticia."]).map((line, blockIndex) => ({
+        id: `summary-${index}-${blockIndex}`,
+        type: "text",
+        body: line,
+      })),
     author: String(item.author || "Redacao Iconics").trim(),
     location: String(item.location || "Arquivo da Fraternidade").trim(),
     time: String(item.time || "Agora").trim(),
