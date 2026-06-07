@@ -1,6 +1,7 @@
 import Link from "next/link";
 import TopBar from "@/components/Topbar";
 import PartnersBar from "@/components/PartnersBar";
+import NewsFeedClient from "@/components/NewsFeedClient";
 import { getPublishedNews } from "@/lib/newsData";
 import { loadNewsItems } from "@/lib/newsStore";
 
@@ -70,19 +71,7 @@ export default async function NoticiasPage() {
         </section>
 
         <section style={contentGridStyle}>
-          <div style={feedStyle}>
-            {listNews.map((item) => (
-              <Link key={item.slug} href={`/noticias/${item.slug}`} style={feedItemStyle}>
-                <img src={item.image} alt={item.imageAlt} style={feedImageStyle} />
-                <div>
-                  <span style={feedKickerStyle}>{item.category}</span>
-                  <h2 style={feedTitleStyle}>{item.title}</h2>
-                  <p style={feedTextStyle}>{item.subtitle}</p>
-                  <small style={feedMetaStyle}>{item.time} - {item.location}</small>
-                </div>
-              </Link>
-            ))}
-          </div>
+          <NewsFeedClient items={listNews} />
 
           <aside style={asideStyle}>
             <h2 style={asideTitleStyle}>Viu isso?</h2>
@@ -248,50 +237,6 @@ const contentGridStyle: React.CSSProperties = {
   display: "grid",
   gridTemplateColumns: "minmax(0, 1fr) 340px",
   gap: 28,
-};
-
-const feedStyle: React.CSSProperties = {
-  display: "grid",
-  gap: 0,
-};
-
-const feedItemStyle: React.CSSProperties = {
-  display: "grid",
-  gridTemplateColumns: "320px minmax(0, 1fr)",
-  gap: 22,
-  padding: "26px 0",
-  borderTop: "1px solid rgba(255,255,255,.14)",
-  color: "#fff",
-  textDecoration: "none",
-};
-
-const feedImageStyle: React.CSSProperties = {
-  width: "100%",
-  aspectRatio: "16 / 9",
-  objectFit: "cover",
-  borderRadius: 8,
-  border: "1px solid rgba(192,132,252,.22)",
-};
-
-const feedKickerStyle: React.CSSProperties = {
-  color: "#c4b5fd",
-  fontWeight: 900,
-};
-
-const feedTitleStyle: React.CSSProperties = {
-  margin: "8px 0",
-  color: "#d946ef",
-  fontSize: 30,
-  lineHeight: 1.04,
-};
-
-const feedTextStyle: React.CSSProperties = {
-  color: "#d8cceb",
-  fontSize: 16,
-};
-
-const feedMetaStyle: React.CSSProperties = {
-  color: "#a78bfa",
 };
 
 const asideStyle: React.CSSProperties = {
