@@ -18,6 +18,7 @@ export default async function NoticiaDetalhePage({ params }: { params: Promise<{
   const previousNews = currentIndex > 0 ? allNews[currentIndex - 1] : allNews[allNews.length - 1];
   const nextNews = currentIndex < allNews.length - 1 ? allNews[currentIndex + 1] : allNews[0];
   const readingMinutes = Math.max(3, Math.ceil(getArticleText(news).split(/\s+/).filter(Boolean).length / 180));
+  const summaryLinks = getSummaryLinks(news);
 
   return (
     <>
@@ -60,11 +61,15 @@ export default async function NoticiaDetalhePage({ params }: { params: Promise<{
             {news.caption ? <figcaption>{news.caption}</figcaption> : null}
           </figure>
 
-          {news.summary.length > 0 ? (
+          {summaryLinks.length > 0 ? (
             <section className="news-summary-card">
-              <strong>Resumo da materia</strong>
+              <strong>Nesta materia</strong>
               <ul>
-                {news.summary.map((line) => <li key={line}>{line}</li>)}
+                {summaryLinks.map((link) => (
+                  <li key={link.id}>
+                    <a href={`#${link.id}`}>{link.title}</a>
+                  </li>
+                ))}
               </ul>
             </section>
           ) : null}
@@ -76,22 +81,6 @@ export default async function NoticiaDetalhePage({ params }: { params: Promise<{
           <section className="news-final-note">
             A cobertura segue em atualizacao conforme novos registros chegam ao arquivo da fraternidade.
           </section>
-
-          <footer className="news-article-footer">
-            <section className="news-reactions">
-              <strong>O que achou desta noticia?</strong>
-              <span>Chama 24</span>
-              <span>Coroa 17</span>
-              <span>Registro 31</span>
-              <span>Iconico 89</span>
-            </section>
-            <section className="news-footer-share">
-              <strong>Compartilhar</strong>
-              <span>Discord</span>
-              <span>Instagram</span>
-              <span>Copiar link</span>
-            </section>
-          </footer>
 
           <nav className="news-neighbor-nav" aria-label="Noticias relacionadas">
             {previousNews && previousNews.slug !== news.slug ? (
@@ -117,13 +106,15 @@ export default async function NoticiaDetalhePage({ params }: { params: Promise<{
 }
 
 function renderBlock(block: NewsContentBlock, news: NewsItem, index: number) {
+  const anchorId = getBlockAnchorId(block);
+
   if (block.type === "heading") {
-    return <h2 key={block.id} className="news-section-heading">{block.title}</h2>;
+    return <h2 key={block.id} id={anchorId} className="news-section-heading">{block.title}</h2>;
   }
 
   if (block.type === "titled_text") {
     return (
-      <section key={block.id} className="news-two-column-text">
+      <section key={block.id} id={anchorId} className="news-two-column-text">
         <h2>{block.title}</h2>
         <p>{block.body}</p>
       </section>
@@ -141,7 +132,7 @@ function renderBlock(block: NewsContentBlock, news: NewsItem, index: number) {
 
   if (block.type === "media") {
     return (
-      <section key={block.id} className={`news-media-block ${block.align === "right" ? "image-right" : "image-left"}`}>
+      <section key={block.id} id={anchorId} className={`news-media-block ${block.align === "right" ? "image-right" : "image-left"}`}>
         <div className="news-media-copy">
           {block.title ? <h2>{block.title}</h2> : null}
           {block.body ? block.body.split("\n").filter(Boolean).map((line) => <p key={line}>{line}</p>) : null}
@@ -177,6 +168,19 @@ function getArticleText(news: NewsItem) {
     ...news.summary,
     ...(news.contentBlocks || []).flatMap((block) => [block.title || "", block.body || "", block.caption || ""]),
   ].join(" ");
+}
+
+function getSummaryLinks(news: NewsItem) {
+  return (news.contentBlocks || [])
+    .filter((block) => Boolean(block.title) && ["heading", "titled_text", "media"].includes(block.type))
+    .map((block) => ({
+      id: getBlockAnchorId(block),
+      title: String(block.title),
+    }));
+}
+
+function getBlockAnchorId(block: NewsContentBlock) {
+  return `noticia-${block.id.replace(/[^a-zA-Z0-9_-]/g, "-")}`;
 }
 
 const articleCss = `
@@ -334,8 +338,9 @@ const articleCss = `
 }
 
 .news-hero-figure img {
-  max-height: 520px;
-  aspect-ratio: 16 / 7;
+  max-height: 680px;
+  object-fit: contain;
+  background: rgba(5, 2, 12, .82);
 }
 
 .news-inline-image {
@@ -377,6 +382,23 @@ const articleCss = `
 .news-summary-card li {
   margin-top: 8px;
   line-height: 1.45;
+}
+
+.news-summary-card a {
+  color: #f5d0fe;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(217, 70, 239, .42);
+}
+
+.news-summary-card a:hover {
+  color: #fff;
+  border-color: #d946ef;
+}
+
+.news-section-heading,
+.news-two-column-text,
+.news-media-block {
+  scroll-margin-top: 120px;
 }
 
 .news-content-flow {
@@ -477,32 +499,6 @@ const articleCss = `
   font-size: 18px;
 }
 
-.news-article-footer {
-  display: grid;
-  grid-template-columns: minmax(0, .9fr) minmax(0, 1fr);
-  gap: 28px;
-  margin-top: 32px;
-}
-
-.news-reactions,
-.news-footer-share {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 18px 28px;
-  align-items: center;
-  padding: 20px;
-  border: 1px solid rgba(216, 180, 254, .24);
-  background: rgba(255, 255, 255, .035);
-}
-
-.news-reactions strong,
-.news-footer-share strong {
-  width: 100%;
-  color: #c4b5fd;
-  text-transform: uppercase;
-  letter-spacing: .12em;
-}
-
 .news-neighbor-nav {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 110px minmax(0, 1fr);
@@ -547,7 +543,6 @@ const articleCss = `
   .news-two-column-text,
   .news-media-block,
   .news-media-block.image-right,
-  .news-article-footer,
   .news-neighbor-nav {
     grid-template-columns: 1fr;
   }
@@ -560,7 +555,6 @@ const articleCss = `
     justify-content: flex-start;
   }
 
-  .news-hero-figure img,
   .news-inline-image img,
   .news-media-block img {
     aspect-ratio: 16 / 10;
