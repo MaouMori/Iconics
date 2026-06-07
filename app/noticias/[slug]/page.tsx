@@ -2,15 +2,12 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import TopBar from "@/components/Topbar";
 import PartnersBar from "@/components/PartnersBar";
-import { NEWS_ITEMS, getNewsBySlug } from "@/lib/newsData";
-
-export function generateStaticParams() {
-  return NEWS_ITEMS.map((item) => ({ slug: item.slug }));
-}
+import { getNewsBySlug } from "@/lib/newsData";
+import { loadNewsItems } from "@/lib/newsStore";
 
 export default async function NoticiaDetalhePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const news = getNewsBySlug(slug);
+  const news = getNewsBySlug(await loadNewsItems(), slug);
 
   if (!news) notFound();
 
@@ -65,6 +62,8 @@ export default async function NoticiaDetalhePage({ params }: { params: Promise<{
     </>
   );
 }
+
+export const dynamic = "force-dynamic";
 
 const pageStyle: React.CSSProperties = {
   minHeight: "100vh",

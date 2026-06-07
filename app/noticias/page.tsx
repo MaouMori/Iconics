@@ -1,13 +1,31 @@
 import Link from "next/link";
 import TopBar from "@/components/Topbar";
 import PartnersBar from "@/components/PartnersBar";
-import { NEWS_ITEMS } from "@/lib/newsData";
+import { getPublishedNews } from "@/lib/newsData";
+import { loadNewsItems } from "@/lib/newsStore";
 
-const mainNews = NEWS_ITEMS.find((item) => item.featured) || NEWS_ITEMS[0];
-const sideNews = NEWS_ITEMS.filter((item) => item.slug !== mainNews.slug).slice(0, 2);
-const listNews = NEWS_ITEMS.filter((item) => item.slug !== mainNews.slug);
+export const dynamic = "force-dynamic";
 
-export default function NoticiasPage() {
+export default async function NoticiasPage() {
+  const news = getPublishedNews(await loadNewsItems());
+  const mainNews = news.find((item) => item.featured) || news[0];
+  const sideNews = news.filter((item) => item.slug !== mainNews?.slug).slice(0, 2);
+  const listNews = news.filter((item) => item.slug !== mainNews?.slug);
+
+  if (!mainNews) {
+    return (
+      <>
+        <TopBar />
+        <main style={pageStyle}>
+          <section style={leadCardStyle}>
+            <h1 style={leadTitleStyle}>Nenhuma noticia publicada</h1>
+            <p style={leadTextStyle}>Crie a primeira noticia no painel administrativo.</p>
+          </section>
+        </main>
+      </>
+    );
+  }
+
   return (
     <>
       <TopBar />
@@ -62,7 +80,7 @@ export default function NoticiasPage() {
 
           <aside style={asideStyle}>
             <h2 style={asideTitleStyle}>Viu isso?</h2>
-            {NEWS_ITEMS.slice(0, 4).map((item) => (
+            {news.slice(0, 4).map((item) => (
               <Link key={item.slug} href={`/noticias/${item.slug}`} style={asideItemStyle}>
                 <span>{item.title}</span>
                 <img src={item.image} alt="" style={asideImageStyle} />

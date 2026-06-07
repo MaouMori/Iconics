@@ -130,6 +130,12 @@ export default function AdminPage() {
           <p className="admin-card-icon">ON</p>
           <button onClick={() => router.push("/admin/paginas")}>Ativar/desativar</button>
         </article>
+
+        <article className="admin-card">
+          <h3>Noticias</h3>
+          <p className="admin-card-icon">IN</p>
+          <button onClick={() => router.push("/admin/noticias")}>Editar portal</button>
+        </article>
       </section>
 
       <section className="admin-table-wrap">
