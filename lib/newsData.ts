@@ -1,10 +1,12 @@
 export type NewsContentBlock = {
   id: string;
-  type: "text" | "image";
+  type: "text" | "heading" | "titled_text" | "image" | "media" | "callout";
+  title?: string;
   body?: string;
   image?: string;
   imageAlt?: string;
   caption?: string;
+  align?: "left" | "right";
 };
 
 export type NewsItem = {
@@ -156,17 +158,28 @@ export function normalizeNewsItem(item: Partial<NewsItem>, index = 0): NewsItem 
   const rawBlocks = Array.isArray(item.contentBlocks) ? item.contentBlocks : [];
   const contentBlocks: NewsContentBlock[] = rawBlocks
     .map((block, blockIndex) => {
-      const type: NewsContentBlock["type"] = block?.type === "image" ? "image" : "text";
+      const validTypes: NewsContentBlock["type"][] = ["text", "heading", "titled_text", "image", "media", "callout"];
+      const type = validTypes.includes(block?.type as NewsContentBlock["type"])
+        ? (block?.type as NewsContentBlock["type"])
+        : "text";
+      const align: NewsContentBlock["align"] = block?.align === "right" ? "right" : "left";
       return {
         id: String(block?.id || `block-${index}-${blockIndex}`),
         type,
+        title: String(block?.title || "").trim(),
         body: String(block?.body || "").trim(),
         image: String(block?.image || "").trim(),
         imageAlt: String(block?.imageAlt || "").trim(),
         caption: String(block?.caption || "").trim(),
+        align,
       };
     })
-    .filter((block) => block.type === "image" ? Boolean(block.image) : Boolean(block.body));
+    .filter((block) => {
+      if (block.type === "heading") return Boolean(block.title);
+      if (block.type === "image") return Boolean(block.image);
+      if (block.type === "media") return Boolean(block.image || block.body || block.title);
+      return Boolean(block.body || block.title);
+    });
 
   return {
     id: String(item.id || slug),

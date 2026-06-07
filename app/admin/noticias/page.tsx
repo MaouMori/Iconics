@@ -8,6 +8,15 @@ import { hasAdminAccess, normalizeRole } from "@/lib/roles";
 import { supabase } from "@/lib/supabase";
 import { useEffect, useState } from "react";
 
+const blockLabels: Record<NewsContentBlock["type"], string> = {
+  text: "Texto",
+  heading: "Titulo",
+  titled_text: "Texto com titulo",
+  image: "Imagem",
+  media: "Imagem + texto",
+  callout: "Texto marcado",
+};
+
 function createNews(existing: NewsItem[]): NewsItem {
   const next = existing.length + 1;
   return {
@@ -41,10 +50,12 @@ function createNewsBlock(type: NewsContentBlock["type"]): NewsContentBlock {
   return {
     id: `block-${Date.now()}-${Math.random().toString(16).slice(2)}`,
     type,
-    body: type === "text" ? "Novo paragrafo da noticia." : "",
-    image: type === "image" ? "/images/iconics_emblem_main.png" : "",
+    title: type === "heading" || type === "titled_text" || type === "media" ? "Novo titulo" : "",
+    body: type === "image" || type === "heading" ? "" : "Novo paragrafo da noticia.",
+    image: type === "image" || type === "media" ? "/images/iconics_emblem_main.png" : "",
     imageAlt: "",
     caption: "",
+    align: "left",
   };
 }
 
@@ -56,6 +67,7 @@ export default function AdminNoticiasPage() {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [saving, setSaving] = useState(false);
   const [mensagem, setMensagem] = useState("");
+  const [draggedBlockIndex, setDraggedBlockIndex] = useState<number | null>(null);
 
   const selected = items[selectedIndex] || null;
 
@@ -182,13 +194,11 @@ export default function AdminNoticiasPage() {
     });
   }
 
-  function moveBlock(blockIndex: number, direction: -1 | 1) {
-    if (!selected) return;
-    const target = blockIndex + direction;
+  function reorderBlock(fromIndex: number, toIndex: number) {
+    if (!selected || fromIndex === toIndex) return;
     const contentBlocks = [...(selected.contentBlocks || [])];
-    if (target < 0 || target >= contentBlocks.length) return;
-    const [item] = contentBlocks.splice(blockIndex, 1);
-    contentBlocks.splice(target, 0, item);
+    const [item] = contentBlocks.splice(fromIndex, 1);
+    contentBlocks.splice(toIndex, 0, item);
     updateNews(selectedIndex, { contentBlocks });
   }
 
@@ -368,18 +378,38 @@ export default function AdminNoticiasPage() {
 
             <div className="lore-block-toolbar">
               <strong>Conteudo da noticia</strong>
+              <button onClick={() => addBlock("heading")}>Adicionar titulo</button>
               <button onClick={() => addBlock("text")}>Adicionar texto</button>
+              <button onClick={() => addBlock("titled_text")}>Texto com titulo</button>
               <button onClick={() => addBlock("image")}>Adicionar imagem</button>
+              <button onClick={() => addBlock("media")}>Imagem + texto</button>
+              <button onClick={() => addBlock("callout")}>Texto marcado</button>
             </div>
 
             <div className="lore-block-list">
               {(selected.contentBlocks || []).map((block, blockIndex) => (
-                <section key={block.id} className="lore-block-card">
+                <section
+                  key={block.id}
+                  className={`lore-block-card news-draggable-block ${draggedBlockIndex === blockIndex ? "dragging" : ""}`}
+                  draggable
+                  onDragStart={(event) => {
+                    setDraggedBlockIndex(blockIndex);
+                    event.dataTransfer.effectAllowed = "move";
+                  }}
+                  onDragOver={(event) => {
+                    event.preventDefault();
+                    event.dataTransfer.dropEffect = "move";
+                  }}
+                  onDrop={(event) => {
+                    event.preventDefault();
+                    if (draggedBlockIndex !== null) reorderBlock(draggedBlockIndex, blockIndex);
+                    setDraggedBlockIndex(null);
+                  }}
+                  onDragEnd={() => setDraggedBlockIndex(null)}
+                >
                   <header>
-                    <strong>{block.type === "image" ? "Imagem" : "Texto"}</strong>
+                    <strong><span className="drag-handle">Arrastar</span>{blockLabels[block.type] || "Bloco"}</strong>
                     <div>
-                      <button onClick={() => moveBlock(blockIndex, -1)}>Up</button>
-                      <button onClick={() => moveBlock(blockIndex, 1)}>Down</button>
                       <button className="danger" onClick={() => removeBlock(blockIndex)}>X</button>
                     </div>
                   </header>
@@ -387,15 +417,26 @@ export default function AdminNoticiasPage() {
                     Tipo
                     <select value={block.type} onChange={(event) => updateBlock(blockIndex, { type: event.target.value as NewsContentBlock["type"] })}>
                       <option value="text">Texto</option>
+                      <option value="heading">Titulo</option>
+                      <option value="titled_text">Texto com titulo</option>
                       <option value="image">Imagem</option>
+                      <option value="media">Imagem + texto</option>
+                      <option value="callout">Texto marcado</option>
                     </select>
                   </label>
-                  {block.type === "text" ? (
+                  {block.type === "heading" || block.type === "titled_text" || block.type === "media" ? (
+                    <label>
+                      Titulo
+                      <input value={block.title || ""} onChange={(event) => updateBlock(blockIndex, { title: event.target.value })} />
+                    </label>
+                  ) : null}
+                  {block.type !== "image" && block.type !== "heading" ? (
                     <label>
                       Texto
                       <textarea value={block.body || ""} onChange={(event) => updateBlock(blockIndex, { body: event.target.value })} />
                     </label>
-                  ) : (
+                  ) : null}
+                  {block.type === "image" || block.type === "media" ? (
                     <>
                       <label>
                         URL da imagem
@@ -409,8 +450,17 @@ export default function AdminNoticiasPage() {
                         Legenda
                         <input value={block.caption || ""} onChange={(event) => updateBlock(blockIndex, { caption: event.target.value })} />
                       </label>
+                      {block.type === "media" ? (
+                        <label>
+                          Posicao da imagem
+                          <select value={block.align || "left"} onChange={(event) => updateBlock(blockIndex, { align: event.target.value as NewsContentBlock["align"] })}>
+                            <option value="left">Imagem esquerda</option>
+                            <option value="right">Imagem direita</option>
+                          </select>
+                        </label>
+                      ) : null}
                     </>
-                  )}
+                  ) : null}
                 </section>
               ))}
             </div>
@@ -434,11 +484,31 @@ export default function AdminNoticiasPage() {
             </dl>
             <div className="lore-preview-content">
               {(selected.contentBlocks || []).map((block) => (
-                block.type === "image" ? (
+                block.type === "heading" ? (
+                  <h3 key={block.id}>{block.title}</h3>
+                ) : block.type === "image" ? (
                   <figure key={block.id} className="wiki-preview-image full">
                     {block.image ? <img src={block.image} alt={block.imageAlt || selected.title} /> : <div>Imagem</div>}
                     {block.caption ? <figcaption>{block.caption}</figcaption> : null}
                   </figure>
+                ) : block.type === "media" ? (
+                  <section key={block.id} className={`wiki-preview-media ${block.align === "right" ? "right" : "left"}`}>
+                    <figure>
+                      {block.image ? <img src={block.image} alt={block.imageAlt || selected.title} /> : <div>Imagem</div>}
+                      {block.caption ? <figcaption>{block.caption}</figcaption> : null}
+                    </figure>
+                    <div>
+                      {block.title ? <h3>{block.title}</h3> : null}
+                      <p>{block.body}</p>
+                    </div>
+                  </section>
+                ) : block.type === "titled_text" ? (
+                  <section key={block.id}>
+                    <h3>{block.title}</h3>
+                    <p>{block.body}</p>
+                  </section>
+                ) : block.type === "callout" ? (
+                  <blockquote key={block.id}>{block.body}</blockquote>
                 ) : (
                   <p key={block.id}>{block.body}</p>
                 )

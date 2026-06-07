@@ -48,16 +48,51 @@ export default async function NoticiaDetalhePage({ params }: { params: Promise<{
             <figcaption style={captionStyle}>{news.caption}</figcaption>
           </figure>
 
-          {(news.contentBlocks || []).map((block) => (
-            block.type === "image" ? (
+          {(news.contentBlocks || []).map((block) => {
+            if (block.type === "heading") {
+              return <h2 key={block.id} style={sectionTitleStyle}>{block.title}</h2>;
+            }
+
+            if (block.type === "titled_text") {
+              return (
+                <section key={block.id} style={titledTextStyle}>
+                  <h2 style={sectionTitleStyle}>{block.title}</h2>
+                  <p style={paragraphStyle}>{block.body}</p>
+                </section>
+              );
+            }
+
+            if (block.type === "callout") {
+              return <blockquote key={block.id} style={calloutStyle}>{block.body}</blockquote>;
+            }
+
+            if (block.type === "media") {
+              return (
+                <section key={block.id} style={{
+                  ...mediaBlockStyle,
+                  gridTemplateColumns: block.align === "right" ? "minmax(0, 1fr) minmax(220px, .85fr)" : "minmax(220px, .85fr) minmax(0, 1fr)",
+                }}>
+                  <figure style={{ ...figureStyle, order: block.align === "right" ? 2 : 0 }}>
+                    <img src={block.image || news.image} alt={block.imageAlt || news.title} style={mediaImageStyle} />
+                    {block.caption ? <figcaption style={captionStyle}>{block.caption}</figcaption> : null}
+                  </figure>
+                  <div>
+                    {block.title ? <h2 style={sectionTitleStyle}>{block.title}</h2> : null}
+                    <p style={paragraphStyle}>{block.body}</p>
+                  </div>
+                </section>
+              );
+            }
+
+            return block.type === "image" ? (
               <figure key={block.id} style={figureStyle}>
                 <img src={block.image || news.image} alt={block.imageAlt || news.title} style={heroImageStyle} />
                 {block.caption ? <figcaption style={captionStyle}>{block.caption}</figcaption> : null}
               </figure>
             ) : (
               <p key={block.id} style={paragraphStyle}>{block.body}</p>
-            )
-          ))}
+            );
+          })}
 
           <p style={paragraphStyle}>
             A cobertura segue em atualizacao conforme novos registros chegam ao arquivo da fraternidade.
@@ -159,6 +194,43 @@ const heroImageStyle: React.CSSProperties = {
 const captionStyle: React.CSSProperties = {
   color: "#a78bfa",
   marginTop: 8,
+};
+
+const sectionTitleStyle: React.CSSProperties = {
+  margin: "34px 0 12px",
+  color: "#f5d0fe",
+  fontSize: 30,
+  lineHeight: 1.1,
+};
+
+const titledTextStyle: React.CSSProperties = {
+  margin: "26px 0",
+};
+
+const calloutStyle: React.CSSProperties = {
+  margin: "32px 0",
+  padding: "20px 24px",
+  borderLeft: "5px solid #d946ef",
+  borderRadius: 8,
+  background: "rgba(216,180,254,.08)",
+  color: "#f5d0fe",
+  fontSize: 20,
+  lineHeight: 1.6,
+};
+
+const mediaBlockStyle: React.CSSProperties = {
+  display: "grid",
+  gap: 22,
+  alignItems: "start",
+  margin: "36px 0",
+};
+
+const mediaImageStyle: React.CSSProperties = {
+  width: "100%",
+  aspectRatio: "4 / 3",
+  objectFit: "cover",
+  borderRadius: 8,
+  border: "1px solid rgba(192,132,252,.28)",
 };
 
 const paragraphStyle: React.CSSProperties = {
