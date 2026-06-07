@@ -44,7 +44,13 @@ export default async function NoticiasPage() {
         </section>
 
         <section style={leadGridStyle}>
-          <Link href={`/noticias/${mainNews.slug}`} style={leadCardStyle}>
+          <Link
+            href={`/noticias/${mainNews.slug}`}
+            style={{
+              ...leadCardStyle,
+              backgroundImage: `linear-gradient(180deg, rgba(5,2,12,.08), rgba(5,2,12,.42) 38%, rgba(5,2,12,.94)), url(${mainNews.image})`,
+            }}
+          >
             <span style={categoryStyle}>{mainNews.category}</span>
             <h1 style={leadTitleStyle}>{mainNews.title}</h1>
             <p style={leadTextStyle}>{mainNews.subtitle}</p>
@@ -167,6 +173,9 @@ const leadCardStyle: React.CSSProperties = {
   borderRadius: 8,
   border: "1px solid rgba(216,180,254,.22)",
   background: "rgba(255,255,255,.05)",
+  backgroundSize: "cover",
+  backgroundPosition: "center",
+  boxShadow: "inset 0 -180px 160px rgba(5,2,12,.65), 0 22px 60px rgba(0,0,0,.24)",
   color: "#fff",
   textDecoration: "none",
 };
@@ -180,21 +189,24 @@ const categoryStyle: React.CSSProperties = {
 
 const leadTitleStyle: React.CSSProperties = {
   margin: "18px 0 12px",
-  color: "#d946ef",
+  color: "#f5d0fe",
   fontSize: "clamp(2.2rem, 5vw, 4.4rem)",
   lineHeight: .95,
+  textShadow: "0 3px 18px rgba(0,0,0,.72)",
 };
 
 const leadTextStyle: React.CSSProperties = {
   maxWidth: 720,
-  color: "#eadcff",
+  color: "#fff",
   fontSize: 18,
+  textShadow: "0 2px 12px rgba(0,0,0,.7)",
 };
 
 const leadListStyle: React.CSSProperties = {
   margin: "14px 0 0",
   paddingLeft: 20,
-  color: "#f0abfc",
+  color: "#f5d0fe",
+  textShadow: "0 2px 10px rgba(0,0,0,.7)",
 };
 
 const sideGridStyle: React.CSSProperties = {
