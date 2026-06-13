@@ -73,7 +73,7 @@ export async function POST(req: NextRequest) {
     }
 
     const discordResult = inserted
-      ? await sendDiscordEmbed(buildRecruitmentSubmissionEmbed(inserted), {
+      ? await sendDiscordEmbed(buildRecruitmentSubmissionEmbed(inserted, fields), {
         kind: "recruitment",
         username: "ICONICS Form",
       })

@@ -15,6 +15,11 @@ type DiscordEmbed = {
   timestamp?: string;
 };
 
+type RecruitmentFieldDef = {
+  id: string;
+  label: string;
+};
+
 function getWebhookUrl(kind: "recruitment" | "site" = "site") {
   if (kind === "recruitment") {
     return (
@@ -40,34 +45,45 @@ function cleanDiscordValue(value: unknown, fallback = "-") {
   return String(value).trim().slice(0, 1000) || fallback;
 }
 
+function buildRecruitmentLines(
+  respostas: Record<string, unknown>,
+  fields: RecruitmentFieldDef[] = []
+) {
+  const used = new Set<string>();
+  const lines: string[] = [];
+
+  for (const field of fields) {
+    if (!field?.id || !(field.id in respostas)) continue;
+    used.add(field.id);
+    lines.push(`**${field.label || field.id}:** ${cleanDiscordValue(respostas[field.id])}`);
+  }
+
+  for (const [key, value] of Object.entries(respostas)) {
+    if (used.has(key)) continue;
+    const label = key.replace(/_/g, " ").trim() || "Campo";
+    lines.push(`**${label}:** ${cleanDiscordValue(value)}`);
+  }
+
+  return lines;
+}
+
 export function buildRecruitmentSubmissionEmbed(submission: {
   id: number | string;
   respostas?: Record<string, unknown> | null;
   created_at?: string | null;
-}) {
+}, fields: RecruitmentFieldDef[] = []) {
   const respostas = submission.respostas && typeof submission.respostas === "object"
     ? submission.respostas
     : {};
-
-  const fields = Object.entries(respostas).slice(0, 20).map(([key, value]) => ({
-    name: key.replace(/_/g, " ").trim().slice(0, 256) || "Campo",
-    value: cleanDiscordValue(value),
-    inline: false,
-  }));
-
-  if (Object.keys(respostas).length > 20) {
-    fields.push({
-      name: "Campos adicionais",
-      value: `${Object.keys(respostas).length - 20} campo(s) nao exibido(s).`,
-      inline: false,
-    });
-  }
+  const lines = buildRecruitmentLines(respostas, fields);
+  const description = lines.length > 0
+    ? lines.join("\n").slice(0, 4000)
+    : `Formulario enviado pelo site. ID #${submission.id}`;
 
   return {
     title: "Nova candidatura recebida",
-    description: `Formulario enviado pelo site. ID #${submission.id}`,
+    description,
     color: 11141375,
-    fields,
     footer: { text: "Sistema de recrutamento Iconics" },
     timestamp: submission.created_at || new Date().toISOString(),
   };

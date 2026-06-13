@@ -8,6 +8,23 @@ type RouteContext = {
   params: Promise<{ id: string }>;
 };
 
+type FieldDef = {
+  id: string;
+  label: string;
+};
+
+async function getRecruitmentFormFields() {
+  const { data } = await supabaseAdmin
+    .from("recruitment_form_settings")
+    .select("campos")
+    .eq("ativo", true)
+    .order("id", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  return Array.isArray(data?.campos) ? (data.campos as FieldDef[]) : [];
+}
+
 export async function POST(req: NextRequest, context: RouteContext) {
   const auth = await getAuthedProfile(req);
   if ("error" in auth) return auth.error;
@@ -36,8 +53,9 @@ export async function POST(req: NextRequest, context: RouteContext) {
     return NextResponse.json({ error: "Candidatura nao encontrada." }, { status: 404 });
   }
 
+  const fields = await getRecruitmentFormFields();
   const result = await sendDiscordEmbed(
-    buildRecruitmentSubmissionEmbed(data),
+    buildRecruitmentSubmissionEmbed(data, fields),
     { kind: "recruitment", username: "ICONICS Form" }
   );
 
