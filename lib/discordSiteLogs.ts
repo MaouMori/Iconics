@@ -1,3 +1,5 @@
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
+
 type DiscordEmbedField = {
   name: string;
   value: string;
@@ -104,15 +106,25 @@ export async function sendDiscordEmbed(
 }
 
 export async function sendSiteLog(title: string, description: string, fields: DiscordEmbedField[] = []) {
-  return sendDiscordEmbed(
-    {
-      title,
-      description,
-      color: 5793266,
-      fields,
-      footer: { text: "Log do site Iconics" },
-      timestamp: new Date().toISOString(),
-    },
-    { kind: "site", username: "ICONICS Logs" }
-  );
+  const fieldText = fields.length > 0
+    ? `\n\n${fields.map((field) => `**${field.name}:** ${field.value}`).join("\n")}`
+    : "";
+
+  const { error } = await supabaseAdmin
+    .from("discord_logs")
+    .insert({
+      guild_id: "site",
+      channel_id: process.env.DISCORD_SITE_LOG_CHANNEL_ID || "1446473299260608536",
+      event_title: title.slice(0, 200),
+      event_description: `${description}${fieldText}`.slice(0, 4000),
+      level: "info",
+      created_at: new Date().toISOString(),
+    });
+
+  if (error) {
+    console.warn("[site-log] nao foi possivel registrar log:", error.message);
+    return { ok: false, error: error.message };
+  }
+
+  return { ok: true };
 }
