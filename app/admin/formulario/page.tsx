@@ -93,6 +93,7 @@ export default function AdminFormularioPage() {
   const [mensagem, setMensagem] = useState("");
 
   const [settingsId, setSettingsId] = useState<number | null>(null);
+  const [token, setToken] = useState("");
   const [titulo, setTitulo] = useState("");
   const [descricao, setDescricao] = useState("");
   const [ativo, setAtivo] = useState(true);
@@ -107,6 +108,8 @@ export default function AdminFormularioPage() {
   useEffect(() => {
     async function load() {
       const { data: userData } = await supabase.auth.getUser();
+      const { data: sessionData } = await supabase.auth.getSession();
+      setToken(sessionData.session?.access_token || "");
 
       if (!userData.user) {
         window.location.href = "/login";
@@ -316,6 +319,19 @@ export default function AdminFormularioPage() {
 
     setSaving(false);
     setMensagem("Formulario salvo com sucesso.");
+    if (token) {
+      fetch("/api/admin/site-log", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          title: "Formulario de recrutamento atualizado",
+          description: `${parsedCampos.length} pergunta(s) foram salvas. Status: ${ativo ? "ativo" : "inativo"}.`,
+        }),
+      }).catch(() => undefined);
+    }
   }
 
   if (loading) {

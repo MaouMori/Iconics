@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthedProfile } from "@/lib/apiAuth";
+import { sendSiteLog } from "@/lib/discordSiteLogs";
 import { hasAdminAccess } from "@/lib/roles";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import {
@@ -62,6 +63,15 @@ export async function PUT(req: NextRequest) {
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
+
+  const disabledPages = MANAGED_SITE_PAGES
+    .filter((page) => visibility[page.key] === false)
+    .map((page) => page.label)
+    .join(", ") || "Nenhuma";
+  await sendSiteLog("Visibilidade de paginas alterada", "A lista de paginas ativas do site foi atualizada.", [
+    { name: "Paginas desativadas", value: disabledPages, inline: false },
+    { name: "Responsavel", value: auth.profile.nome || auth.profile.email || auth.userId, inline: false },
+  ]);
 
   return NextResponse.json({ ok: true, pages: MANAGED_SITE_PAGES, visibility });
 }

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { buildRecruitmentSubmissionEmbed, sendDiscordEmbed, sendSiteLog } from "@/lib/discordSiteLogs";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
 type FieldDef = {
@@ -35,13 +36,13 @@ export async function POST(req: NextRequest) {
     const respostas = body?.respostas;
 
     if (!respostas || typeof respostas !== "object") {
-      return NextResponse.json({ error: "Dados inválidos." }, { status: 400 });
+      return NextResponse.json({ error: "Dados invalidos." }, { status: 400 });
     }
 
     const { data: formSettings, error: formError } = await getRecruitmentFormSettings();
 
     if (formError || !formSettings) {
-      return NextResponse.json({ error: "Formulário não encontrado." }, { status: 500 });
+      return NextResponse.json({ error: "Formulario nao encontrado." }, { status: 500 });
     }
 
     const fields = (formSettings.campos || []) as FieldDef[];
@@ -51,62 +52,40 @@ export async function POST(req: NextRequest) {
         const value = respostas[field.id];
         if (value === undefined || value === null || String(value).trim() === "") {
           return NextResponse.json(
-            { error: `Campo obrigatório não preenchido: ${field.label}` },
+            { error: `Campo obrigatorio nao preenchido: ${field.label}` },
             { status: 400 }
           );
         }
       }
     }
 
-    const { error: insertError } = await supabaseAdmin
+    const { data: inserted, error: insertError } = await supabaseAdmin
       .from("recruitment_submissions")
       .insert({
         respostas,
         status: "novo",
-      });
+      })
+      .select("id, respostas, status, created_at")
+      .single();
 
     if (insertError) {
       return NextResponse.json({ error: insertError.message }, { status: 500 });
     }
 
-    const webhook = process.env.DISCORD_WEBHOOK_URL;
+    const discordResult = inserted
+      ? await sendDiscordEmbed(buildRecruitmentSubmissionEmbed(inserted), {
+        kind: "recruitment",
+        username: "ICONICS Form",
+      })
+      : { ok: false, error: "Candidatura salva sem retorno do banco." };
 
-    if (webhook) {
-      const lines = fields.map((field) => {
-        const value = respostas[field.id] ?? "—";
-        return `**${field.label}:** ${String(value)}`;
-      });
-
-      const discordResponse = await fetch(webhook, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          username: "ICONICS Form",
-          embeds: [
-            {
-              title: "Nova candidatura recebida",
-              description: lines.join("\n"),
-              color: 11141375,
-              footer: {
-                text: "Sistema de recrutamento Iconics",
-              },
-              timestamp: new Date().toISOString(),
-            },
-          ],
-        }),
-      });
-
-      if (!discordResponse.ok) {
-        return NextResponse.json(
-          { error: "Candidatura salva, mas falhou ao enviar notificação no Discord." },
-          { status: 502 }
-        );
-      }
+    if (!discordResult.ok) {
+      console.warn("[recruitment] candidatura salva, Discord nao enviado:", discordResult.error);
+    } else if (inserted) {
+      await sendSiteLog("Nova candidatura no site", `Candidatura #${inserted.id} foi recebida e enviada ao Discord.`);
     }
 
-    return NextResponse.json({ ok: true });
+    return NextResponse.json({ ok: true, discordNotified: discordResult.ok });
   } catch {
     return NextResponse.json({ error: "Erro interno no servidor." }, { status: 500 });
   }

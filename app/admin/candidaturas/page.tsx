@@ -19,10 +19,14 @@ export default function AdminCandidaturasPage() {
   const [loading, setLoading] = useState(true);
   const [permitido, setPermitido] = useState(false);
   const [mensagem, setMensagem] = useState("");
+  const [token, setToken] = useState("");
+  const [sendingId, setSendingId] = useState<number | null>(null);
 
   useEffect(() => {
     async function load() {
       const { data: userData } = await supabase.auth.getUser();
+      const { data: sessionData } = await supabase.auth.getSession();
+      setToken(sessionData.session?.access_token || "");
 
       if (!userData.user) {
         window.location.href = "/login";
@@ -90,6 +94,28 @@ export default function AdminCandidaturasPage() {
       prev.map((item) => (item.status === "novo" ? { ...item, status: "lido" } : item))
     );
     setMensagem("Todas as candidaturas foram marcadas como lidas.");
+  }
+
+  async function enviarDiscord(id: number) {
+    if (!token) {
+      setMensagem("Sessao expirada. Entre novamente no painel.");
+      return;
+    }
+
+    setSendingId(id);
+    const response = await fetch(`/api/admin/recruitment-submissions/${id}/send-discord`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const payload = await response.json().catch(() => ({}));
+    setSendingId(null);
+
+    if (!response.ok) {
+      setMensagem(payload.error || "Nao foi possivel enviar para o Discord.");
+      return;
+    }
+
+    setMensagem("Candidatura enviada ao Discord.");
   }
 
   const totalNovas = items.filter((item) => item.status === "novo").length;
@@ -161,6 +187,13 @@ export default function AdminCandidaturasPage() {
                           Marcar como lida
                         </button>
                       )}
+                      <button
+                        style={discordBtnStyle}
+                        onClick={() => enviarDiscord(item.id)}
+                        disabled={sendingId === item.id}
+                      >
+                        {sendingId === item.id ? "Enviando..." : "Enviar ao Discord"}
+                      </button>
                     </div>
                   </div>
 
@@ -267,6 +300,18 @@ const markReadBtnStyle: React.CSSProperties = {
   border: "1px solid rgba(168,85,247,0.3)",
   background: "rgba(168,85,247,0.12)",
   color: "#e9d5ff",
+  fontSize: "0.85rem",
+  fontWeight: 700,
+  cursor: "pointer",
+};
+
+const discordBtnStyle: React.CSSProperties = {
+  height: 36,
+  padding: "0 14px",
+  borderRadius: 999,
+  border: "1px solid rgba(34,211,238,0.32)",
+  background: "rgba(34,211,238,0.12)",
+  color: "#cffafe",
   fontSize: "0.85rem",
   fontWeight: 700,
   cursor: "pointer",

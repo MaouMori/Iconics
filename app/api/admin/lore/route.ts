@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthedProfile } from "@/lib/apiAuth";
+import { sendSiteLog } from "@/lib/discordSiteLogs";
 import { hasAdminAccess } from "@/lib/roles";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import {
@@ -104,6 +105,10 @@ export async function PUT(req: NextRequest) {
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
+
+  await sendSiteLog("Wiki atualizada", `${pages.length} pagina(s) e ${categories.length} categoria(s) foram salvas na wiki.`, [
+    { name: "Responsavel", value: auth.profile.nome || auth.profile.email || auth.userId, inline: false },
+  ]);
 
   return NextResponse.json({ ok: true, pages, categories });
 }
